@@ -37,57 +37,98 @@ const featuredTools = [
   </section>
 
   <script>
-    // 使用 Intersection Observer 替代滚动监听，避免强制回流
-    const heroSection = document.getElementById('hero-section');
-    const searchContainer = document.getElementById('search-container');
+    // 高性能滚动监听：缓存 Hero 底部位置，使用 requestAnimationFrame 节流
+    let heroBottomCache = null;
+    let ticking = false;
+    let floatingSearch = null;
     const header = document.querySelector('header');
-    
-    if (heroSection && searchContainer && header) {
-      let floatingSearch = null;
+
+    // 更新缓存（在加载和 resize 时调用）
+    function updateHeroBottom() {
+      const hero = document.getElementById('hero-section');
+      if (hero) heroBottomCache = hero.offsetTop + hero.offsetHeight;
+    }
+
+    // 添加浮动搜索框
+    function addFloatingSearch() {
+      if (floatingSearch) return;
+      const searchContainer = document.getElementById('search-container');
+      if (!searchContainer || !header) return;
+
+      const searchClone = searchContainer.cloneNode(true);
+      searchClone.id = 'floating-search';
+      searchClone.classList.add('absolute', 'right-4', 'top-1/2', 'transform', '-translate-y-1/2', 'w-64', 'md:w-80', 'z-50');
       
-      // 使用 Intersection Observer 检测 Hero 区域是否离开视口
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (!entry.isIntersecting) {
-              // Hero 区域离开视口顶部时，显示浮动搜索框
-              if (!floatingSearch) {
-                const searchClone = searchContainer.cloneNode(true);
-                searchClone.id = 'floating-search';
-                searchClone.classList.add('absolute', 'right-4', 'top-1/2', 'transform', '-translate-y-1/2', 'w-64', 'md:w-80');
-                
-                const originalInput = searchContainer.querySelector('input');
-                if (originalInput) originalInput.id = 'searchInput-original';
-                
-                const cloneInput = searchClone.querySelector('input');
-                if (cloneInput) {
-                  cloneInput.id = 'searchInput-floating';
-                  cloneInput.addEventListener('input', syncSearch);
-                }
-                
-                header.appendChild(searchClone);
-                floatingSearch = searchClone;
-                searchContainer.style.opacity = '0';
-                searchContainer.style.pointerEvents = 'none';
-              }
-            } else {
-              // Hero 区域在视口内时，移除浮动搜索框
-              if (floatingSearch) {
-                floatingSearch.remove();
-                floatingSearch = null;
-                searchContainer.style.opacity = '';
-                searchContainer.style.pointerEvents = '';
-              }
-            }
-          });
-        },
-        { threshold: 0 }
-      );
+      // 同步输入事件
+      const originalInput = document.getElementById('searchInput');
+      const cloneInput = searchClone.querySelector('input');
+      if (originalInput && cloneInput) {
+        cloneInput.value = originalInput.value;
+        cloneInput.addEventListener('input', (e) => {
+          originalInput.value = e.target.value;
+          originalInput.dispatchEvent(new Event('input'));
+        });
+      }
       
-      observer.observe(heroSection);
+      header.style.position = 'relative';
+      header.appendChild(searchClone);
+      floatingSearch = searchClone;
       
-      // 搜索过滤逻辑
-      function syncSearch(e) {
+      // 隐藏原始搜索框（避免重复）
+      searchContainer.style.opacity = '0';
+      searchContainer.style.pointerEvents = 'none';
+    }
+
+    // 移除浮动搜索框
+    function removeFloatingSearch() {
+      if (!floatingSearch) return;
+      floatingSearch.remove();
+      floatingSearch = null;
+      const searchContainer = document.getElementById('search-container');
+      if (searchContainer) {
+        searchContainer.style.opacity = '';
+        searchContainer.style.pointerEvents = '';
+      }
+    }
+
+    // 滚动时的逻辑（不访问布局属性）
+    function onScroll() {
+      if (heroBottomCache === null) return;
+      const scrollY = window.scrollY;
+      const isPastHero = scrollY > heroBottomCache - 80;
+      if (isPastHero && !floatingSearch) {
+        addFloatingSearch();
+      } else if (!isPastHero && floatingSearch) {
+        removeFloatingSearch();
+      }
+    }
+
+    // 节流包装
+    function handleScroll() {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          onScroll();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    }
+
+    // 初始化
+    window.addEventListener('load', () => {
+      updateHeroBottom();
+      onScroll();
+    });
+    window.addEventListener('resize', () => {
+      updateHeroBottom();
+      onScroll();
+    });
+    window.addEventListener('scroll', handleScroll);
+
+    // 原始搜索框的过滤逻辑
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
         const term = e.target.value.toLowerCase();
         const cards = document.querySelectorAll('#toolsGrid > div');
         cards.forEach(card => {
@@ -95,13 +136,7 @@ const featuredTools = [
           const desc = card.querySelector('p')?.innerText.toLowerCase() || '';
           card.style.display = (title.includes(term) || desc.includes(term)) ? '' : 'none';
         });
-      }
-      
-      // 原始搜索框事件监听
-      const originalInput = document.getElementById('searchInput');
-      if (originalInput) {
-        originalInput.addEventListener('input', syncSearch);
-      }
+      });
     }
   </script>
 </BaseLayout>
