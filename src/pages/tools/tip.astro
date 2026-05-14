@@ -1,0 +1,67 @@
+---
+import Schema from '../../components/Schema.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const title = "Tip Calculator - Split Bill & Tip Percentage";
+const description = "Calculate tip amount, total bill, and per person share easily.";
+---
+
+<BaseLayout title={title} description={description} currentPath="/tools/tip">
+  <div class="max-w-2xl mx-auto py-8">
+    <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+      <h1 class="text-3xl font-bold mb-2">💵 Tip Calculator</h1>
+      <p class="text-gray-600 mb-6">Calculate tip and split the bill easily.</p>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium mb-1">Bill Amount ($)</label>
+          <input type="number" id="bill" class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="0.00" step="any" value="50">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Tip Percentage (%)</label>
+          <input type="number" id="tipPercent" class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="15" step="any" value="15">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Number of People</label>
+          <input type="number" id="people" class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="1" min="1" value="1">
+        </div>
+        <button id="calcBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 rounded-full transition-transform transform hover:scale-98">Calculate Tip</button>
+        <div id="result" class="mt-4 p-4 bg-gray-100 rounded-xl text-center text-gray-800 hidden">
+          <p>Tip Amount: $<span id="tipAmount">0.00</span></p>
+          <p>Total Bill: $<span id="totalBill">0.00</span></p>
+          <p>Per Person: $<span id="perPerson">0.00</span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const billInput = document.getElementById('bill');
+    const tipPercentInput = document.getElementById('tipPercent');
+    const peopleInput = document.getElementById('people');
+    const calcBtn = document.getElementById('calcBtn');
+    const resultDiv = document.getElementById('result');
+    const tipAmountSpan = document.getElementById('tipAmount');
+    const totalBillSpan = document.getElementById('totalBill');
+    const perPersonSpan = document.getElementById('perPerson');
+
+    calcBtn.addEventListener('click', () => {
+      let bill = parseFloat(billInput.value);
+      let tipPercent = parseFloat(tipPercentInput.value);
+      let people = parseInt(peopleInput.value);
+      if (isNaN(bill) || bill < 0) bill = 0;
+      if (isNaN(tipPercent)) tipPercent = 0;
+      if (isNaN(people) || people < 1) people = 1;
+      const tip = bill * (tipPercent / 100);
+      const total = bill + tip;
+      const perPerson = total / people;
+      tipAmountSpan.textContent = tip.toFixed(2);
+      totalBillSpan.textContent = total.toFixed(2);
+      perPersonSpan.textContent = perPerson.toFixed(2);
+      resultDiv.classList.remove('hidden');
+    });
+  </script>
+    <Schema
+    toolName="Tip Calculator"
+    description={description}
+    url={Astro.url.href}
+  />
+</BaseLayout>

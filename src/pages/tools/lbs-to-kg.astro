@@ -1,0 +1,48 @@
+---
+import Schema from '../../components/Schema.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const title = "lbs to kg Converter - Pounds to Kilograms";
+const description = "Convert pounds to kilograms instantly. Free online weight converter.";
+---
+
+<BaseLayout title={title} description={description} currentPath="/tools/lbs-to-kg">
+  <div class="max-w-2xl mx-auto py-8">
+    <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+      <h1 class="text-3xl font-bold mb-2">⚖️ Pounds to Kilograms</h1>
+      <p class="text-gray-600 mb-6">Enter weight in pounds (lbs) to convert to kilograms.</p>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium mb-1">Pounds (lbs)</label>
+          <input type="number" id="lbs" class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="e.g., 150" step="any">
+        </div>
+        <button id="convertBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 rounded-full transition-transform transform hover:scale-98">Convert → kg</button>
+        <div id="result" class="mt-4 p-4 bg-gray-100 rounded-xl text-center text-gray-800 hidden">
+          <span id="kg">--</span> kg
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const lbsInput = document.getElementById('lbs');
+    const convertBtn = document.getElementById('convertBtn');
+    const resultDiv = document.getElementById('result');
+    const kgSpan = document.getElementById('kg');
+
+    convertBtn.addEventListener('click', () => {
+      const lbs = parseFloat(lbsInput.value);
+      if (isNaN(lbs)) {
+        showMessage('Please enter a valid number.', 'error');
+        return;
+      }
+      const kg = lbs * 0.45359237;
+      kgSpan.textContent = kg.toFixed(4);
+      resultDiv.classList.remove('hidden');
+    });
+  </script>
+    <Schema
+    toolName="lbs to kg Converter"
+    description={description}
+    url={Astro.url.href}
+  />
+</BaseLayout>

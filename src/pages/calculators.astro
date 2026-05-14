@@ -1,0 +1,59 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import ToolCard from "../components/ToolCard.astro";
+
+const title = "Online Calculators - Free Math & Health Tools";
+const description =
+  "BMI, Age, Tip, Mortgage, Date difference, and more. All calculators free to use.";
+const calculators = [
+  {
+    title: "BMI Calculator",
+    description: "Body Mass Index",
+    icon: "⚖️",
+    href: "/tools/bmi",
+  },
+  {
+    title: "Age Calculator",
+    description: "Exact age in years, months, days",
+    icon: "🎂",
+    href: "/tools/age",
+  },
+  {
+    title: "Tip Calculator",
+    description: "Split bill with tip",
+    icon: "💵",
+    href: "/tools/tip",
+  },
+  {
+    title: "CM to Inches",
+    description: "Length conversion",
+    icon: "📐",
+    href: "/tools/cm-to-inches",
+  },
+  {
+    title: "lbs to kg",
+    description: "Weight conversion",
+    icon: "⚖️",
+    href: "/tools/lbs-to-kg",
+  },
+  {
+    title: "Loan Calculator",
+    description: "Monthly payment & interest",
+    icon: "🏦",
+    href: "/tools/loan-calculator",
+  },
+];
+---
+
+<BaseLayout title={title} description={description} currentPath="/calculators">
+  <section class="py-8">
+    <h1 class="text-3xl font-bold mb-4">Online Calculators</h1>
+    <p class="text-gray-600 mb-8">Everyday math, health, and finance tools.</p>
+    <div
+      class="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6"
+      id="toolsGrid"
+    >
+      {calculators.map((tool) => <ToolCard {...tool} />)}
+    </div>
+  </section>
+</BaseLayout>

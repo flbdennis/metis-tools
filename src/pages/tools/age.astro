@@ -1,0 +1,74 @@
+---
+import Schema from '../../components/Schema.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const title = "Age Calculator - Exact Age in Years, Months, Days";
+const description = "Calculate your exact age in years, months, days, and total days lived.";
+---
+
+<BaseLayout title={title} description={description} currentPath="/tools/age">
+  <div class="max-w-2xl mx-auto py-8">
+    <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+      <h1 class="text-3xl font-bold mb-2">🎂 Age Calculator</h1>
+      <p class="text-gray-600 mb-6">Enter your date of birth to calculate your exact age.</p>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium mb-1">Date of Birth</label>
+          <input type="date" id="dob" class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500" value="2000-01-01">
+        </div>
+        <button id="calcBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 rounded-full transition-transform transform hover:scale-98">Calculate Age</button>
+        <div id="result" class="mt-4 p-4 bg-gray-100 rounded-xl text-center text-gray-800 hidden">
+          <p><strong>Your exact age:</strong> <span id="ageYears">--</span> years, <span id="ageMonths">--</span> months, <span id="ageDays">--</span> days</p>
+          <p>Total days lived: <span id="totalDays">--</span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const dobInput = document.getElementById('dob');
+    const calcBtn = document.getElementById('calcBtn');
+    const resultDiv = document.getElementById('result');
+    const ageYears = document.getElementById('ageYears');
+    const ageMonths = document.getElementById('ageMonths');
+    const ageDays = document.getElementById('ageDays');
+    const totalDaysSpan = document.getElementById('totalDays');
+
+    calcBtn.addEventListener('click', () => {
+      const dobValue = dobInput.value;
+      if (!dobValue) {
+        showMessage('Please select your date of birth.', 'error');
+        return;
+      }
+      const birthDate = new Date(dobValue);
+      const today = new Date();
+      if (birthDate > today) {
+        showMessage('Birth date cannot be in the future.', 'error');
+        return;
+      }
+      let years = today.getFullYear() - birthDate.getFullYear();
+      let months = today.getMonth() - birthDate.getMonth();
+      let days = today.getDate() - birthDate.getDate();
+      if (days < 0) {
+        months--;
+        const lastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+        days += lastMonth.getDate();
+      }
+      if (months < 0) {
+        years--;
+        months += 12;
+      }
+      const timeDiff = today - birthDate;
+      const totalDays = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+      ageYears.textContent = years;
+      ageMonths.textContent = months;
+      ageDays.textContent = days;
+      totalDaysSpan.textContent = totalDays;
+      resultDiv.classList.remove('hidden');
+    });
+  </script>
+    <Schema
+    toolName="Age Calculator"
+    description={description}
+    url={Astro.url.href}
+  />
+</BaseLayout>

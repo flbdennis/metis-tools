@@ -1,0 +1,48 @@
+---
+import Schema from '../../components/Schema.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const title = "CM to Inches Converter - Length Converter";
+const description = "Convert centimeters to inches instantly. Accurate and free online tool.";
+---
+
+<BaseLayout title={title} description={description} currentPath="/tools/cm-to-inches">
+  <div class="max-w-2xl mx-auto py-8">
+    <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+      <h1 class="text-3xl font-bold mb-2">📏 CM to Inches Converter</h1>
+      <p class="text-gray-600 mb-6">Enter centimeters value to convert to inches.</p>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium mb-1">Centimeters</label>
+          <input type="number" id="cm" class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="e.g., 10" step="any">
+        </div>
+        <button id="convertBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 rounded-full transition-transform transform hover:scale-98">Convert → Inches</button>
+        <div id="result" class="mt-4 p-4 bg-gray-100 rounded-xl text-center text-gray-800 hidden">
+          <span id="inches">--</span> inches
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const cmInput = document.getElementById('cm');
+    const convertBtn = document.getElementById('convertBtn');
+    const resultDiv = document.getElementById('result');
+    const inchesSpan = document.getElementById('inches');
+
+    convertBtn.addEventListener('click', () => {
+      const cm = parseFloat(cmInput.value);
+      if (isNaN(cm)) {
+        showMessage('Please enter a valid number.', 'error');
+        return;
+      }
+      const inches = cm / 2.54;
+      inchesSpan.textContent = inches.toFixed(4);
+      resultDiv.classList.remove('hidden');
+    });
+  </script>
+    <Schema
+    toolName="CM to Inches Converter"
+    description={description}
+    url={Astro.url.href}
+  />
+</BaseLayout>

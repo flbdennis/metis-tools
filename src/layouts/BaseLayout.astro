@@ -1,0 +1,98 @@
+---
+import Navigation from "../components/Navigation.astro";
+import Footer from "../components/Footer.astro";
+
+// 从 Astro 配置中获取站点基础 URL
+const siteUrl = Astro.site?.href as string;
+// 确保 siteUrl 以斜杠结尾（Astro.site.href 默认包含），用于拼接
+const baseUrl = siteUrl.endsWith("/") ? siteUrl : `${siteUrl}/`;
+
+const {
+  title,
+  description,
+  currentPath = "/",
+  ogImage: propOgImage,
+  canonical: propCanonical,
+  type = "website",
+} = Astro.props;
+
+// 处理相对路径的 OG 图片
+let ogImage;
+if (propOgImage) {
+  // 如果传入的是完整 URL 则直接使用，否则相对于站点根目录
+  ogImage = propOgImage.startsWith("http")
+    ? propOgImage
+    : new URL(propOgImage, baseUrl).href;
+} else {
+  ogImage = new URL("/og-default.jpg", baseUrl).href;
+}
+
+// 处理规范链接
+const canonical =
+  propCanonical || new URL(currentPath.replace(/^\//, ""), baseUrl).href;
+
+// 完整标题
+const fullTitle = `${title} | MetisTools`;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+
+    <meta name="robots" content="index, follow" />
+
+    <meta property="og:type" content={type} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content="MetisTools" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='80'%3E🛠️%3C/text%3E%3C/svg%3E"
+    />
+
+    <script>
+      window.addEventListener("load", () => {
+        setTimeout(() => {
+          const script = document.createElement("script");
+          script.src =
+            "https://www.googletagmanager.com/gtag/js?id=G-HF9W6DBLKY";
+          script.async = true;
+          document.head.appendChild(script);
+          window.dataLayer = window.dataLayer || [];
+          function gtag() {
+            dataLayer.push(arguments);
+          }
+          gtag("js", new Date());
+          gtag("config", "G-HF9W6DBLKY");
+        }, 200);
+      });
+    </script>
+  </head>
+  <body
+    class="bg-gradient-to-br from-gray-50 to-gray-100 text-gray-900 font-sans"
+  >
+    <Navigation currentPath={currentPath} />
+    <main class="pt-16">
+      <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <slot />
+      </div>
+    </main>
+    <Footer />
+    <script is:inline src="/js/common.js"></script>
+  </body>
+</html>

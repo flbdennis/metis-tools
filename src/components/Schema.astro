@@ -1,0 +1,29 @@
+---
+const { toolName, description, url, imageUrl, operatingSystem = 'All' } = Astro.props;
+const siteUrl = Astro.site?.href;
+// 如果传入的 url 是相对路径，则拼接
+const fullUrl = url?.startsWith('http') ? url : new URL(url || '/', siteUrl).href;
+const imageFullUrl = imageUrl?.startsWith('http') ? imageUrl : new URL(imageUrl || '/favicon.svg', siteUrl).href;
+---
+
+<script type="application/ld+json" set:html={JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": toolName,
+  "description": description,
+  "url": fullUrl,
+  "applicationCategory": "Utility",
+  "operatingSystem": operatingSystem,
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "featureList": "Instant results, free, no signup required",
+  "image": imageFullUrl,
+  "author": {
+    "@type": "Organization",
+    "name": "MetisTools",
+    "url": siteUrl
+  }
+})} />

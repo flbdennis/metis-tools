@@ -1,0 +1,115 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ToolCard from '../components/ToolCard.astro';
+
+const title = "MetisTools - Free Online Converters & Calculators";
+const description = "All-in-one toolkit: file conversion, unit conversion, health, finance, and daily math tools. 100% free, no signup required.";
+const featuredTools = [
+  { title: 'PDF to Word', description: 'Convert PDF to editable DOCX', icon: '📄', href: '/tools/pdf-to-word' },
+  { title: 'BMI Calculator', description: 'Body Mass Index for adults', icon: '⚖️', href: '/tools/bmi' },
+  { title: 'Age Calculator', description: 'Exact age in years, months, days', icon: '🎂', href: '/tools/age' },
+  { title: 'Unit Converter', description: 'Length, weight, temperature', icon: '📏', href: '/tools/unit-converter' },
+  { title: 'Tip Calculator', description: 'Split bill with tip %', icon: '💵', href: '/tools/tip' },
+  { title: 'CM to Inches', description: 'Quick length conversion', icon: '📐', href: '/tools/cm-to-inches' },
+];
+---
+
+<BaseLayout title={title} description={description} currentPath="/">
+  <!-- Hero 区域，包含搜索框 -->
+  <section class="text-center py-12 md:py-20" id="hero-section">
+    <h1 class="text-4xl md:text-6xl font-bold bg-gradient-to-r from-indigo-600 to-cyan-500 bg-clip-text text-transparent">
+      Convert Anything in Seconds
+    </h1>
+    <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
+      Free online file converters, unit converters, health and finance calculators — everything you need.
+    </p>
+    <div class="mt-8 max-w-lg mx-auto" id="search-container">
+      <input type="text" placeholder="Search 40+ tools..." class="w-full px-4 py-3 rounded-full border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" id="searchInput">
+    </div>
+  </section>
+
+  <!-- 热门工具网格 -->
+  <section class="py-8">
+    <h2 class="text-2xl font-bold mb-6">Popular Tools</h2>
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6" id="toolsGrid">
+      {featuredTools.map(tool => <ToolCard {...tool} />)}
+    </div>
+  </section>
+
+  <script>
+    // 滚动固定搜索框的逻辑
+    const heroSection = document.getElementById('hero-section');
+    const searchContainer = document.getElementById('search-container');
+    const header = document.querySelector('header');
+    
+    if (heroSection && searchContainer && header) {
+      let floatingSearch = null;
+      
+      function handleScroll() {
+        const heroBottom = heroSection.offsetTop + heroSection.offsetHeight;
+        const scrollY = window.scrollY;
+        
+        if (scrollY > heroBottom - 80) { // 滚动超过 Hero 区域时
+          if (!floatingSearch) {
+            // 克隆搜索框并添加到导航栏右侧
+            const searchClone = searchContainer.cloneNode(true);
+            searchClone.id = 'floating-search';
+            searchClone.classList.add('absolute', 'right-4', 'top-1/2', 'transform', '-translate-y-1/2', 'w-64', 'md:w-80');
+            // 移除原始输入框的 id，避免重复
+            const originalInput = searchContainer.querySelector('#searchInput');
+            if (originalInput) originalInput.id = 'searchInput-original';
+            // 为克隆输入框绑定相同的事件
+            const cloneInput = searchClone.querySelector('#searchInput');
+            if (cloneInput) {
+              cloneInput.id = 'searchInput-floating';
+              cloneInput.addEventListener('input', (e) => {
+                const term = e.target.value.toLowerCase();
+                const cards = document.querySelectorAll('#toolsGrid > div');
+                cards.forEach(card => {
+                  const title = card.querySelector('h3')?.innerText.toLowerCase() || '';
+                  const desc = card.querySelector('p')?.innerText.toLowerCase() || '';
+                  card.style.display = (title.includes(term) || desc.includes(term)) ? '' : 'none';
+                });
+                // 同时同步原搜索框的值
+                const originalInputElem = document.getElementById('searchInput-original');
+                if (originalInputElem) originalInputElem.value = term;
+              });
+            }
+            header.appendChild(searchClone);
+            floatingSearch = searchClone;
+            // 隐藏原始搜索框（避免重复）
+            searchContainer.style.opacity = '0';
+            searchContainer.style.pointerEvents = 'none';
+          }
+        } else {
+          if (floatingSearch) {
+            floatingSearch.remove();
+            floatingSearch = null;
+            searchContainer.style.opacity = '';
+            searchContainer.style.pointerEvents = '';
+            // 恢复原始输入框的 id
+            const originalInput = document.getElementById('searchInput-original');
+            if (originalInput) originalInput.id = 'searchInput';
+          }
+        }
+      }
+      
+      window.addEventListener('scroll', handleScroll);
+      handleScroll(); // 初始化
+      
+      // 原始搜索框的事件监听（保持不变）
+      const originalInput = document.getElementById('searchInput');
+      if (originalInput) {
+        originalInput.addEventListener('input', (e) => {
+          const term = e.target.value.toLowerCase();
+          const cards = document.querySelectorAll('#toolsGrid > div');
+          cards.forEach(card => {
+            const title = card.querySelector('h3')?.innerText.toLowerCase() || '';
+            const desc = card.querySelector('p')?.innerText.toLowerCase() || '';
+            card.style.display = (title.includes(term) || desc.includes(term)) ? '' : 'none';
+          });
+        });
+      }
+    }
+  </script>
+</BaseLayout>
