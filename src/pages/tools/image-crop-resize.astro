@@ -1,0 +1,258 @@
+---
+import Schema from '../../components/Schema.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const title = "Image Cropper & Resizer - Crop, Resize Images Online";
+const description = "Crop or resize your images to exact dimensions. Free, private, no upload required.";
+---
+
+<BaseLayout title={title} description={description} currentPath="/tools/image-crop-resize">
+  <div class="max-w-4xl mx-auto py-8">
+    <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+      <h1 class="text-3xl font-bold mb-2">✂️ Image Cropper & Resizer</h1>
+      <p class="text-gray-600 mb-6">Drag to crop, adjust selection box, then apply resize (optional). Image zoom is disabled.</p>
+
+      <!-- 上传区域 -->
+      <div id="upload-zone" class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center cursor-pointer hover:border-indigo-500 transition">
+        <svg class="mx-auto h-10 w-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+        </svg>
+        <p class="mt-2 text-sm text-gray-600">Drag & drop an image here, or <span class="text-indigo-600 font-medium">browse</span></p>
+        <input type="file" id="file-input" accept="image/*" class="hidden">
+      </div>
+
+      <!-- 图片容器 -->
+      <div id="image-container" class="mt-4 hidden">
+        <div class="bg-gray-100 rounded-xl p-2">
+          <img id="source-image" class="max-w-full" style="max-height: 400px; margin: 0 auto;" />
+        </div>
+      </div>
+
+      <!-- 裁剪和调整控制 -->
+      <div id="controls" class="mt-4 hidden">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium mb-1">Crop Aspect Ratio</label>
+            <select id="aspect-ratio" class="w-full px-4 py-2 rounded-full border border-gray-300">
+              <option value="0">Free</option>
+              <option value="1">1:1 (Square)</option>
+              <option value="1.3333333333333333">4:3</option>
+              <option value="1.7777777777777777">16:9</option>
+              <option value="1.5">3:2</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Resize (optional)</label>
+            <div class="flex gap-2">
+              <input type="number" id="resize-width" placeholder="Width (px)" class="w-full px-4 py-2 rounded-full border border-gray-300">
+              <span class="self-center">×</span>
+              <input type="number" id="resize-height" placeholder="Height (px)" class="w-full px-4 py-2 rounded-full border border-gray-300">
+            </div>
+            <label class="flex items-center mt-1"><input type="checkbox" id="keep-aspect" class="mr-2"> Keep aspect ratio</label>
+          </div>
+        </div>
+        <button id="apply-btn" class="w-full bg-indigo-600 text-white py-2 rounded-full mt-4">Apply Crop & Resize</button>
+      </div>
+
+      <!-- 结果区域 -->
+      <div id="result-area" class="mt-6 hidden">
+        <p class="font-semibold text-green-600">✓ Processing completed</p>
+        <div class="flex gap-4 mt-2">
+          <img id="result-image" class="max-h-48 rounded border" />
+          <button id="download-btn" class="bg-indigo-600 text-white px-4 py-2 rounded-full text-sm self-end">Download</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+
+  <script>
+    let cropper = null;
+    let currentFile = null;
+    let currentResultBlob = null;
+    let currentImageUrl = null;
+
+    // DOM 元素
+    const uploadZone = document.getElementById('upload-zone');
+    const fileInput = document.getElementById('file-input');
+    const imageContainer = document.getElementById('image-container');
+    const sourceImg = document.getElementById('source-image');
+    const controls = document.getElementById('controls');
+    const aspectRatioSelect = document.getElementById('aspect-ratio');
+    const resizeWidth = document.getElementById('resize-width');
+    const resizeHeight = document.getElementById('resize-height');
+    const keepAspect = document.getElementById('keep-aspect');
+    const applyBtn = document.getElementById('apply-btn');
+    const resultArea = document.getElementById('result-area');
+    const resultImage = document.getElementById('result-image');
+    const downloadBtn = document.getElementById('download-btn');
+
+    function showMsg(msg, type) {
+      if (typeof showMessage === 'function') showMessage(msg, type);
+      else alert(msg);
+    }
+
+    function destroyCropper() {
+      if (cropper) {
+        cropper.destroy();
+        cropper = null;
+      }
+    }
+
+    // 裁剪框相对于图片显示区域居中（仅在初始化时调用一次）
+    function centerCropBoxOnce() {
+      if (!cropper) return;
+      const imageData = cropper.getImageData();
+      const containerData = cropper.getContainerData();
+      if (!imageData || !containerData) return;
+      const imgLeft = imageData.left;
+      const imgTop = imageData.top;
+      const imgWidth = imageData.width;
+      const imgHeight = imageData.height;
+      let cropWidth = Math.min(imgWidth * 0.8, containerData.width * 0.8);
+      let cropHeight = cropWidth / (cropper.getAspectRatio() || 1);
+      if (cropHeight > imgHeight * 0.8) {
+        cropHeight = imgHeight * 0.8;
+        cropWidth = cropHeight * (cropper.getAspectRatio() || 1);
+      }
+      const centerX = imgLeft + imgWidth / 2;
+      const centerY = imgTop + imgHeight / 2;
+      let left = centerX - cropWidth / 2;
+      let top = centerY - cropHeight / 2;
+      left = Math.max(imgLeft, Math.min(left, imgLeft + imgWidth - cropWidth));
+      top = Math.max(imgTop, Math.min(top, imgTop + imgHeight - cropHeight));
+      cropper.setCropBoxData({ left, top, width: cropWidth, height: cropHeight });
+    }
+
+    function initCropper() {
+      destroyCropper();
+      const ratio = parseFloat(aspectRatioSelect.value);
+      cropper = new Cropper(sourceImg, {
+        aspectRatio: isNaN(ratio) || ratio === 0 ? NaN : ratio,
+        viewMode: 1,
+        autoCropArea: 0.8,
+        responsive: true,
+        background: false,
+        dragMode: 'crop',
+        cropBoxMovable: true,
+        cropBoxResizable: true,
+        wheel: false,          // 禁用鼠标滚轮缩放
+        zoomable: false,       // 禁止缩放功能
+        ready() {
+          centerCropBoxOnce(); // 初始化时居中裁剪框
+        }
+      });
+    }
+
+    function loadImage(file) {
+      if (currentImageUrl) URL.revokeObjectURL(currentImageUrl);
+      currentImageUrl = URL.createObjectURL(file);
+      sourceImg.onload = () => {
+        imageContainer.classList.remove('hidden');
+        controls.classList.remove('hidden');
+        initCropper();
+        resultArea.classList.add('hidden');
+      };
+      sourceImg.src = currentImageUrl;
+      currentFile = file;
+    }
+
+    function handleFile(file) {
+      if (!file || !file.type.startsWith('image/')) {
+        showMsg('Please upload an image file', 'error');
+        return;
+      }
+      loadImage(file);
+    }
+
+    async function apply() {
+      if (!cropper) return;
+      applyBtn.disabled = true;
+      try {
+        const croppedCanvas = cropper.getCroppedCanvas();
+        if (!croppedCanvas) throw new Error('Unable to crop');
+        let canvas = croppedCanvas;
+        let targetWidth = parseInt(resizeWidth.value);
+        let targetHeight = parseInt(resizeHeight.value);
+        if ((targetWidth && targetWidth > 0) || (targetHeight && targetHeight > 0)) {
+          const originalWidth = canvas.width;
+          const originalHeight = canvas.height;
+          if (keepAspect.checked) {
+            if (targetWidth && !targetHeight) {
+              targetHeight = Math.round(originalHeight * (targetWidth / originalWidth));
+            } else if (targetHeight && !targetWidth) {
+              targetWidth = Math.round(originalWidth * (targetHeight / originalHeight));
+            } else if (targetWidth && targetHeight) {
+              const ratio = originalWidth / originalHeight;
+              const newRatio = targetWidth / targetHeight;
+              if (newRatio > ratio) {
+                targetWidth = Math.round(targetHeight * ratio);
+              } else {
+                targetHeight = Math.round(targetWidth / ratio);
+              }
+            }
+          }
+          if (targetWidth && targetHeight && targetWidth > 0 && targetHeight > 0) {
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = targetWidth;
+            tempCanvas.height = targetHeight;
+            const ctx = tempCanvas.getContext('2d');
+            ctx.drawImage(canvas, 0, 0, canvas.width, canvas.height, 0, 0, targetWidth, targetHeight);
+            canvas = tempCanvas;
+          }
+        }
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, currentFile.type));
+        currentResultBlob = blob;
+        const url = URL.createObjectURL(blob);
+        resultImage.src = url;
+        resultArea.classList.remove('hidden');
+        showMsg('Image processed successfully', 'success');
+      } catch (err) {
+        showMsg('Processing failed: ' + err.message, 'error');
+      } finally {
+        applyBtn.disabled = false;
+      }
+    }
+
+    aspectRatioSelect.addEventListener('change', () => {
+      if (cropper) {
+        const ratio = parseFloat(aspectRatioSelect.value);
+        cropper.setAspectRatio(isNaN(ratio) || ratio === 0 ? NaN : ratio);
+        // 比例改变后重新居中裁剪框（确保视觉效果）
+        setTimeout(() => centerCropBoxOnce(), 50);
+      }
+    });
+
+    uploadZone.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length) handleFile(e.target.files[0]);
+    });
+    uploadZone.addEventListener('dragover', (e) => e.preventDefault());
+    uploadZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith('image/')) handleFile(file);
+      else showMsg('Please drop an image file', 'error');
+    });
+    applyBtn.addEventListener('click', apply);
+    downloadBtn.addEventListener('click', () => {
+      if (currentResultBlob) {
+        const url = URL.createObjectURL(currentResultBlob);
+        const a = document.createElement('a');
+        a.download = `processed.${currentResultBlob.type.split('/')[1] || 'png'}`;
+        a.href = url;
+        a.click();
+        URL.revokeObjectURL(url);
+      } else {
+        showMsg('No processed image', 'error');
+      }
+    });
+  </script>
+  <Schema
+    toolName="Image Cropper & Resizer"
+    description={description}
+    url={Astro.url.href}
+  />
+</BaseLayout>

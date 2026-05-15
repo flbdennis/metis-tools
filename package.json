@@ -8,9 +8,11 @@
   },
   "dependencies": {
     "astro": "^4.0.0",
+    "cropperjs": "^2.1.1",
     "jszip": "^3.10.1",
     "pdf-lib": "^1.17.1",
-    "pdfjs-dist": "^5.7.284"
+    "pdfjs-dist": "^5.7.284",
+    "qrcode": "^1.5.4"
   },
   "devDependencies": {
     "@astrojs/tailwind": "^6.0.2",
