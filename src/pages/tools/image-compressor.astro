@@ -12,7 +12,6 @@ const description = "Compress JPEG, PNG, WebP images without losing quality. Fre
       <h1 class="text-3xl font-bold mb-2">🖼️ Image Compressor</h1>
       <p class="text-gray-600 mb-6">Reduce image file size while maintaining quality. Your images never leave your device.</p>
 
-      <!-- 上传区域 -->
       <div id="upload-zone" class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center cursor-pointer hover:border-indigo-500 transition">
         <svg class="mx-auto h-10 w-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
@@ -22,13 +21,11 @@ const description = "Compress JPEG, PNG, WebP images without losing quality. Fre
         <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp" class="hidden">
       </div>
 
-      <!-- 压缩选项 -->
       <div class="mt-4">
         <label class="block text-sm font-medium mb-1">Quality: <span id="quality-value">80</span>%</label>
         <input type="range" id="quality" min="10" max="100" value="80" class="w-full">
       </div>
 
-      <!-- 预览 & 结果 -->
       <div id="preview-area" class="mt-6 hidden">
         <div class="flex flex-col md:flex-row gap-4">
           <div class="flex-1">
@@ -61,6 +58,8 @@ const description = "Compress JPEG, PNG, WebP images without losing quality. Fre
 
     let currentFile = null;
     let currentCompressedBlob = null;
+    let currentOriginalUrl = null;   // 保存原始图片的 blob URL
+    let currentCompressedUrl = null; // 保存压缩后图片的 blob URL
 
     function showMsg(msg, type = 'info') {
       if (typeof showMessage === 'function') showMessage(msg, type);
@@ -76,14 +75,25 @@ const description = "Compress JPEG, PNG, WebP images without losing quality. Fre
       if (!file) return;
       try {
         const quality = qualitySlider.value / 100;
-        const originalUrl = URL.createObjectURL(file);
-        originalImg.src = originalUrl;
+
+        // 1. 清理旧的 blob URL，避免内存泄漏
+        if (currentOriginalUrl) URL.revokeObjectURL(currentOriginalUrl);
+        if (currentCompressedUrl) URL.revokeObjectURL(currentCompressedUrl);
+
+        // 2. 创建原始图片的 blob URL 并立即显示
+        currentOriginalUrl = URL.createObjectURL(file);
+        originalImg.src = currentOriginalUrl;
         originalSizeSpan.textContent = `Size: ${(file.size / 1024).toFixed(2)} KB`;
 
-        // 使用 Canvas 压缩
+        // 3. 等待图片加载完成后再进行压缩
         const img = new Image();
-        img.src = originalUrl;
-        await new Promise(resolve => { img.onload = resolve; });
+        img.src = currentOriginalUrl;
+        await new Promise((resolve, reject) => {
+          img.onload = resolve;
+          img.onerror = reject;
+        });
+
+        // 4. Canvas 压缩
         const canvas = document.createElement('canvas');
         canvas.width = img.width;
         canvas.height = img.height;
@@ -92,13 +102,12 @@ const description = "Compress JPEG, PNG, WebP images without losing quality. Fre
         const mimeType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
         const compressedBlob = await new Promise(resolve => canvas.toBlob(resolve, mimeType, quality));
         currentCompressedBlob = compressedBlob;
-        const compressedUrl = URL.createObjectURL(compressedBlob);
-        compressedImg.src = compressedUrl;
+
+        // 5. 创建压缩后图片的 blob URL 并显示
+        currentCompressedUrl = URL.createObjectURL(compressedBlob);
+        compressedImg.src = currentCompressedUrl;
         compressedSizeSpan.textContent = `Size: ${(compressedBlob.size / 1024).toFixed(2)} KB (${Math.round((1 - compressedBlob.size / file.size) * 100)}% reduction)`;
         downloadBtn.disabled = false;
-        // 清理临时 URL
-        URL.revokeObjectURL(originalUrl);
-        URL.revokeObjectURL(compressedUrl);
       } catch (err) {
         console.error(err);
         showMsg('Compression failed: ' + err.message, 'error');
@@ -119,7 +128,6 @@ const description = "Compress JPEG, PNG, WebP images without losing quality. Fre
       previewArea.classList.remove('hidden');
     }
 
-    // 上传交互
     uploadZone.addEventListener('click', () => fileInput.click());
     fileInput.addEventListener('change', (e) => {
       if (e.target.files.length) processFile(e.target.files[0]);
@@ -144,9 +152,10 @@ const description = "Compress JPEG, PNG, WebP images without losing quality. Fre
         const url = URL.createObjectURL(currentCompressedBlob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `compressed.${currentCompressedBlob.type.split('/')[1]}`;
+        a.download = `compressed.${currentCompressedBlob.type.split('/')[1] || 'jpg'}`;
         a.click();
-        URL.revokeObjectURL(url);
+        // 延迟释放，确保下载请求已经发出
+        setTimeout(() => URL.revokeObjectURL(url), 100);
       }
     });
   </script>
@@ -155,4 +164,4 @@ const description = "Compress JPEG, PNG, WebP images without losing quality. Fre
     description={description}
     url={Astro.url.href}
   />
-</BaseLayout>
+</BaseLayout> 

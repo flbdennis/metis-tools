@@ -1,0 +1,104 @@
+---
+import Schema from '../../components/Schema.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const title = "Code Beautifier - Format HTML, CSS, JS Online";
+const description = "Beautify (pretty print) or minify your HTML, CSS, JavaScript code. Free online tool.";
+---
+
+<BaseLayout title={title} description={description} currentPath="/tools/code-beautifier">
+  <div class="max-w-4xl mx-auto py-8">
+    <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+      <h1 class="text-3xl font-bold mb-2">✨ Code Beautifier</h1>
+      <p class="text-gray-600 mb-6">Beautify or minify HTML, CSS, and JavaScript code. All processing is client-side.</p>
+
+      <div class="flex gap-2 mb-4">
+        <select id="lang" class="px-4 py-2 rounded-full border border-gray-300">
+          <option value="html">HTML</option>
+          <option value="css">CSS</option>
+          <option value="js">JavaScript</option>
+        </select>
+        <button id="beautify-btn" class="bg-indigo-600 text-white px-4 py-2 rounded-full text-sm">Beautify</button>
+        <button id="minify-btn" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-full text-sm">Minify</button>
+      </div>
+
+      <textarea id="input-code" rows="8" class="w-full px-4 py-3 rounded-xl border border-gray-300 font-mono text-sm" placeholder="Paste your code here..."></textarea>
+
+      <div class="mt-4">
+        <label class="block text-sm font-medium mb-1">Result</label>
+        <textarea id="output-code" rows="8" class="w-full px-4 py-3 rounded-xl border border-gray-300 bg-gray-50 font-mono text-sm" readonly placeholder="Result will appear here..."></textarea>
+        <button id="copy-btn" class="mt-2 bg-indigo-600 text-white px-4 py-2 rounded-full text-sm">Copy Result</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/js-beautify@1.15.1/js/lib/beautify.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/js-beautify@1.15.1/js/lib/beautify-css.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/js-beautify@1.15.1/js/lib/beautify-html.min.js"></script>
+  <script>
+    const langSelect = document.getElementById('lang');
+    const inputCode = document.getElementById('input-code');
+    const outputCode = document.getElementById('output-code');
+    const beautifyBtn = document.getElementById('beautify-btn');
+    const minifyBtn = document.getElementById('minify-btn');
+    const copyBtn = document.getElementById('copy-btn');
+
+    function showMsg(msg, type) {
+      if (typeof showMessage === 'function') showMessage(msg, type);
+      else alert(msg);
+    }
+
+    function beautify() {
+      let result = '';
+      const lang = langSelect.value;
+      const code = inputCode.value;
+      try {
+        if (lang === 'html') {
+          result = html_beautify(code, { indent_size: 2 });
+        } else if (lang === 'css') {
+          result = css_beautify(code, { indent_size: 2 });
+        } else if (lang === 'js') {
+          result = js_beautify(code, { indent_size: 2 });
+        }
+        outputCode.value = result;
+        showMsg('Beautified', 'success');
+      } catch (e) {
+        showMsg('Error: ' + e.message, 'error');
+      }
+    }
+
+    function minify() {
+      let result = '';
+      const lang = langSelect.value;
+      const code = inputCode.value;
+      try {
+        if (lang === 'html') {
+          result = html_beautify(code, { indent_size: 0, preserve_newlines: false });
+        } else if (lang === 'css') {
+          result = css_beautify(code, { indent_size: 0, preserve_newlines: false });
+        } else if (lang === 'js') {
+          result = js_beautify(code, { indent_size: 0, preserve_newlines: false });
+        }
+        outputCode.value = result;
+        showMsg('Minified', 'success');
+      } catch (e) {
+        showMsg('Error: ' + e.message, 'error');
+      }
+    }
+
+    beautifyBtn.addEventListener('click', beautify);
+    minifyBtn.addEventListener('click', minify);
+    copyBtn.addEventListener('click', () => {
+      if (outputCode.value) {
+        navigator.clipboard.writeText(outputCode.value).then(() => showMsg('Copied!', 'success')).catch(() => showMsg('Copy failed', 'error'));
+      } else {
+        showMsg('Nothing to copy', 'error');
+      }
+    });
+  </script>
+  <Schema
+    toolName="Code Beautifier"
+    description={description}
+    url={Astro.url.href}
+  />
+</BaseLayout>

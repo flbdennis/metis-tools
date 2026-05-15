@@ -1,0 +1,111 @@
+---
+import Schema from '../../components/Schema.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { testRegex } from '../../lib/text-tools';
+
+const title = "Regex Tester - Test Regular Expressions Online";
+const description = "Test your regular expressions with real-time matching and highlighting. Supports flags g, i, m. Free and private.";
+---
+
+<BaseLayout title={title} description={description} currentPath="/text-tools/regex-tester">
+  <div class="max-w-4xl mx-auto py-8">
+    <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+      <h1 class="text-3xl font-bold mb-2">🎯 Regex Tester</h1>
+      <p class="text-gray-600 mb-6">Write a regular expression and test it against your text. Matches are highlighted in real‑time.</p>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium mb-1">Regular Expression</label>
+          <input type="text" id="regex-input" class="w-full px-4 py-2 rounded-full border border-gray-300 font-mono" placeholder="e.g., \b\w{4}\b">
+        </div>
+        <div class="flex items-center gap-4">
+          <label class="inline-flex items-center"><input type="checkbox" id="flag-g" value="g" class="mr-1"> g (global)</label>
+          <label class="inline-flex items-center"><input type="checkbox" id="flag-i" value="i" class="mr-1"> i (case‑insensitive)</label>
+          <label class="inline-flex items-center"><input type="checkbox" id="flag-m" value="m" class="mr-1"> m (multiline)</label>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Test String</label>
+          <textarea id="test-string" rows="8" class="w-full px-4 py-3 rounded-xl border border-gray-300 font-mono" placeholder="Enter test text..."></textarea>
+        </div>
+      </div>
+
+      <div id="result-area" class="mt-6 p-4 bg-gray-50 rounded-xl hidden">
+        <p id="match-count" class="text-sm font-medium"></p>
+        <div id="highlighted-output" class="mt-2 p-3 bg-white border rounded font-mono text-sm overflow-auto max-h-60"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    import { testRegex } from '../../lib/text-tools';
+
+    const regexInput = document.getElementById('regex-input');
+    const flagG = document.getElementById('flag-g');
+    const flagI = document.getElementById('flag-i');
+    const flagM = document.getElementById('flag-m');
+    const testString = document.getElementById('test-string');
+    const resultArea = document.getElementById('result-area');
+    const matchCountSpan = document.getElementById('match-count');
+    const highlightedOutput = document.getElementById('highlighted-output');
+
+    function updateHighlight() {
+      const pattern = regexInput.value;
+      if (!pattern) {
+        resultArea.classList.add('hidden');
+        return;
+      }
+      let flags = '';
+      if (flagG.checked) flags += 'g';
+      if (flagI.checked) flags += 'i';
+      if (flagM.checked) flags += 'm';
+      const testStr = testString.value;
+      if (!testStr) {
+        resultArea.classList.add('hidden');
+        return;
+      }
+
+      const result = testRegex(pattern, flags, testStr);
+      if (!result.isValid) {
+        resultArea.classList.remove('hidden');
+        matchCountSpan.textContent = `Invalid regex: ${result.error}`;
+        highlightedOutput.innerHTML = '';
+        return;
+      }
+
+      const matches = result.matches;
+      let html = '';
+      let lastIndex = 0;
+      for (const m of matches) {
+        const matchText = m.match;
+        const idx = m.index;
+        html += escapeHtml(testStr.substring(lastIndex, idx));
+        html += `<mark class="bg-yellow-200 rounded px-0.5">${escapeHtml(matchText)}</mark>`;
+        lastIndex = idx + matchText.length;
+      }
+      html += escapeHtml(testStr.substring(lastIndex));
+      highlightedOutput.innerHTML = html;
+      matchCountSpan.textContent = `${matches.length} match(es) found.`;
+      resultArea.classList.remove('hidden');
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+      });
+    }
+
+    regexInput.addEventListener('input', updateHighlight);
+    flagG.addEventListener('change', updateHighlight);
+    flagI.addEventListener('change', updateHighlight);
+    flagM.addEventListener('change', updateHighlight);
+    testString.addEventListener('input', updateHighlight);
+  </script>
+  <Schema
+    toolName="Regex Tester"
+    description={description}
+    url={Astro.url.href}
+  />
+</BaseLayout>

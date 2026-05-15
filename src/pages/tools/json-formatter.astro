@@ -1,0 +1,78 @@
+---
+import Schema from '../../components/Schema.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const title = "JSON Formatter & Minifier - Pretty Print JSON";
+const description = "Format (beautify) or minify your JSON data online. Free and private.";
+---
+
+<BaseLayout title={title} description={description} currentPath="/tools/json-formatter">
+  <div class="max-w-4xl mx-auto py-8">
+    <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+      <h1 class="text-3xl font-bold mb-2">🔧 JSON Formatter & Minifier</h1>
+      <p class="text-gray-600 mb-6">Format (pretty‑print) or minify your JSON data. All processing is done in your browser.</p>
+
+      <textarea id="input-json" rows="10" class="w-full px-4 py-3 rounded-xl border border-gray-300 font-mono text-sm" placeholder='{"name":"John","age":30,"city":"New York"}'></textarea>
+
+      <div class="mt-4 flex flex-wrap gap-2">
+        <button id="format-btn" class="bg-indigo-600 text-white px-4 py-2 rounded-full text-sm">Format (Pretty)</button>
+        <button id="minify-btn" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-full text-sm">Minify</button>
+        <button id="validate-btn" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-full text-sm">Validate</button>
+      </div>
+
+      <div class="mt-4">
+        <label class="block text-sm font-medium mb-1">Result</label>
+        <textarea id="output-json" rows="10" class="w-full px-4 py-3 rounded-xl border border-gray-300 bg-gray-50 font-mono text-sm" readonly placeholder="Result will appear here..."></textarea>
+        <button id="copy-btn" class="mt-2 bg-indigo-600 text-white px-4 py-2 rounded-full text-sm">Copy Result</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const input = document.getElementById('input-json');
+    const output = document.getElementById('output-json');
+    const formatBtn = document.getElementById('format-btn');
+    const minifyBtn = document.getElementById('minify-btn');
+    const validateBtn = document.getElementById('validate-btn');
+    const copyBtn = document.getElementById('copy-btn');
+
+    function showMsg(msg, type) {
+      if (typeof showMessage === 'function') showMessage(msg, type);
+      else alert(msg);
+    }
+
+    function formatJSON(space = 2) {
+      try {
+        const obj = JSON.parse(input.value);
+        output.value = JSON.stringify(obj, null, space);
+        showMsg('Formatted successfully', 'success');
+      } catch (e) {
+        output.value = '';
+        showMsg(`Invalid JSON: ${e.message}`, 'error');
+      }
+    }
+
+    formatBtn.addEventListener('click', () => formatJSON(2));
+    minifyBtn.addEventListener('click', () => formatJSON(0));
+    validateBtn.addEventListener('click', () => {
+      try {
+        JSON.parse(input.value);
+        showMsg('Valid JSON', 'success');
+      } catch (e) {
+        showMsg(`Invalid JSON: ${e.message}`, 'error');
+      }
+    });
+    copyBtn.addEventListener('click', () => {
+      if (output.value) {
+        navigator.clipboard.writeText(output.value).then(() => showMsg('Copied!', 'success')).catch(() => showMsg('Copy failed', 'error'));
+      } else {
+        showMsg('Nothing to copy', 'error');
+      }
+    });
+  </script>
+  <Schema
+    toolName="JSON Formatter"
+    description={description}
+    url={Astro.url.href}
+  />
+</BaseLayout>

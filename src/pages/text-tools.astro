@@ -1,0 +1,25 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ToolCard from '../components/ToolCard.astro';
+
+const title = "Text Tools - Free Online Text Processing Utilities";
+const description = "Case converter, encoding/decoding, regex tester, duplicate remover, sorting, statistics, and more. All in your browser.";
+
+const textTools = [
+  { title: 'Case Converter', description: 'Convert text to uppercase, lowercase, sentence case, title case', icon: '🔠', href: 'tools/case-converter' },
+  { title: 'Encode / Decode', description: 'Base64, URL, HTML encoding and decoding', icon: '🔐', href: '/tools/encode-decode' },
+  { title: 'Regex Tester', description: 'Test regular expressions with real-time highlighting', icon: '🎯', href: '/tools/regex-tester' },
+  { title: 'Remove Duplicate Lines', description: 'Remove duplicate lines while preserving order', icon: '🧹', href: '/tools/remove-duplicates' },
+  { title: 'Text Statistics', description: 'Word count, character count, line count, and more', icon: '📊', href: '/tools/text-stats' },
+];
+---
+
+<BaseLayout title={title} description={description} currentPath="/text-tools">
+  <section class="py-8">
+    <h1 class="text-3xl font-bold mb-4">Text Tools</h1>
+    <p class="text-gray-600 mb-8">All processing is done locally in your browser. Your data never leaves your device.</p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {textTools.map(tool => <ToolCard {...tool} />)}
+    </div>
+  </section>
+</BaseLayout>

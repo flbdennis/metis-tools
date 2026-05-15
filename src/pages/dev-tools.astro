@@ -1,0 +1,25 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ToolCard from '../components/ToolCard.astro';
+
+const title = "Developer Tools - Online Utilities for Coders";
+const description = "Free online tools for developers: timestamp converter, JSON formatter, JWT decoder, UUID generator, color converter, code beautifier.";
+const tools = [
+  { title: "Unix Timestamp Converter", description: "Convert between Unix timestamps and human-readable dates.", icon: "⏱️", href: "/tools/unix-timestamp" },
+  { title: "JSON Formatter & Minifier", description: "Format or minify your JSON code for readability or storage.", icon: "🔧", href: "/tools/json-formatter" },
+  { title: "JWT Decoder", description: "Decode JSON Web Tokens and inspect headers/payloads.", icon: "🔓", href: "/tools/jwt-decoder" },
+  { title: "UUID / GUID Generator", description: "Generate random UUID v4 or custom GUIDs.", icon: "🆔", href: "/tools/uuid-generator" },
+  { title: "Color Converter", description: "Convert between HEX, RGB, HSL color formats.", icon: "🎨", href: "/tools/color-converter" },
+  { title: "Code Beautifier", description: "Beautify or minify HTML, CSS, JavaScript code.", icon: "✨", href: "/tools/code-beautifier" },
+];
+---
+
+<BaseLayout title={title} description={description} currentPath="/dev-tools">
+  <section class="py-8">
+    <h1 class="text-3xl font-bold mb-4">🛠️ Developer Tools</h1>
+    <p class="text-gray-600 mb-8">Essential utilities for developers – all running locally in your browser.</p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {tools.map(tool => <ToolCard {...tool} />)}
+    </div>
+  </section>
+</BaseLayout>

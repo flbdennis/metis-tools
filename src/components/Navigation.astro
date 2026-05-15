@@ -1,65 +1,87 @@
 ---
-const { currentPath = '/' } = Astro.props;
+const { currentPath = "/" } = Astro.props;
 const navItems = [
-  { href: '/', label: 'Home' },
-  { href: '/converters', label: 'Converters' },
-  { href: '/calculators', label: 'Calculators' },
+  { href: "/", label: "Home" },
+  { href: "/converters", label: "Converters" },
+  { href: "/calculators", label: "Calculators" },
+  { href: "/text-tools", label: "Text Tools" },
+  { href: "/dev-tools", label: "Dev Tools" },
 ];
 ---
 
-<header class="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200">
+<header
+  class="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200"
+>
   <div class="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
-    <a href="/" class="text-xl md:text-2xl font-bold bg-gradient-to-r from-indigo-600 to-cyan-500 bg-clip-text text-transparent flex-shrink-0">
+    <a
+      href="/"
+      class="text-xl md:text-2xl font-bold bg-gradient-to-r from-indigo-600 to-cyan-500 bg-clip-text text-transparent flex-shrink-0"
+    >
       MetisTools
     </a>
-    
+
     <!-- 桌面端导航 -->
     <nav class="hidden md:flex items-center space-x-8">
-      {navItems.map(item => (
-        <a
-          href={item.href}
-          class={`text-sm md:text-base text-gray-700 hover:text-indigo-600 font-medium transition ${
-            currentPath === item.href ? 'text-indigo-600 border-b-2 border-indigo-600 pb-1' : ''
-          }`}
-        >
-          {item.label}
-        </a>
-      ))}
+      {
+        navItems.map((item) => (
+          <a
+            href={item.href}
+            class={`text-sm md:text-base text-gray-700 hover:text-indigo-600 font-medium transition ${
+              currentPath === item.href
+                ? "text-indigo-600 border-b-2 border-indigo-600 pb-1"
+                : ""
+            }`}
+          >
+            {item.label}
+          </a>
+        ))
+      }
     </nav>
-    
+
     <!-- 移动端菜单按钮 -->
-    <button id="menu-btn" class="md:hidden text-gray-700 text-2xl focus:outline-none p-2" aria-label="Toggle menu">
+    <button
+      id="menu-btn"
+      class="md:hidden text-gray-700 text-2xl focus:outline-none p-2"
+      aria-label="Toggle menu"
+    >
       ☰
     </button>
   </div>
-  
+
   <!-- 移动端下拉菜单 -->
-  <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-200 shadow-lg">
+  <div
+    id="mobile-menu"
+    class="hidden md:hidden bg-white border-t border-gray-200 shadow-lg"
+  >
     <div class="flex flex-col py-2 px-4 sm:px-6 lg:px-8">
-      {navItems.map(item => (
-        <a
-          href={item.href}
-          class={`block px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-indigo-600 font-medium transition ${
-            currentPath === item.href ? 'text-indigo-600 bg-gray-50 border-l-4 border-indigo-600 pl-3' : ''
-          }`}
-        >
-          {item.label}
-        </a>
-      ))}
+      {
+        navItems.map((item) => (
+          <a
+            href={item.href}
+            class={`block px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-indigo-600 font-medium transition ${
+              currentPath === item.href
+                ? "text-indigo-600 bg-gray-50 border-l-4 border-indigo-600 pl-3"
+                : ""
+            }`}
+          >
+            {item.label}
+          </a>
+        ))
+      }
     </div>
   </div>
-  
+
   <script>
-    const menuBtn = document.getElementById('menu-btn');
-    const mobileMenu = document.getElementById('mobile-menu');
+    const menuBtn = document.getElementById("menu-btn");
+    const mobileMenu = document.getElementById("mobile-menu");
     if (menuBtn && mobileMenu) {
-      menuBtn.addEventListener('click', (e) => {
+      menuBtn.addEventListener("click", (e) => {
         e.stopPropagation();
-        mobileMenu.classList.toggle('hidden');
+        mobileMenu.classList.toggle("hidden");
       });
-      document.addEventListener('click', (e) => {
+      document.addEventListener("click", (e) => {
         if (!mobileMenu.contains(e.target) && e.target !== menuBtn) {
-          mobileMenu.classList.add('hidden');
+          mobileMenu.classList.add("hidden");
         }
       });
     }

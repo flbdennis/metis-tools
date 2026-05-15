@@ -1,0 +1,103 @@
+---
+import Schema from '../../components/Schema.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const title = "Unix Timestamp Converter - Epoch Time Converter";
+const description = "Convert Unix timestamps to human-readable dates and vice versa. Free online tool.";
+---
+
+<BaseLayout title={title} description={description} currentPath="/tools/unix-timestamp">
+  <div class="max-w-2xl mx-auto py-8">
+    <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+      <h1 class="text-3xl font-bold mb-2">⏱️ Unix Timestamp Converter</h1>
+      <p class="text-gray-600 mb-6">Convert between Unix timestamps (seconds since 1970-01-01) and human-readable dates.</p>
+
+      <div class="space-y-6">
+        <div>
+          <label class="block text-sm font-medium mb-1">Unix Timestamp (seconds)</label>
+          <div class="flex gap-2">
+            <input type="number" id="timestamp" class="flex-1 px-4 py-2 rounded-full border border-gray-300" placeholder="e.g., 1700000000" step="1">
+            <button id="now-btn" class="bg-gray-200 px-4 py-2 rounded-full text-sm">Now</button>
+          </div>
+          <button id="ts-to-date" class="mt-2 bg-indigo-600 text-white px-4 py-2 rounded-full text-sm">Convert to Date →</button>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-1">Date & Time (UTC)</label>
+          <div class="flex gap-2">
+            <input type="datetime-local" id="datetime" class="flex-1 px-4 py-2 rounded-full border border-gray-300">
+            <button id="local-btn" class="bg-gray-200 px-4 py-2 rounded-full text-sm">Use Local</button>
+          </div>
+          <button id="date-to-ts" class="mt-2 bg-indigo-600 text-white px-4 py-2 rounded-full text-sm">Convert to Timestamp →</button>
+        </div>
+
+        <div id="result" class="mt-4 p-4 bg-gray-100 rounded-xl text-center hidden">
+          <p id="result-text" class="text-lg font-semibold"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const timestampInput = document.getElementById('timestamp');
+    const datetimeInput = document.getElementById('datetime');
+    const nowBtn = document.getElementById('now-btn');
+    const localBtn = document.getElementById('local-btn');
+    const tsToDateBtn = document.getElementById('ts-to-date');
+    const dateToTsBtn = document.getElementById('date-to-ts');
+    const resultDiv = document.getElementById('result');
+    const resultText = document.getElementById('result-text');
+
+    function showResult(msg) {
+      resultText.textContent = msg;
+      resultDiv.classList.remove('hidden');
+    }
+
+    nowBtn.addEventListener('click', () => {
+      const now = Math.floor(Date.now() / 1000);
+      timestampInput.value = now;
+      showResult(`Current Unix timestamp: ${now}`);
+    });
+
+    localBtn.addEventListener('click', () => {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      datetimeInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+    });
+
+    tsToDateBtn.addEventListener('click', () => {
+      const ts = parseInt(timestampInput.value);
+      if (isNaN(ts)) {
+        showResult('Please enter a valid Unix timestamp.');
+        return;
+      }
+      const date = new Date(ts * 1000);
+      showResult(date.toUTCString());
+    });
+
+    dateToTsBtn.addEventListener('click', () => {
+      let dateStr = datetimeInput.value;
+      if (!dateStr) {
+        showResult('Please select a date and time.');
+        return;
+      }
+      // 如果用户选择了本地时间，需要加上时区偏移
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) {
+        showResult('Invalid date.');
+        return;
+      }
+      const ts = Math.floor(date.getTime() / 1000);
+      showResult(`Unix timestamp: ${ts} (UTC)`);
+    });
+  </script>
+  <Schema
+    toolName="Unix Timestamp Converter"
+    description={description}
+    url={Astro.url.href}
+  />
+</BaseLayout>

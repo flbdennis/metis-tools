@@ -1,0 +1,82 @@
+---
+import Schema from '../../components/Schema.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { removeDuplicateLines, removeEmptyLines, trimWhitespace } from '../../lib/text-tools';
+
+// 自定义压缩空格函数（去除首尾空白，并将连续空白替换为单个空格）
+function collapseSpaces(text) {
+  return text.trim().replace(/\s+/g, ' ');
+}
+
+const title = "Text Cleaner - Remove Duplicates, Empty Lines, Trim & Collapse Spaces";
+const description = "Clean up your text: remove duplicate lines, empty lines, trim leading/trailing whitespace, or collapse multiple spaces.";
+---
+
+<BaseLayout title={title} description={description} currentPath="/text-tools/remove-duplicates">
+  <div class="max-w-4xl mx-auto py-8">
+    <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+      <h1 class="text-3xl font-bold mb-2">🧹 Text Cleaner</h1>
+      <p class="text-gray-600 mb-6">Clean up your text with one click. All operations are client-side, private, and unlimited.</p>
+
+      <textarea id="input-text" rows="8" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono" placeholder="Paste your text here..."></textarea>
+
+      <div class="mt-4 flex flex-wrap gap-2">
+        <button id="remove-duplicates" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-full text-sm font-medium">Remove Duplicate Lines</button>
+        <button id="remove-empty" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-full text-sm font-medium">Remove Empty Lines</button>
+        <button id="trim-whitespace" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-full text-sm font-medium">Trim Whitespace (Start/End)</button>
+        <button id="collapse-spaces" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-full text-sm font-medium">Collapse Multiple Spaces</button>
+      </div>
+
+      <div class="mt-4">
+        <label class="block text-sm font-medium mb-1">Result</label>
+        <textarea id="output-text" rows="8" class="w-full px-4 py-3 rounded-xl border border-gray-300 bg-gray-50 font-mono" readonly placeholder="Result will appear here..."></textarea>
+        <button id="copy-btn" class="mt-2 bg-indigo-600 text-white px-4 py-2 rounded-full text-sm">Copy Result</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    import { removeDuplicateLines, removeEmptyLines, trimWhitespace } from '../../lib/text-tools';
+
+    // 定义压缩空格函数（因为可能未导出）
+    function collapseSpaces(text) {
+      return text.trim().replace(/\s+/g, ' ');
+    }
+
+    const inputEl = document.getElementById('input-text');
+    const outputEl = document.getElementById('output-text');
+    const copyBtn = document.getElementById('copy-btn');
+
+    function applyOperation(operation) {
+      const text = inputEl.value;
+      let result = '';
+      if (operation === 'duplicates') result = removeDuplicateLines(text);
+      else if (operation === 'empty') result = removeEmptyLines(text);
+      else if (operation === 'trim') result = trimWhitespace(text);
+      else if (operation === 'collapse') result = collapseSpaces(text);
+      outputEl.value = result;
+    }
+
+    document.getElementById('remove-duplicates').addEventListener('click', () => applyOperation('duplicates'));
+    document.getElementById('remove-empty').addEventListener('click', () => applyOperation('empty'));
+    document.getElementById('trim-whitespace').addEventListener('click', () => applyOperation('trim'));
+    document.getElementById('collapse-spaces').addEventListener('click', () => applyOperation('collapse'));
+
+    copyBtn.addEventListener('click', () => {
+      if (outputEl.value) {
+        navigator.clipboard.writeText(outputEl.value).then(() => {
+          showMessage('Copied to clipboard!', 'success');
+        }).catch(() => {
+          showMessage('Failed to copy.', 'error');
+        });
+      } else {
+        showMessage('Nothing to copy.', 'error');
+      }
+    });
+  </script>
+  <Schema
+    toolName="Text Cleaner"
+    description={description}
+    url={Astro.url.href}
+  />
+</BaseLayout>

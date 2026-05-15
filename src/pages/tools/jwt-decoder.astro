@@ -1,0 +1,77 @@
+---
+import Schema from '../../components/Schema.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const title = "JWT Decoder - Decode JSON Web Tokens Online";
+const description = "Decode JWT tokens and inspect header, payload, and signature. Free online tool.";
+---
+
+<BaseLayout title={title} description={description} currentPath="/tools/jwt-decoder">
+  <div class="max-w-4xl mx-auto py-8">
+    <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+      <h1 class="text-3xl font-bold mb-2">🔓 JWT Decoder</h1>
+      <p class="text-gray-600 mb-6">Paste a JWT to decode its header and payload. Your token never leaves your browser.</p>
+
+      <textarea id="jwt-input" rows="4" class="w-full px-4 py-3 rounded-xl border border-gray-300 font-mono text-sm" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"></textarea>
+      <button id="decode-btn" class="mt-2 bg-indigo-600 text-white px-4 py-2 rounded-full text-sm">Decode</button>
+
+      <div id="result-area" class="mt-6 hidden">
+        <h3 class="font-semibold">Header</h3>
+        <pre id="header-output" class="p-3 bg-gray-50 rounded border overflow-auto text-xs mb-4"></pre>
+        <h3 class="font-semibold">Payload</h3>
+        <pre id="payload-output" class="p-3 bg-gray-50 rounded border overflow-auto text-xs"></pre>
+        <p id="signature-note" class="text-xs text-gray-500 mt-2"></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const input = document.getElementById('jwt-input');
+    const decodeBtn = document.getElementById('decode-btn');
+    const resultArea = document.getElementById('result-area');
+    const headerOutput = document.getElementById('header-output');
+    const payloadOutput = document.getElementById('payload-output');
+    const signatureNote = document.getElementById('signature-note');
+
+    function showMsg(msg, type) {
+      if (typeof showMessage === 'function') showMessage(msg, type);
+      else alert(msg);
+    }
+
+    function base64UrlDecode(str) {
+      str = str.replace(/-/g, '+').replace(/_/g, '/');
+      while (str.length % 4) str += '=';
+      return atob(str);
+    }
+
+    decodeBtn.addEventListener('click', () => {
+      const token = input.value.trim();
+      if (!token) {
+        showMsg('Please enter a JWT token', 'error');
+        return;
+      }
+      const parts = token.split('.');
+      if (parts.length !== 3) {
+        showMsg('Invalid JWT format (expected three parts separated by dots)', 'error');
+        return;
+      }
+      try {
+        const header = JSON.parse(base64UrlDecode(parts[0]));
+        const payload = JSON.parse(base64UrlDecode(parts[1]));
+        headerOutput.textContent = JSON.stringify(header, null, 2);
+        payloadOutput.textContent = JSON.stringify(payload, null, 2);
+        signatureNote.textContent = `Signature (Base64Url): ${parts[2].substring(0, 20)}... (verification not performed)`;
+        resultArea.classList.remove('hidden');
+        showMsg('Decoded successfully', 'success');
+      } catch (e) {
+        showMsg(`Decoding failed: ${e.message}`, 'error');
+        resultArea.classList.add('hidden');
+      }
+    });
+  </script>
+  <Schema
+    toolName="JWT Decoder"
+    description={description}
+    url={Astro.url.href}
+  />
+</BaseLayout>
