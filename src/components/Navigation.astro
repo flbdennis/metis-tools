@@ -1,5 +1,4 @@
 ---
-import ThemeToggle from "./ThemeToggle.astro";
 const { currentPath = "/" } = Astro.props;
 const navItems = [
   { href: "/", label: "Home" },
@@ -38,7 +37,7 @@ function isActive(href) {
       }
     </nav>
     <div class="flex items-center space-x-2">
-      <ThemeToggle />
+      <!-- <ThemeToggle /> -->
       <button
         id="menu-btn"
         class="md:hidden text-gray-700 dark:text-gray-200 text-2xl focus:outline-none p-2"
