@@ -1,5 +1,5 @@
 ---
-const { toolName, description, url, imageUrl, operatingSystem = 'All' } = Astro.props;
+const { toolName, description, url, imageUrl, operatingSystem = 'All', category = 'Utility' } = Astro.props;
 const siteUrl = Astro.site?.href;
 // 如果传入的 url 是相对路径，则拼接
 const fullUrl = url?.startsWith('http') ? url : new URL(url || '/', siteUrl).href;
@@ -12,7 +12,7 @@ const imageFullUrl = imageUrl?.startsWith('http') ? imageUrl : new URL(imageUrl 
   "name": toolName,
   "description": description,
   "url": fullUrl,
-  "applicationCategory": "Utility",
+  "applicationCategory": category,
   "operatingSystem": operatingSystem,
   "offers": {
     "@type": "Offer",
@@ -25,5 +25,5 @@ const imageFullUrl = imageUrl?.startsWith('http') ? imageUrl : new URL(imageUrl 
     "@type": "Organization",
     "name": "MetisTools",
     "url": siteUrl
-  }
+  },
 })} />
