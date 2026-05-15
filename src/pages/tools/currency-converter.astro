@@ -1,0 +1,213 @@
+---
+import Schema from '../../components/Schema.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const title = "Currency Converter - Real-Time Exchange Rates";
+const description = "Convert between 170+ currencies using the latest exchange rates. Free, no signup required.";
+---
+
+<BaseLayout title={title} description={description} currentPath="/tools/currency-converter">
+  <div class="max-w-2xl mx-auto py-8">
+    <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+      <h1 class="text-3xl font-bold mb-2">💱 Currency Converter</h1>
+      <p class="text-gray-600 mb-6">Convert between 170+ currencies using the latest exchange rates (daily update).</p>
+      
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium mb-1">Amount</label>
+          <input type="number" id="amount" class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="e.g., 100" step="any" value="1">
+        </div>
+        
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium mb-1">From</label>
+            <select id="from" class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500" disabled>
+              <option value="">Loading currencies...</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">To</label>
+            <select id="to" class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500" disabled>
+              <option value="">Loading currencies...</option>
+            </select>
+          </div>
+        </div>
+        
+        <button id="convertBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 rounded-full transition-transform transform hover:scale-98" disabled>Convert</button>
+        
+        <div id="result" class="mt-4 p-4 bg-gray-100 rounded-xl text-center text-gray-800 hidden">
+          <p class="text-lg font-semibold" id="resultText">--</p>
+          <p class="text-xs text-gray-500 mt-1" id="rateInfo"></p>
+          <p class="text-xs text-gray-500" id="dateInfo"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    let cachedRates = null;
+    let cacheTimestamp = null;
+    let currencyList = null;
+    let currencyCodes = [];
+    const CACHE_DURATION = 12 * 60 * 60 * 1000; // 12小时
+
+    // --- DOM 元素 ---
+    const fromSelect = document.getElementById('from');
+    const toSelect = document.getElementById('to');
+    const convertBtn = document.getElementById('convertBtn');
+    const amountInput = document.getElementById('amount');
+    const resultDiv = document.getElementById('result');
+    const resultSpan = document.getElementById('resultText');
+    const rateInfoSpan = document.getElementById('rateInfo');
+    const dateInfoSpan = document.getElementById('dateInfo');
+    
+    // 货币代码对应的完整名称（备用列表）
+    const currencyNames = {
+      "USD": "US Dollar", "EUR": "Euro", "GBP": "British Pound", "JPY": "Japanese Yen",
+      "CNY": "Chinese Yuan", "AUD": "Australian Dollar", "CAD": "Canadian Dollar",
+      "CHF": "Swiss Franc", "HKD": "Hong Kong Dollar", "NZD": "New Zealand Dollar",
+      "SEK": "Swedish Krona", "KRW": "South Korean Won", "SGD": "Singapore Dollar",
+      "NOK": "Norwegian Krone", "MXN": "Mexican Peso", "INR": "Indian Rupee",
+      "RUB": "Russian Ruble", "ZAR": "South African Rand", "TRY": "Turkish Lira",
+      "BRL": "Brazilian Real", "TWD": "New Taiwan Dollar", "THB": "Thai Baht",
+      "VND": "Vietnamese Dong", "IDR": "Indonesian Rupiah", "MYR": "Malaysian Ringgit",
+      "PHP": "Philippine Peso", "PLN": "Polish Zloty", "CZK": "Czech Koruna",
+      "DKK": "Danish Krone", "HUF": "Hungarian Forint", "ILS": "Israeli New Shekel"
+    };
+    
+    // 1. 获取货币列表（通过代理调用 open.er-api.com）
+    async function fetchCurrencyList() {
+      try {
+        const response = await proxyFetch('https://open.er-api.com/v6/latest');
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        if (data && data.rates) {
+          // 从 rates 中提取货币代码
+          const rates = data.rates;
+          currencyCodes = Object.keys(rates).sort();
+          // 构建货币列表（代码 + 名称）
+          currencyList = {};
+          currencyCodes.forEach(code => {
+            currencyList[code] = currencyNames[code] || code;
+          });
+          return true;
+        } else {
+          throw new Error('Invalid data');
+        }
+      } catch (error) {
+        console.error('Failed to fetch currency list, using fallback:', error);
+        // 降级：使用预定义的备用货币列表
+        currencyList = currencyNames;
+        currencyCodes = Object.keys(currencyNames).sort();
+        return false;
+      }
+    }
+    
+    // 2. 填充下拉框
+    function populateSelects() {
+      if (!currencyList) return;
+      const fromVal = fromSelect.value;
+      const toVal = toSelect.value;
+      fromSelect.innerHTML = '';
+      toSelect.innerHTML = '';
+      for (const code of currencyCodes) {
+        const name = currencyList[code];
+        const optionFrom = document.createElement('option');
+        optionFrom.value = code;
+        optionFrom.textContent = `${code} - ${name}`;
+        fromSelect.appendChild(optionFrom);
+        
+        const optionTo = document.createElement('option');
+        optionTo.value = code;
+        optionTo.textContent = `${code} - ${name}`;
+        toSelect.appendChild(optionTo);
+      }
+      // 设置默认值
+      fromSelect.value = currencyCodes.includes(fromVal) ? fromVal : 'USD';
+      toSelect.value = currencyCodes.includes(toVal) ? toVal : 'EUR';
+      fromSelect.disabled = false;
+      toSelect.disabled = false;
+      convertBtn.disabled = false;
+    }
+    
+    // 3. 获取汇率（通过代理调用 open.er-api.com）
+    async function fetchExchangeRates(base) {
+      const now = Date.now();
+      if (cachedRates && cacheTimestamp && (now - cacheTimestamp < CACHE_DURATION) && cachedRates.base === base) {
+        return cachedRates;
+      }
+      try {
+        const url = `https://open.er-api.com/v6/latest/${base}`;
+        const response = await proxyFetch(url);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        if (data && data.rates) {
+          cachedRates = {
+            base: data.base_code,
+            rates: data.rates,
+            date: data.time_last_update_utc
+          };
+          cacheTimestamp = now;
+          return cachedRates;
+        } else {
+          throw new Error('Invalid response');
+        }
+      } catch (error) {
+        console.error('Failed to fetch rates:', error);
+        if (cachedRates) {
+          console.warn('Using stale cache');
+          return cachedRates;
+        }
+        throw error;
+      }
+    }
+    
+    // 4. 执行转换
+    async function convertCurrency() {
+      const amount = parseFloat(amountInput.value);
+      const fromCode = fromSelect.value;
+      const toCode = toSelect.value;
+      if (isNaN(amount) || amount === 0) {
+        showMessage('Please enter a valid amount.', 'error');
+        return;
+      }
+      resultSpan.textContent = 'Fetching rates...';
+      resultDiv.classList.remove('hidden');
+      rateInfoSpan.textContent = '';
+      dateInfoSpan.textContent = '';
+      convertBtn.disabled = true;
+      try {
+        const ratesData = await fetchExchangeRates(fromCode);
+        const rate = ratesData.rates[toCode];
+        if (!rate) throw new Error(`Rate for ${toCode} not available`);
+        const converted = amount * rate;
+        resultSpan.innerHTML = `${amount} ${fromCode} = <strong>${converted.toFixed(2)} ${toCode}</strong>`;
+        rateInfoSpan.textContent = `1 ${fromCode} = ${rate.toFixed(4)} ${toCode}`;
+        if (ratesData.date) dateInfoSpan.textContent = `Exchange rates as of ${ratesData.date}`;
+      } catch (error) {
+        showMessage('Failed to get exchange rates. Please try again later.', 'error');
+        resultDiv.classList.add('hidden');
+      } finally {
+        convertBtn.disabled = false;
+      }
+    }
+    
+    // 5. 页面初始化
+    async function init() {
+      fromSelect.disabled = true;
+      toSelect.disabled = true;
+      convertBtn.disabled = true;
+      await fetchCurrencyList();
+      populateSelects();
+      convertBtn.addEventListener('click', convertCurrency);
+      setTimeout(() => convertCurrency(), 100);
+    }
+    
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+  <Schema
+    toolName="Currency Converter"
+    description={description}
+    url={Astro.url.href}
+  />
+</BaseLayout>

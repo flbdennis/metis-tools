@@ -1,0 +1,96 @@
+---
+import Schema from '../../components/Schema.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const title = "Date Difference Calculator - Days Between Dates";
+const description = "Calculate the number of days, weeks, months, or years between two dates. Free online date difference tool.";
+---
+
+<BaseLayout title={title} description={description} currentPath="/tools/date-difference">
+  <div class="max-w-2xl mx-auto py-8">
+    <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+      <h1 class="text-3xl font-bold mb-2">📅 Date Difference Calculator</h1>
+      <p class="text-gray-600 mb-6">Calculate the exact difference between two dates.</p>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium mb-1">Start Date</label>
+          <input type="date" id="startDate" class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">End Date</label>
+          <input type="date" id="endDate" class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Result Unit</label>
+          <select id="unit" class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <option value="days">Days</option>
+            <option value="weeks">Weeks</option>
+            <option value="months">Months</option>
+            <option value="years">Years</option>
+          </select>
+        </div>
+        <button id="calcBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 rounded-full transition-transform transform hover:scale-98">Calculate Difference</button>
+        <div id="result" class="mt-4 p-4 bg-gray-100 rounded-xl text-center text-gray-800 hidden">
+          <span id="resultText">--</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const startInput = document.getElementById('startDate');
+    const endInput = document.getElementById('endDate');
+    const unitSelect = document.getElementById('unit');
+    const calcBtn = document.getElementById('calcBtn');
+    const resultDiv = document.getElementById('result');
+    const resultSpan = document.getElementById('resultText');
+
+    // 设置默认值：今天和一周后
+    const today = new Date();
+    const nextWeek = new Date(today);
+    nextWeek.setDate(today.getDate() + 7);
+    startInput.value = today.toISOString().split('T')[0];
+    endInput.value = nextWeek.toISOString().split('T')[0];
+
+    function dateDiffInDays(date1, date2) {
+      const oneDay = 24 * 60 * 60 * 1000;
+      return Math.round(Math.abs((date2 - date1) / oneDay));
+    }
+
+    function formatResult(days, unit) {
+      switch(unit) {
+        case 'days': return `${days} days`;
+        case 'weeks': return `${(days / 7).toFixed(2)} weeks`;
+        case 'months': return `${(days / 30.44).toFixed(2)} months (approx)`;
+        case 'years': return `${(days / 365.25).toFixed(2)} years (approx)`;
+        default: return `${days} days`;
+      }
+    }
+
+    function calculate() {
+      const startVal = startInput.value;
+      const endVal = endInput.value;
+      if (!startVal || !endVal) {
+        showMessage('Please select both dates.', 'error');
+        return;
+      }
+      const startDate = new Date(startVal);
+      const endDate = new Date(endVal);
+      if (isNaN(startDate) || isNaN(endDate)) {
+        showMessage('Invalid date format.', 'error');
+        return;
+      }
+      const days = dateDiffInDays(startDate, endDate);
+      const unit = unitSelect.value;
+      const resultText = formatResult(days, unit);
+      resultSpan.textContent = resultText;
+      resultDiv.classList.remove('hidden');
+    }
+
+    calcBtn.addEventListener('click', calculate);
+  </script>
+  <Schema
+    toolName="Date Difference Calculator"
+    description={description}
+    url={Astro.url.href}
+  />
+</BaseLayout>

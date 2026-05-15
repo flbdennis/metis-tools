@@ -1,0 +1,219 @@
+---
+import Schema from '../../components/Schema.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const title = "Unit Converter - Free Online Conversion Tool";
+const description = "Convert length, weight, temperature, volume, and more. Easy-to-use unit converter with instant results.";
+---
+
+<BaseLayout title={title} description={description} currentPath="/tools/unit-converter">
+  <div class="max-w-2xl mx-auto py-8">
+    <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+      <h1 class="text-3xl font-bold mb-2">📏 Unit Converter</h1>
+      <p class="text-gray-600 mb-6">Convert between different units of measurement.</p>
+
+      <!-- 类别切换按钮 -->
+      <div class="flex flex-wrap gap-2 mb-6">
+        <button data-category="length" class="cat-btn px-4 py-2 rounded-full bg-indigo-600 text-white text-sm font-medium transition">Length</button>
+        <button data-category="weight" class="cat-btn px-4 py-2 rounded-full bg-gray-200 text-gray-700 hover:bg-gray-300 text-sm font-medium transition">Weight</button>
+        <button data-category="temperature" class="cat-btn px-4 py-2 rounded-full bg-gray-200 text-gray-700 hover:bg-gray-300 text-sm font-medium transition">Temperature</button>
+        <button data-category="volume" class="cat-btn px-4 py-2 rounded-full bg-gray-200 text-gray-700 hover:bg-gray-300 text-sm font-medium transition">Volume</button>
+      </div>
+
+      <!-- 转换表单 -->
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium mb-1" id="fromLabel">From</label>
+          <select id="fromUnit" class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"></select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Value</label>
+          <input type="number" id="value" class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Enter value" step="any" value="1">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1" id="toLabel">To</label>
+          <select id="toUnit" class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"></select>
+        </div>
+        <button id="convertBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 rounded-full transition-transform transform hover:scale-98">Convert</button>
+        <div id="result" class="mt-4 p-4 bg-gray-100 rounded-xl text-center text-gray-800">
+          Result: <span id="resultValue">0</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 定义各类别的单位和转换因子（以第一个单位为基准）
+    const categories = {
+      length: {
+        units: ['meter', 'kilometer', 'centimeter', 'millimeter', 'mile', 'yard', 'foot', 'inch'],
+        toBase: {
+          meter: 1,
+          kilometer: 1000,
+          centimeter: 0.01,
+          millimeter: 0.001,
+          mile: 1609.344,
+          yard: 0.9144,
+          foot: 0.3048,
+          inch: 0.0254
+        },
+        fromBase: {
+          meter: 1,
+          kilometer: 0.001,
+          centimeter: 100,
+          millimeter: 1000,
+          mile: 1/1609.344,
+          yard: 1/0.9144,
+          foot: 1/0.3048,
+          inch: 1/0.0254
+        }
+      },
+      weight: {
+        units: ['kilogram', 'gram', 'milligram', 'tonne', 'pound', 'ounce'],
+        toBase: {
+          kilogram: 1,
+          gram: 0.001,
+          milligram: 0.000001,
+          tonne: 1000,
+          pound: 0.45359237,
+          ounce: 0.028349523125
+        },
+        fromBase: {
+          kilogram: 1,
+          gram: 1000,
+          milligram: 1000000,
+          tonne: 0.001,
+          pound: 1/0.45359237,
+          ounce: 1/0.028349523125
+        }
+      },
+      temperature: {
+        units: ['celsius', 'fahrenheit', 'kelvin'],
+        // 温度需要特殊转换函数，因为不是线性比例
+        convert: (value, from, to) => {
+          let celsius;
+          // 转换到摄氏度
+          if (from === 'celsius') celsius = value;
+          else if (from === 'fahrenheit') celsius = (value - 32) * 5/9;
+          else if (from === 'kelvin') celsius = value - 273.15;
+          // 从摄氏度转换到目标单位
+          if (to === 'celsius') return celsius;
+          else if (to === 'fahrenheit') return celsius * 9/5 + 32;
+          else if (to === 'kelvin') return celsius + 273.15;
+          return value;
+        }
+      },
+      volume: {
+        units: ['liter', 'milliliter', 'cubic meter', 'gallon (US)', 'quart (US)', 'pint (US)', 'cup (US)', 'fluid ounce (US)'],
+        toBase: {
+          liter: 1,
+          milliliter: 0.001,
+          'cubic meter': 1000,
+          'gallon (US)': 3.785411784,
+          'quart (US)': 0.946352946,
+          'pint (US)': 0.473176473,
+          'cup (US)': 0.2365882365,
+          'fluid ounce (US)': 0.0295735295625
+        },
+        fromBase: {
+          liter: 1,
+          milliliter: 1000,
+          'cubic meter': 0.001,
+          'gallon (US)': 1/3.785411784,
+          'quart (US)': 1/0.946352946,
+          'pint (US)': 1/0.473176473,
+          'cup (US)': 1/0.2365882365,
+          'fluid ounce (US)': 1/0.0295735295625
+        }
+      }
+    };
+
+    let currentCategory = 'length';
+
+    // DOM 元素
+    const fromUnitSelect = document.getElementById('fromUnit');
+    const toUnitSelect = document.getElementById('toUnit');
+    const valueInput = document.getElementById('value');
+    const convertBtn = document.getElementById('convertBtn');
+    const resultSpan = document.getElementById('resultValue');
+    const catButtons = document.querySelectorAll('.cat-btn');
+
+    // 更新单位下拉列表
+    function updateUnits() {
+      const cat = categories[currentCategory];
+      const units = cat.units;
+      fromUnitSelect.innerHTML = '';
+      toUnitSelect.innerHTML = '';
+      units.forEach(unit => {
+        const option1 = document.createElement('option');
+        option1.value = unit;
+        option1.textContent = unit.charAt(0).toUpperCase() + unit.slice(1);
+        fromUnitSelect.appendChild(option1);
+        const option2 = document.createElement('option');
+        option2.value = unit;
+        option2.textContent = unit.charAt(0).toUpperCase() + unit.slice(1);
+        toUnitSelect.appendChild(option2);
+      });
+      // 默认设置 toUnit 为第二个单位（如果存在）
+      if (units.length > 1) toUnitSelect.selectedIndex = 1;
+    }
+
+    // 执行转换
+    function convert() {
+      const fromUnit = fromUnitSelect.value;
+      const toUnit = toUnitSelect.value;
+      let value = parseFloat(valueInput.value);
+      if (isNaN(value)) {
+        showMessage('Please enter a valid number.', 'error');
+        return;
+      }
+
+      let result;
+      const cat = categories[currentCategory];
+      if (currentCategory === 'temperature') {
+        result = cat.convert(value, fromUnit, toUnit);
+      } else {
+        const toBase = cat.toBase[fromUnit];
+        const fromBase = cat.fromBase[toUnit];
+        // 先转换到基准单位，再转换到目标单位
+        const baseValue = value * toBase;
+        result = baseValue * fromBase;
+      }
+      resultSpan.textContent = result.toFixed(6);
+    }
+
+    // 切换类别
+    function setCategory(category) {
+      currentCategory = category;
+      // 更新按钮样式
+      catButtons.forEach(btn => {
+        if (btn.dataset.category === category) {
+          btn.classList.remove('bg-gray-200', 'text-gray-700');
+          btn.classList.add('bg-indigo-600', 'text-white');
+        } else {
+          btn.classList.remove('bg-indigo-600', 'text-white');
+          btn.classList.add('bg-gray-200', 'text-gray-700');
+        }
+      });
+      updateUnits();
+      convert(); // 自动重新计算
+    }
+
+    // 绑定事件
+    catButtons.forEach(btn => {
+      btn.addEventListener('click', () => setCategory(btn.dataset.category));
+    });
+    convertBtn.addEventListener('click', convert);
+    valueInput.addEventListener('input', convert);
+    fromUnitSelect.addEventListener('change', convert);
+    toUnitSelect.addEventListener('change', convert);
+
+    // 初始化
+    setCategory('length');
+  </script>
+  <Schema
+    toolName="Unit Converter"
+    description={description}
+    url={Astro.url.href}
+  />
+</BaseLayout>

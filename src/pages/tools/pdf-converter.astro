@@ -1,0 +1,258 @@
+---
+import Schema from '../../components/Schema.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const title = "PDF Converter - Convert PDF to Any Format";
+const description = "Convert PDF to images, text, HTML, and more. Free, private, and all in your browser.";
+---
+
+<BaseLayout title={title} description={description} currentPath="/tools/pdf-converter">
+  <div class="max-w-2xl mx-auto py-8">
+    <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+      <h1 class="text-3xl font-bold mb-2">🔄 PDF Converter</h1>
+      <p class="text-gray-600 mb-6">Upload a PDF and choose a target format. Conversion happens entirely in your browser.</p>
+
+      <!-- 内嵌上传区域（带拖拽） -->
+      <div id="upload-zone" class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center cursor-pointer hover:border-indigo-500 transition">
+        <svg class="mx-auto h-10 w-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+        </svg>
+        <p class="mt-2 text-sm text-gray-600">Drag & drop your PDF file here, or <span class="text-indigo-600 font-medium">browse</span></p>
+        <p class="text-xs text-gray-400 mt-1">PDF files only, up to 50MB</p>
+        <input type="file" id="file-input" accept="application/pdf" class="hidden">
+      </div>
+
+      <!-- 格式选择 -->
+      <div class="mt-4">
+        <label class="block text-sm font-medium mb-2">Convert to</label>
+        <select id="target-format" class="w-full px-4 py-2 rounded-full border border-gray-300">
+          <optgroup label="📄 Text & HTML">
+            <option value="txt">Plain Text (.txt)</option>
+            <option value="html">HTML (.html)</option>
+          </optgroup>
+          <optgroup label="🖼️ Image formats">
+            <option value="png">PNG (images per page)</option>
+            <option value="jpg">JPEG (images per page)</option>
+          </optgroup>
+          <optgroup label="📁 Microsoft Office">
+            <option value="docx" disabled>Word (.docx) - Coming soon</option>
+            <option value="pptx" disabled>PowerPoint (.pptx) - Coming soon</option>
+            <option value="xlsx" disabled>Excel (.xlsx) - Coming soon</option>
+          </optgroup>
+        </select>
+        <p class="text-xs text-gray-500 mt-1">* Office formats coming soon (in development).</p>
+      </div>
+
+      <!-- 结果区域 -->
+      <div id="result-area" class="mt-6 hidden">
+        <div class="p-4 bg-gray-100 rounded-xl">
+          <p class="font-semibold text-green-600">✓ Conversion completed</p>
+          <div id="result-content" class="mt-2"></div>
+          <button id="download-btn" class="mt-4 bg-indigo-600 text-white px-4 py-2 rounded-full text-sm">Download</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 引入必需的库 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+  <script>
+    let pdfjsReady = false;
+
+    // 等待 PDF.js 库加载完成
+    function initPdfWorker() {
+      if (typeof pdfjsLib !== 'undefined') {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        pdfjsReady = true;
+      } else {
+        setTimeout(initPdfWorker, 100);
+      }
+    }
+    initPdfWorker();
+
+    // 定义 PDF 处理函数
+    async function pdfToImages(pdfFile, imageType = 'image/png', scale = 1.5) {
+      while (!pdfjsReady) await new Promise(r => setTimeout(r, 50));
+      const arrayBuffer = await pdfFile.arrayBuffer();
+      const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+      const pdf = await loadingTask.promise;
+      const numPages = pdf.numPages;
+      const blobs = [];
+
+      for (let i = 1; i <= numPages; i++) {
+        const page = await pdf.getPage(i);
+        const viewport = page.getViewport({ scale });
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        await page.render({ canvasContext: context, viewport }).promise;
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, imageType));
+        blobs.push(blob);
+      }
+      return blobs;
+    }
+
+    async function pdfToText(pdfFile) {
+      while (!pdfjsReady) await new Promise(r => setTimeout(r, 50));
+      const arrayBuffer = await pdfFile.arrayBuffer();
+      const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+      const pdf = await loadingTask.promise;
+      let fullText = '';
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const textContent = await page.getTextContent();
+        const pageText = textContent.items.map(item => item.str).join(' ');
+        fullText += pageText + '\n';
+      }
+      return fullText;
+    }
+
+    async function pdfToHtml(pdfFile) {
+      const text = await pdfToText(pdfFile);
+      const escapedText = text.replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+      });
+      return `<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>Converted PDF</title></head>
+<body><pre>${escapedText}</pre></body>
+</html>`;
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/[&<>]/g, (m) => {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+      });
+    }
+
+    // DOM 元素
+    const uploadZone = document.getElementById('upload-zone');
+    const fileInput = document.getElementById('file-input');
+    const targetFormat = document.getElementById('target-format');
+    const resultDiv = document.getElementById('result-area');
+    const resultContent = document.getElementById('result-content');
+    const downloadBtn = document.getElementById('download-btn');
+
+    let currentBlob = null;
+    let currentFilename = null;
+
+    function showMsg(msg, type = 'info') {
+      if (typeof showMessage === 'function') {
+        showMessage(msg, type);
+      } else {
+        alert(msg);
+      }
+    }
+
+    async function processFile(file) {
+      if (!file || file.type !== 'application/pdf') {
+        showMsg('Please upload a valid PDF file.', 'error');
+        return;
+      }
+
+      const format = targetFormat.value;
+
+      if (['docx', 'pptx', 'xlsx'].includes(format)) {
+        showMsg(`${format.toUpperCase()} format is not yet supported. Coming soon.`, 'error');
+        return;
+      }
+
+      resultDiv.classList.add('hidden');
+      resultContent.innerHTML = '';
+      showMsg(`Converting PDF to ${format}...`, 'info');
+
+      try {
+        if (format === 'png' || format === 'jpg') {
+          const imageType = format === 'png' ? 'image/png' : 'image/jpeg';
+          const blobs = await pdfToImages(file, imageType);
+          if (!blobs.length) throw new Error('No pages extracted');
+          // 使用全局 JSZip
+          const zip = new JSZip();
+          blobs.forEach((blob, idx) => {
+            zip.file(`page-${idx+1}.${format}`, blob);
+          });
+          const zipBlob = await zip.generateAsync({ type: 'blob' });
+          currentBlob = zipBlob;
+          currentFilename = `pdf-images.zip`;
+          resultContent.innerHTML = `<p>${blobs.length} pages converted. Download the ZIP archive.</p>`;
+        } 
+        else if (format === 'txt') {
+          const text = await pdfToText(file);
+          if (!text.trim()) throw new Error('No text content');
+          currentBlob = new Blob([text], { type: 'text/plain' });
+          currentFilename = `converted.txt`;
+          const preview = text.slice(0, 500) + (text.length > 500 ? '…' : '');
+          resultContent.innerHTML = `<pre class="text-xs max-h-60 overflow-auto bg-gray-50 p-2 rounded">${escapeHtml(preview)}</pre>`;
+        } 
+        else if (format === 'html') {
+          const html = await pdfToHtml(file);
+          currentBlob = new Blob([html], { type: 'text/html' });
+          currentFilename = `converted.html`;
+          resultContent.innerHTML = `<p>HTML file generated.</p>`;
+        } 
+        else {
+          showMsg(`Unsupported format: ${format}`, 'error');
+          return;
+        }
+
+        resultDiv.classList.remove('hidden');
+        showMsg('Conversion successful!', 'success');
+      } catch (err) {
+        console.error(err);
+        showMsg(`Conversion failed: ${err.message}`, 'error');
+      }
+    }
+
+    uploadZone.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length) processFile(e.target.files[0]);
+    });
+
+    uploadZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadZone.classList.add('border-indigo-500', 'bg-indigo-50');
+    });
+    uploadZone.addEventListener('dragleave', () => {
+      uploadZone.classList.remove('border-indigo-500', 'bg-indigo-50');
+    });
+    uploadZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadZone.classList.remove('border-indigo-500', 'bg-indigo-50');
+      const file = e.dataTransfer.files[0];
+      if (file && file.type === 'application/pdf') {
+        processFile(file);
+      } else {
+        showMsg('Please drop a PDF file.', 'error');
+      }
+    });
+
+    downloadBtn.addEventListener('click', () => {
+      if (currentBlob && currentFilename) {
+        const url = URL.createObjectURL(currentBlob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = currentFilename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } else {
+        showMsg('No conversion result yet.', 'error');
+      }
+    });
+  </script>
+  <Schema
+    toolName="PDF Converter"
+    description={description}
+    url={Astro.url.href}
+  />
+</BaseLayout>

@@ -1,0 +1,140 @@
+---
+import Schema from '../../components/Schema.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const title = "Percentage Calculator - Free Online Tool";
+const description = "Calculate percentages easily: find what percent of a number, calculate percentage increase/decrease, and more.";
+---
+
+<BaseLayout title={title} description={description} currentPath="/tools/percentage-calculator">
+  <div class="max-w-2xl mx-auto py-8">
+    <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+      <h1 class="text-3xl font-bold mb-2">📊 Percentage Calculator</h1>
+      <p class="text-gray-600 mb-6">Three common percentage calculations.</p>
+      
+      <!-- 模式选择 -->
+      <div class="mb-4">
+        <label class="block text-sm font-medium mb-1">Calculation Type</label>
+        <select id="mode" class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          <option value="what-percent">What percent of number A is number B?</option>
+          <option value="percent-of">What is X% of number Y?</option>
+          <option value="percent-change">Percentage increase/decrease from A to B</option>
+        </select>
+      </div>
+      
+      <!-- 动态输入区域 -->
+      <div id="inputs-area"></div>
+      
+      <button id="calcBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 rounded-full transition-transform transform hover:scale-98">Calculate</button>
+      
+      <div id="result" class="mt-4 p-4 bg-gray-100 rounded-xl text-center text-gray-800 hidden">
+        <span id="resultText">--</span>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    const modeSelect = document.getElementById('mode');
+    const inputsArea = document.getElementById('inputs-area');
+    const calcBtn = document.getElementById('calcBtn');
+    const resultDiv = document.getElementById('result');
+    const resultSpan = document.getElementById('resultText');
+    
+    // 渲染动态输入框
+    function renderInputs() {
+      const mode = modeSelect.value;
+      let html = '';
+      if (mode === 'what-percent') {
+        html = `
+          <div class="mb-4">
+            <label class="block text-sm font-medium mb-1">Number A (part)</label>
+            <input type="number" id="a" class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="e.g., 30" step="any">
+          </div>
+          <div class="mb-4">
+            <label class="block text-sm font-medium mb-1">Number B (whole)</label>
+            <input type="number" id="b" class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="e.g., 200" step="any">
+          </div>
+        `;
+      } else if (mode === 'percent-of') {
+        html = `
+          <div class="mb-4">
+            <label class="block text-sm font-medium mb-1">Percentage (%)</label>
+            <input type="number" id="percent" class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="e.g., 15" step="any">
+          </div>
+          <div class="mb-4">
+            <label class="block text-sm font-medium mb-1">Number</label>
+            <input type="number" id="number" class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="e.g., 200" step="any">
+          </div>
+        `;
+      } else if (mode === 'percent-change') {
+        html = `
+          <div class="mb-4">
+            <label class="block text-sm font-medium mb-1">Initial value</label>
+            <input type="number" id="initial" class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="e.g., 100" step="any">
+          </div>
+          <div class="mb-4">
+            <label class="block text-sm font-medium mb-1">Final value</label>
+            <input type="number" id="final" class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="e.g., 120" step="any">
+          </div>
+        `;
+      }
+      inputsArea.innerHTML = html;
+      resultDiv.classList.add('hidden');
+    }
+    
+    function calculate() {
+      const mode = modeSelect.value;
+      let result = '';
+      let isValid = true;
+      
+      if (mode === 'what-percent') {
+        const a = parseFloat(document.getElementById('a')?.value);
+        const b = parseFloat(document.getElementById('b')?.value);
+        if (isNaN(a) || isNaN(b) || b === 0) {
+          showMessage('Please enter valid numbers (B cannot be zero).', 'error');
+          return;
+        }
+        const percent = (a / b) * 100;
+        result = `${a} is ${percent.toFixed(2)}% of ${b}`;
+      } 
+      else if (mode === 'percent-of') {
+        const percent = parseFloat(document.getElementById('percent')?.value);
+        const number = parseFloat(document.getElementById('number')?.value);
+        if (isNaN(percent) || isNaN(number)) {
+          showMessage('Please enter valid numbers.', 'error');
+          return;
+        }
+        const value = (percent / 100) * number;
+        result = `${percent}% of ${number} is ${value.toFixed(4)}`;
+      } 
+      else if (mode === 'percent-change') {
+        const initial = parseFloat(document.getElementById('initial')?.value);
+        const final = parseFloat(document.getElementById('final')?.value);
+        if (isNaN(initial) || isNaN(final)) {
+          showMessage('Please enter valid numbers.', 'error');
+          return;
+        }
+        if (initial === 0) {
+          showMessage('Initial value cannot be zero for percentage change.', 'error');
+          return;
+        }
+        const change = ((final - initial) / initial) * 100;
+        const type = change >= 0 ? 'increase' : 'decrease';
+        result = `${type.charAt(0).toUpperCase() + type.slice(1)} of ${Math.abs(change).toFixed(2)}% from ${initial} to ${final}`;
+      }
+      
+      resultSpan.textContent = result;
+      resultDiv.classList.remove('hidden');
+    }
+    
+    modeSelect.addEventListener('change', renderInputs);
+    calcBtn.addEventListener('click', calculate);
+    
+    renderInputs();
+  </script>
+  <Schema
+    toolName="Percentage Calculator"
+    description={description}
+    url={Astro.url.href}
+  />
+</BaseLayout>

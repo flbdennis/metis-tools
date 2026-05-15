@@ -49,13 +49,13 @@ const siteUrl = Astro.site.href;
     (function() {
       function loadGA() {
         const script = document.createElement('script');
-        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-HF9W6DBLKY';
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-51ESSC57VC';
         script.async = true;
         document.head.appendChild(script);
         window.dataLayer = window.dataLayer || [];
         function gtag(){ dataLayer.push(arguments); }
         gtag('js', new Date());
-        gtag('config', 'G-HF9W6DBLKY');
+        gtag('config', 'G-51ESSC57VC');
       }
       // 延迟 2 秒加载，或使用 requestIdleCallback
       if ('requestIdleCallback' in window) {

@@ -7,7 +7,10 @@
     "preview": "astro preview"
   },
   "dependencies": {
-    "astro": "^4.0.0"
+    "astro": "^4.0.0",
+    "jszip": "^3.10.1",
+    "pdf-lib": "^1.17.1",
+    "pdfjs-dist": "^5.7.284"
   },
   "devDependencies": {
     "@astrojs/tailwind": "^6.0.2",

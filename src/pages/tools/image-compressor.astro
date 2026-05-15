@@ -1,0 +1,158 @@
+---
+import Schema from '../../components/Schema.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const title = "Image Compressor - Reduce Image Size Online";
+const description = "Compress JPEG, PNG, WebP images without losing quality. Free, private, all in your browser.";
+---
+
+<BaseLayout title={title} description={description} currentPath="/tools/image-compressor">
+  <div class="max-w-2xl mx-auto py-8">
+    <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+      <h1 class="text-3xl font-bold mb-2">🖼️ Image Compressor</h1>
+      <p class="text-gray-600 mb-6">Reduce image file size while maintaining quality. Your images never leave your device.</p>
+
+      <!-- 上传区域 -->
+      <div id="upload-zone" class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center cursor-pointer hover:border-indigo-500 transition">
+        <svg class="mx-auto h-10 w-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+        </svg>
+        <p class="mt-2 text-sm text-gray-600">Drag & drop an image here, or <span class="text-indigo-600 font-medium">browse</span></p>
+        <p class="text-xs text-gray-400 mt-1">Supports JPG, PNG, WebP. Max 20MB.</p>
+        <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp" class="hidden">
+      </div>
+
+      <!-- 压缩选项 -->
+      <div class="mt-4">
+        <label class="block text-sm font-medium mb-1">Quality: <span id="quality-value">80</span>%</label>
+        <input type="range" id="quality" min="10" max="100" value="80" class="w-full">
+      </div>
+
+      <!-- 预览 & 结果 -->
+      <div id="preview-area" class="mt-6 hidden">
+        <div class="flex flex-col md:flex-row gap-4">
+          <div class="flex-1">
+            <p class="text-sm font-medium">Original</p>
+            <img id="original-preview" class="mt-2 max-h-48 rounded border" />
+            <p class="text-xs text-gray-500 mt-1" id="original-size"></p>
+          </div>
+          <div class="flex-1">
+            <p class="text-sm font-medium">Compressed</p>
+            <img id="compressed-preview" class="mt-2 max-h-48 rounded border" />
+            <p class="text-xs text-gray-500 mt-1" id="compressed-size"></p>
+          </div>
+        </div>
+        <button id="download-btn" class="mt-4 bg-indigo-600 text-white px-4 py-2 rounded-full text-sm disabled:opacity-50" disabled>Download Compressed Image</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const uploadZone = document.getElementById('upload-zone');
+    const fileInput = document.getElementById('file-input');
+    const qualitySlider = document.getElementById('quality');
+    const qualityValue = document.getElementById('quality-value');
+    const previewArea = document.getElementById('preview-area');
+    const originalImg = document.getElementById('original-preview');
+    const compressedImg = document.getElementById('compressed-preview');
+    const originalSizeSpan = document.getElementById('original-size');
+    const compressedSizeSpan = document.getElementById('compressed-size');
+    const downloadBtn = document.getElementById('download-btn');
+
+    let currentFile = null;
+    let currentCompressedBlob = null;
+
+    function showMsg(msg, type = 'info') {
+      if (typeof showMessage === 'function') showMessage(msg, type);
+      else alert(msg);
+    }
+
+    qualitySlider.addEventListener('input', () => {
+      qualityValue.textContent = qualitySlider.value;
+      if (currentFile) compressImage(currentFile);
+    });
+
+    async function compressImage(file) {
+      if (!file) return;
+      try {
+        const quality = qualitySlider.value / 100;
+        const originalUrl = URL.createObjectURL(file);
+        originalImg.src = originalUrl;
+        originalSizeSpan.textContent = `Size: ${(file.size / 1024).toFixed(2)} KB`;
+
+        // 使用 Canvas 压缩
+        const img = new Image();
+        img.src = originalUrl;
+        await new Promise(resolve => { img.onload = resolve; });
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        const mimeType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+        const compressedBlob = await new Promise(resolve => canvas.toBlob(resolve, mimeType, quality));
+        currentCompressedBlob = compressedBlob;
+        const compressedUrl = URL.createObjectURL(compressedBlob);
+        compressedImg.src = compressedUrl;
+        compressedSizeSpan.textContent = `Size: ${(compressedBlob.size / 1024).toFixed(2)} KB (${Math.round((1 - compressedBlob.size / file.size) * 100)}% reduction)`;
+        downloadBtn.disabled = false;
+        // 清理临时 URL
+        URL.revokeObjectURL(originalUrl);
+        URL.revokeObjectURL(compressedUrl);
+      } catch (err) {
+        console.error(err);
+        showMsg('Compression failed: ' + err.message, 'error');
+      }
+    }
+
+    function processFile(file) {
+      if (!file || !file.type.startsWith('image/')) {
+        showMsg('Please upload an image file (JPG, PNG, WebP).', 'error');
+        return;
+      }
+      if (file.size > 20 * 1024 * 1024) {
+        showMsg('File too large. Max 20MB.', 'error');
+        return;
+      }
+      currentFile = file;
+      compressImage(file);
+      previewArea.classList.remove('hidden');
+    }
+
+    // 上传交互
+    uploadZone.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length) processFile(e.target.files[0]);
+    });
+    uploadZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadZone.classList.add('border-indigo-500', 'bg-indigo-50');
+    });
+    uploadZone.addEventListener('dragleave', () => {
+      uploadZone.classList.remove('border-indigo-500', 'bg-indigo-50');
+    });
+    uploadZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadZone.classList.remove('border-indigo-500', 'bg-indigo-50');
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith('image/')) processFile(file);
+      else showMsg('Please drop an image file.', 'error');
+    });
+
+    downloadBtn.addEventListener('click', () => {
+      if (currentCompressedBlob) {
+        const url = URL.createObjectURL(currentCompressedBlob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `compressed.${currentCompressedBlob.type.split('/')[1]}`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+    });
+  </script>
+  <Schema
+    toolName="Image Compressor"
+    description={description}
+    url={Astro.url.href}
+  />
+</BaseLayout>

@@ -1,0 +1,91 @@
+---
+import Schema from '../../components/Schema.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const title = "Loan Calculator - Monthly Payment & Interest Calculator";
+const description = "Calculate your monthly loan payment, total interest, and total payment. Free online loan calculator.";
+---
+
+<BaseLayout title={title} description={description} currentPath="/tools/loan-calculator">
+  <div class="max-w-2xl mx-auto py-8">
+    <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+      <h1 class="text-3xl font-bold mb-2">🏦 Loan Calculator</h1>
+      <p class="text-gray-600 mb-6">Calculate monthly payment, total interest, and total payment for your loan.</p>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium mb-1">Loan Amount ($)</label>
+          <input type="number" id="amount" class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="e.g., 10000" value="10000">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Annual Interest Rate (%)</label>
+          <input type="number" id="rate" class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="e.g., 5.5" value="5.5" step="0.1">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Loan Term (years)</label>
+          <input type="number" id="years" class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="e.g., 5" value="5">
+        </div>
+        <button id="calcBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 rounded-full transition-transform transform hover:scale-98">Calculate</button>
+        <div id="result" class="mt-4 p-4 bg-gray-100 rounded-xl text-center text-gray-800 hidden">
+          <p>Monthly Payment: $<span id="monthly">0.00</span></p>
+          <p>Total Interest: $<span id="totalInterest">0.00</span></p>
+          <p>Total Payment: $<span id="totalPayment">0.00</span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const amountInput = document.getElementById('amount');
+    const rateInput = document.getElementById('rate');
+    const yearsInput = document.getElementById('years');
+    const calcBtn = document.getElementById('calcBtn');
+    const resultDiv = document.getElementById('result');
+    const monthlySpan = document.getElementById('monthly');
+    const totalInterestSpan = document.getElementById('totalInterest');
+    const totalPaymentSpan = document.getElementById('totalPayment');
+
+    function calculateLoan() {
+      let P = parseFloat(amountInput.value); // 本金
+      let annualRate = parseFloat(rateInput.value); // 年利率 (%)
+      let years = parseFloat(yearsInput.value); // 年数
+
+      if (isNaN(P) || P <= 0) {
+        showMessage('Please enter a valid loan amount.', 'error');
+        return;
+      }
+      if (isNaN(annualRate) || annualRate < 0) {
+        showMessage('Please enter a valid interest rate.', 'error');
+        return;
+      }
+      if (isNaN(years) || years <= 0) {
+        showMessage('Please enter a valid loan term.', 'error');
+        return;
+      }
+
+      const monthlyRate = annualRate / 100 / 12;
+      const months = years * 12;
+      let monthlyPayment, totalPayment, totalInterest;
+
+      if (monthlyRate === 0) {
+        monthlyPayment = P / months;
+        totalPayment = P;
+        totalInterest = 0;
+      } else {
+        monthlyPayment = P * (monthlyRate * Math.pow(1 + monthlyRate, months)) / (Math.pow(1 + monthlyRate, months) - 1);
+        totalPayment = monthlyPayment * months;
+        totalInterest = totalPayment - P;
+      }
+
+      monthlySpan.textContent = monthlyPayment.toFixed(2);
+      totalInterestSpan.textContent = totalInterest.toFixed(2);
+      totalPaymentSpan.textContent = totalPayment.toFixed(2);
+      resultDiv.classList.remove('hidden');
+    }
+
+    calcBtn.addEventListener('click', calculateLoan);
+  </script>
+  <Schema
+    toolName="Loan Calculator"
+    description={description}
+    url={Astro.url.href}
+  />
+</BaseLayout>
