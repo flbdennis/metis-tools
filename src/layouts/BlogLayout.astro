@@ -1,6 +1,5 @@
 ---
 import BaseLayout from './BaseLayout.astro';
-
 const { title, description, pubDate, author, category, tags } = Astro.props;
 const currentPath = Astro.url.pathname;
 ---
@@ -8,23 +7,23 @@ const currentPath = Astro.url.pathname;
 <BaseLayout title={title} description={description} currentPath={currentPath}>
   <article class="max-w-3xl mx-auto px-4 py-12">
     <header class="mb-8">
-      <div class="flex flex-wrap items-center gap-2 text-sm text-gray-500 mb-4">
-        <span class="inline-block px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded-full">{category}</span>
+      <div class="flex flex-wrap items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-4">
+        <span class="inline-block px-2 py-0.5 bg-indigo-50 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 rounded-full">{category}</span>
         <span>{pubDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
         <span>· by {author}</span>
       </div>
-      <h1 class="text-3xl md:text-4xl font-bold text-gray-900">{title}</h1>
+      <h1 class="text-3xl md:text-4xl font-bold text-gray-800 dark:text-gray-100">{title}</h1>
       {tags && tags.length > 0 && (
         <div class="flex flex-wrap gap-2 mt-4">
-          {tags.map(tag => <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">#{tag}</span>)}
+          {tags.map(tag => <span class="text-xs bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 px-2 py-1 rounded-full">#{tag}</span>)}
         </div>
       )}
     </header>
-    <div class="prose prose-indigo max-w-none">
+    <div class="prose prose-indigo dark:prose-invert max-w-none">
       <slot />
     </div>
-    <footer class="mt-12 pt-6 border-t border-gray-200 text-center text-sm text-gray-500">
-      <p>Thanks for reading! <a href="/" class="text-indigo-600 hover:underline">MetisTools</a></p>
+    <footer class="mt-12 pt-6 border-t border-gray-200 dark:border-gray-700 text-center text-sm text-gray-500 dark:text-gray-400">
+      <p>Thanks for reading! <a href="/" class="text-indigo-600 dark:text-indigo-400 hover:underline">MetisTools</a></p>
     </footer>
   </article>
 </BaseLayout>

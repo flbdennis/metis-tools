@@ -44,7 +44,6 @@ Our [Color Converter](/tools/color-converter) makes conversion instant:
 
 Stop guessing color conversions. Use our free [Color Converter](/tools/color-converter) to switch between formats instantly. Perfect for designers and developers.
 
----
 **Related Tools:**
 - [Code Beautifier](/tools/code-beautifier)
 - [JSON Formatter](/tools/json-formatter)

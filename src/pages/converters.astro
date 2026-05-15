@@ -1,43 +1,10 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
-import ToolCard from "../components/ToolCard.astro";
+import CategoryLayout from '../components/CategoryLayout.astro';
+import { allTools } from '../data/tools';
 
 const title = "File Converters - Free Online Conversion Tools";
-const description =
-  "Convert PDF, images, videos, audio files online. Free, fast, and secure.";
-const converters = [
-  {
-    title: "PDF Converter",
-    description: "Convert PDF to image, text, HTML, and more",
-    icon: "🔄",
-    href: "/tools/pdf-converter",
-  },
-  // {
-  //   title: "MP4 to GIF",
-  //   description: "Convert video to animated GIF",
-  //   icon: "🎬",
-  //   href: "/tools/mp4-to-gif",
-  // },
-  {
-    title: "Currency Converter",
-    description: "Real-time exchange rates",
-    icon: "💱",
-    href: "/tools/currency-converter",
-  },
-];
+const description = "Convert PDF, images, videos, audio files online. Free, fast, and secure.";
+const converters = allTools.filter(tool => tool.category === "converters");
 ---
 
-<BaseLayout title={title} description={description} currentPath="/converters">
-  <section class="py-8">
-    <h1 class="text-3xl font-bold mb-4">File Converters</h1>
-    <p class="text-gray-600 mb-8">
-      Convert your files to any format — completely free.
-    </p>
-    <div
-      class="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6"
-      id="toolsGrid"
-    >
-      {converters.map((tool) => <ToolCard {...tool} />)}
-    </div>
-  </section>
-</BaseLayout>
+<CategoryLayout title={title} description={description} currentPath="/converters" tools={converters} />

@@ -9,29 +9,29 @@ const description = "Test your regular expressions with real-time matching and h
 
 <BaseLayout title={title} description={description} currentPath="/text-tools/regex-tester">
   <div class="max-w-4xl mx-auto py-8">
-    <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+    <div class="bg-white dark:bg-slate-950 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-slate-800">
       <h1 class="text-3xl font-bold mb-2">🎯 Regex Tester</h1>
-      <p class="text-gray-600 mb-6">Write a regular expression and test it against your text. Matches are highlighted in real‑time.</p>
+      <p class="text-gray-600 dark:text-gray-300 mb-6">Write a regular expression and test it against your text. Matches are highlighted in real‑time.</p>
 
       <div class="space-y-4">
         <div>
           <label class="block text-sm font-medium mb-1">Regular Expression</label>
-          <input type="text" id="regex-input" class="w-full px-4 py-2 rounded-full border border-gray-300 font-mono" placeholder="e.g., \b\w{4}\b">
+          <input type="text" id="regex-input" class="w-full px-4 py-2 rounded-full border border-gray-300 dark:border-slate-700 font-mono text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950" placeholder="e.g., \b\w{4}\b">
         </div>
         <div class="flex items-center gap-4">
-          <label class="inline-flex items-center"><input type="checkbox" id="flag-g" value="g" class="mr-1"> g (global)</label>
-          <label class="inline-flex items-center"><input type="checkbox" id="flag-i" value="i" class="mr-1"> i (case‑insensitive)</label>
-          <label class="inline-flex items-center"><input type="checkbox" id="flag-m" value="m" class="mr-1"> m (multiline)</label>
+          <label class="inline-flex items-center"><input type="checkbox" id="flag-g" value="g" class="mr-1 text-gray-900 dark:text-gray-100"> g (global)</label>
+          <label class="inline-flex items-center"><input type="checkbox" id="flag-i" value="i" class="mr-1 text-gray-900 dark:text-gray-100"> i (case‑insensitive)</label>
+          <label class="inline-flex items-center"><input type="checkbox" id="flag-m" value="m" class="mr-1 text-gray-900 dark:text-gray-100"> m (multiline)</label>
         </div>
         <div>
           <label class="block text-sm font-medium mb-1">Test String</label>
-          <textarea id="test-string" rows="8" class="w-full px-4 py-3 rounded-xl border border-gray-300 font-mono" placeholder="Enter test text..."></textarea>
+          <textarea id="test-string" rows="8" class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-slate-700 font-mono text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950" placeholder="Enter test text..."></textarea>
         </div>
       </div>
 
-      <div id="result-area" class="mt-6 p-4 bg-gray-50 rounded-xl hidden">
+      <div id="result-area" class="mt-6 p-4 bg-gray-50 dark:bg-slate-950 rounded-xl hidden">
         <p id="match-count" class="text-sm font-medium"></p>
-        <div id="highlighted-output" class="mt-2 p-3 bg-white border rounded font-mono text-sm overflow-auto max-h-60"></div>
+        <div id="highlighted-output" class="mt-2 p-3 bg-white dark:bg-slate-950 border rounded font-mono text-sm overflow-auto max-h-60"></div>
       </div>
     </div>
   </div>

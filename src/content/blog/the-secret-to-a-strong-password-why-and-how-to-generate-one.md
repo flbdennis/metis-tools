@@ -47,7 +47,6 @@ Our [Password Generator](/tools/password-generator) creates secure passwords ins
 
 Stop using guessable passwords. Generate strong, unique passwords with our [free password generator](/tools/password-generator) – no signup, no tracking.
 
----
 **Related Tools:**
 - [UUID Generator](/tools/uuid-generator)
 - [JWT Decoder](/tools/jwt-decoder)

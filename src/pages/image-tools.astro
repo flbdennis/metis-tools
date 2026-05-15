@@ -1,41 +1,10 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
-import ToolCard from "../components/ToolCard.astro";
+import CategoryLayout from '../components/CategoryLayout.astro';
+import { allTools } from '../data/tools';
 
 const title = "Image Tools - Free Online Image Processing";
-const description =
-    "Compress, convert, crop, resize images online. All processing done locally in your browser.";
-const tools = [
-    {
-        title: "Image Compressor",
-        description: "Reduce image file size while preserving quality.",
-        icon: "🖼️",
-        href: "/tools/image-compressor",
-    },
-    {
-        title: "Image Format Converter",
-        description: "Convert between PNG, JPEG, WebP formats.",
-        icon: "🔄",
-        href: "/tools/image-format-converter",
-    },
-    {
-        title: "Image Cropper & Resizer",
-        description: "Crop or resize images to exact dimensions.",
-        icon: "✂️",
-        href: "/tools/image-crop-resize",
-    },
-];
+const description = "Compress, convert, crop, resize images online. All processing done locally in your browser.";
+const imageTools = allTools.filter(tool => tool.category === "image");
 ---
 
-<BaseLayout title={title} description={description} currentPath="/image-tools">
-    <section class="py-8">
-        <h1 class="text-3xl font-bold mb-4">🖼️ Image Tools</h1>
-        <p class="text-gray-600 mb-8">
-            All image processing happens in your browser – private, fast, and
-            unlimited.
-        </p>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {tools.map((tool) => <ToolCard {...tool} />)}
-        </div>
-    </section>
-</BaseLayout>
+<CategoryLayout title={title} description={description} currentPath="/image-tools" tools={imageTools} />

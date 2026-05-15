@@ -8,34 +8,34 @@ const description = "Convert length, weight, temperature, volume, and more. Easy
 
 <BaseLayout title={title} description={description} currentPath="/tools/unit-converter">
   <div class="max-w-2xl mx-auto py-8">
-    <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+    <div class="bg-white dark:bg-slate-950 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-slate-800">
       <h1 class="text-3xl font-bold mb-2">📏 Unit Converter</h1>
-      <p class="text-gray-600 mb-6">Convert between different units of measurement.</p>
+      <p class="text-gray-600 dark:text-gray-300 mb-6">Convert between different units of measurement.</p>
 
       <!-- 类别切换按钮 -->
       <div class="flex flex-wrap gap-2 mb-6">
-        <button data-category="length" class="cat-btn px-4 py-2 rounded-full bg-indigo-600 text-white text-sm font-medium transition">Length</button>
-        <button data-category="weight" class="cat-btn px-4 py-2 rounded-full bg-gray-200 text-gray-700 hover:bg-gray-300 text-sm font-medium transition">Weight</button>
-        <button data-category="temperature" class="cat-btn px-4 py-2 rounded-full bg-gray-200 text-gray-700 hover:bg-gray-300 text-sm font-medium transition">Temperature</button>
-        <button data-category="volume" class="cat-btn px-4 py-2 rounded-full bg-gray-200 text-gray-700 hover:bg-gray-300 text-sm font-medium transition">Volume</button>
+        <button data-category="length" class="cat-btn px-4 py-2 rounded-full bg-indigo-600 dark:bg-indigo-500 text-white text-sm font-medium transition">Length</button>
+        <button data-category="weight" class="cat-btn px-4 py-2 rounded-full bg-gray-200 dark:bg-slate-800 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-slate-700 text-sm font-medium transition">Weight</button>
+        <button data-category="temperature" class="cat-btn px-4 py-2 rounded-full bg-gray-200 dark:bg-slate-800 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-slate-700 text-sm font-medium transition">Temperature</button>
+        <button data-category="volume" class="cat-btn px-4 py-2 rounded-full bg-gray-200 dark:bg-slate-800 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-slate-700 text-sm font-medium transition">Volume</button>
       </div>
 
       <!-- 转换表单 -->
       <div class="space-y-4">
         <div>
           <label class="block text-sm font-medium mb-1" id="fromLabel">From</label>
-          <select id="fromUnit" class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"></select>
+          <select id="fromUnit" class="w-full px-4 py-2 rounded-full border border-gray-300 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950"></select>
         </div>
         <div>
           <label class="block text-sm font-medium mb-1">Value</label>
-          <input type="number" id="value" class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Enter value" step="any" value="1">
+          <input type="number" id="value" class="w-full px-4 py-2 rounded-full border border-gray-300 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950" placeholder="Enter value" step="any" value="1">
         </div>
         <div>
           <label class="block text-sm font-medium mb-1" id="toLabel">To</label>
-          <select id="toUnit" class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"></select>
+          <select id="toUnit" class="w-full px-4 py-2 rounded-full border border-gray-300 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950"></select>
         </div>
-        <button id="convertBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 rounded-full transition-transform transform hover:scale-98">Convert</button>
-        <div id="result" class="mt-4 p-4 bg-gray-100 rounded-xl text-center text-gray-800">
+        <button id="convertBtn" class="w-full bg-indigo-600 dark:bg-indigo-500 hover:bg-indigo-700 dark:hover:bg-indigo-600 text-white font-medium py-2 rounded-full transition-transform transform hover:scale-98">Convert</button>
+        <div id="result" class="mt-4 p-4 bg-gray-100 dark:bg-slate-900 rounded-xl text-center text-gray-800 dark:text-gray-100">
           Result: <span id="resultValue">0</span>
         </div>
       </div>
@@ -188,11 +188,11 @@ const description = "Convert length, weight, temperature, volume, and more. Easy
       // 更新按钮样式
       catButtons.forEach(btn => {
         if (btn.dataset.category === category) {
-          btn.classList.remove('bg-gray-200', 'text-gray-700');
-          btn.classList.add('bg-indigo-600', 'text-white');
+          btn.classList.remove('bg-gray-200 dark:bg-slate-800', 'text-gray-700 dark:text-gray-200');
+          btn.classList.add('bg-indigo-600 dark:bg-indigo-500', 'text-white');
         } else {
-          btn.classList.remove('bg-indigo-600', 'text-white');
-          btn.classList.add('bg-gray-200', 'text-gray-700');
+          btn.classList.remove('bg-indigo-600 dark:bg-indigo-500', 'text-white');
+          btn.classList.add('bg-gray-200 dark:bg-slate-800', 'text-gray-700 dark:text-gray-200');
         }
       });
       updateUnits();

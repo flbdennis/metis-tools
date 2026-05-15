@@ -32,27 +32,29 @@ Our [Code Beautifier](/tools/code-beautifier) supports HTML, CSS, and JavaScript
 **Before:**
 ```javascript
 function hello(name){console.log("Hello "+name);}
+```
 
 **After:**
+```javascript
 function hello(name) {
   console.log("Hello " + name);
 }
+```
 
-Bonus: Minify for Production
+## Bonus: Minify for Production
+
 You can also minify code to reduce file size – ideal for production websites. Our tool provides both beautify and minify options.
 
-Best Practices
-Always keep a readable source version.
+## Best Practices
 
-Use beautifiers during code reviews.
+- Always keep a readable source version.
+- Use beautifiers during code reviews.
+- Minify only the final build.
 
-Minify only the final build.
+## Final Thoughts
 
-Final Thoughts
 Clean code leads to fewer bugs and happier developers. Try our free code beautifier to instantly format your HTML, CSS, or JavaScript.
 
-Related Tools:
-
-JSON Formatter
-
-Color Converter
+**Related Tools:**
+- [JSON Formatter](/tools/json-formatter)
+- [Color Converter](/tools/color-converter)

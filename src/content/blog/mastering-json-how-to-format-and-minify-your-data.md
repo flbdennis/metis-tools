@@ -37,6 +37,7 @@ Our [JSON Formatter & Minifier](/tools/json-formatter) offers three operations:
 **Minified:**
 ```json
 {"name":"John","age":30,"city":"New York"}
+```
 
 **Formatted:**
 ```json
@@ -45,19 +46,18 @@ Our [JSON Formatter & Minifier](/tools/json-formatter) offers three operations:
   "age": 30,
   "city": "New York"
 }
+```
 
-Pro Tips
-Always validate JSON after manual edits.
+## Pro Tips
 
-Use minification in production to optimize API responses.
+- Always validate JSON after manual edits.
+- Use minification in production to optimize API responses.
+- Keep a formatted version for source control.
 
-Keep a formatted version for source control.
+## Final Thoughts
 
-Final Thoughts
 Stop wrestling with ugly JSON. Use our JSON Formatter & Minifier to clean up or compress your data in seconds.
 
-Related Tools:
-
-Code Beautifier
-
-JWT Decoder
+**Related Tools:**
+- [Code Beautifier](/tools/code-beautifier)
+- [JWT Decoder](/tools/jwt-decoder)

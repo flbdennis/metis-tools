@@ -8,30 +8,30 @@ const description = "Convert Unix timestamps to human-readable dates and vice ve
 
 <BaseLayout title={title} description={description} currentPath="/tools/unix-timestamp">
   <div class="max-w-2xl mx-auto py-8">
-    <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+    <div class="bg-white dark:bg-slate-950 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-slate-800">
       <h1 class="text-3xl font-bold mb-2">⏱️ Unix Timestamp Converter</h1>
-      <p class="text-gray-600 mb-6">Convert between Unix timestamps (seconds since 1970-01-01) and human-readable dates.</p>
+      <p class="text-gray-600 dark:text-gray-300 mb-6">Convert between Unix timestamps (seconds since 1970-01-01) and human-readable dates.</p>
 
       <div class="space-y-6">
         <div>
           <label class="block text-sm font-medium mb-1">Unix Timestamp (seconds)</label>
           <div class="flex gap-2">
-            <input type="number" id="timestamp" class="flex-1 px-4 py-2 rounded-full border border-gray-300" placeholder="e.g., 1700000000" step="1">
-            <button id="now-btn" class="bg-gray-200 px-4 py-2 rounded-full text-sm">Now</button>
+            <input type="number" id="timestamp" class="flex-1 px-4 py-2 rounded-full border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950" placeholder="e.g., 1700000000" step="1">
+            <button id="now-btn" class="bg-gray-200 dark:bg-slate-800 px-4 py-2 rounded-full text-sm">Now</button>
           </div>
-          <button id="ts-to-date" class="mt-2 bg-indigo-600 text-white px-4 py-2 rounded-full text-sm">Convert to Date →</button>
+          <button id="ts-to-date" class="mt-2 bg-indigo-600 dark:bg-indigo-500 text-white px-4 py-2 rounded-full text-sm">Convert to Date →</button>
         </div>
 
         <div>
           <label class="block text-sm font-medium mb-1">Date & Time (UTC)</label>
           <div class="flex gap-2">
-            <input type="datetime-local" id="datetime" class="flex-1 px-4 py-2 rounded-full border border-gray-300">
-            <button id="local-btn" class="bg-gray-200 px-4 py-2 rounded-full text-sm">Use Local</button>
+            <input type="datetime-local" id="datetime" class="flex-1 px-4 py-2 rounded-full border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950">
+            <button id="local-btn" class="bg-gray-200 dark:bg-slate-800 px-4 py-2 rounded-full text-sm">Use Local</button>
           </div>
-          <button id="date-to-ts" class="mt-2 bg-indigo-600 text-white px-4 py-2 rounded-full text-sm">Convert to Timestamp →</button>
+          <button id="date-to-ts" class="mt-2 bg-indigo-600 dark:bg-indigo-500 text-white px-4 py-2 rounded-full text-sm">Convert to Timestamp →</button>
         </div>
 
-        <div id="result" class="mt-4 p-4 bg-gray-100 rounded-xl text-center hidden">
+        <div id="result" class="mt-4 p-4 bg-gray-100 dark:bg-slate-900 rounded-xl text-center hidden">
           <p id="result-text" class="text-lg font-semibold"></p>
         </div>
       </div>

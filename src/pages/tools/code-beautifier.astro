@@ -8,26 +8,26 @@ const description = "Beautify (pretty print) or minify your HTML, CSS, JavaScrip
 
 <BaseLayout title={title} description={description} currentPath="/tools/code-beautifier">
   <div class="max-w-4xl mx-auto py-8">
-    <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+    <div class="bg-white dark:bg-slate-950 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-slate-800">
       <h1 class="text-3xl font-bold mb-2">✨ Code Beautifier</h1>
-      <p class="text-gray-600 mb-6">Beautify or minify HTML, CSS, and JavaScript code. All processing is client-side.</p>
+      <p class="text-gray-600 dark:text-gray-300 mb-6">Beautify or minify HTML, CSS, and JavaScript code. All processing is client-side.</p>
 
       <div class="flex gap-2 mb-4">
-        <select id="lang" class="px-4 py-2 rounded-full border border-gray-300">
+        <select id="lang" class="px-4 py-2 rounded-full border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950">
           <option value="html">HTML</option>
           <option value="css">CSS</option>
           <option value="js">JavaScript</option>
         </select>
-        <button id="beautify-btn" class="bg-indigo-600 text-white px-4 py-2 rounded-full text-sm">Beautify</button>
-        <button id="minify-btn" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-full text-sm">Minify</button>
+        <button id="beautify-btn" class="bg-indigo-600 dark:bg-indigo-500 text-white px-4 py-2 rounded-full text-sm">Beautify</button>
+        <button id="minify-btn" class="bg-gray-200 dark:bg-slate-800 hover:bg-gray-300 dark:hover:bg-slate-700 px-4 py-2 rounded-full text-sm">Minify</button>
       </div>
 
-      <textarea id="input-code" rows="8" class="w-full px-4 py-3 rounded-xl border border-gray-300 font-mono text-sm" placeholder="Paste your code here..."></textarea>
+      <textarea id="input-code" rows="8" class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-slate-700 font-mono text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950" placeholder="Paste your code here..."></textarea>
 
       <div class="mt-4">
         <label class="block text-sm font-medium mb-1">Result</label>
-        <textarea id="output-code" rows="8" class="w-full px-4 py-3 rounded-xl border border-gray-300 bg-gray-50 font-mono text-sm" readonly placeholder="Result will appear here..."></textarea>
-        <button id="copy-btn" class="mt-2 bg-indigo-600 text-white px-4 py-2 rounded-full text-sm">Copy Result</button>
+        <textarea id="output-code" rows="8" class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-slate-700 bg-gray-50 dark:bg-slate-950 font-mono text-sm text-gray-900 dark:text-gray-100" readonly placeholder="Result will appear here..."></textarea>
+        <button id="copy-btn" class="mt-2 bg-indigo-600 dark:bg-indigo-500 text-white px-4 py-2 rounded-full text-sm">Copy Result</button>
       </div>
     </div>
   </div>

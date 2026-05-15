@@ -8,19 +8,19 @@ const description = "Decode JWT tokens and inspect header, payload, and signatur
 
 <BaseLayout title={title} description={description} currentPath="/tools/jwt-decoder">
   <div class="max-w-4xl mx-auto py-8">
-    <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+    <div class="bg-white dark:bg-slate-950 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-slate-800">
       <h1 class="text-3xl font-bold mb-2">🔓 JWT Decoder</h1>
-      <p class="text-gray-600 mb-6">Paste a JWT to decode its header and payload. Your token never leaves your browser.</p>
+      <p class="text-gray-600 dark:text-gray-300 mb-6">Paste a JWT to decode its header and payload. Your token never leaves your browser.</p>
 
-      <textarea id="jwt-input" rows="4" class="w-full px-4 py-3 rounded-xl border border-gray-300 font-mono text-sm" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"></textarea>
-      <button id="decode-btn" class="mt-2 bg-indigo-600 text-white px-4 py-2 rounded-full text-sm">Decode</button>
+      <textarea id="jwt-input" rows="4" class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-slate-700 font-mono text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"></textarea>
+      <button id="decode-btn" class="mt-2 bg-indigo-600 dark:bg-indigo-500 text-white px-4 py-2 rounded-full text-sm">Decode</button>
 
       <div id="result-area" class="mt-6 hidden">
         <h3 class="font-semibold">Header</h3>
-        <pre id="header-output" class="p-3 bg-gray-50 rounded border overflow-auto text-xs mb-4"></pre>
+        <pre id="header-output" class="p-3 bg-gray-50 dark:bg-slate-950 rounded border overflow-auto text-xs mb-4"></pre>
         <h3 class="font-semibold">Payload</h3>
-        <pre id="payload-output" class="p-3 bg-gray-50 rounded border overflow-auto text-xs"></pre>
-        <p id="signature-note" class="text-xs text-gray-500 mt-2"></p>
+        <pre id="payload-output" class="p-3 bg-gray-50 dark:bg-slate-950 rounded border overflow-auto text-xs"></pre>
+        <p id="signature-note" class="text-xs text-gray-500 dark:text-gray-400 mt-2"></p>
       </div>
     </div>
   </div>

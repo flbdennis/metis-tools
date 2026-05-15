@@ -8,24 +8,24 @@ const description = "Calculate your monthly loan payment, total interest, and to
 
 <BaseLayout title={title} description={description} currentPath="/tools/loan-calculator">
   <div class="max-w-2xl mx-auto py-8">
-    <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+    <div class="bg-white dark:bg-slate-950 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-slate-800">
       <h1 class="text-3xl font-bold mb-2">🏦 Loan Calculator</h1>
-      <p class="text-gray-600 mb-6">Calculate monthly payment, total interest, and total payment for your loan.</p>
+      <p class="text-gray-600 dark:text-gray-300 mb-6">Calculate monthly payment, total interest, and total payment for your loan.</p>
       <div class="space-y-4">
         <div>
           <label class="block text-sm font-medium mb-1">Loan Amount ($)</label>
-          <input type="number" id="amount" class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="e.g., 10000" value="10000">
+          <input type="number" id="amount" class="w-full px-4 py-2 rounded-full border border-gray-300 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950" placeholder="e.g., 10000" value="10000">
         </div>
         <div>
           <label class="block text-sm font-medium mb-1">Annual Interest Rate (%)</label>
-          <input type="number" id="rate" class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="e.g., 5.5" value="5.5" step="0.1">
+          <input type="number" id="rate" class="w-full px-4 py-2 rounded-full border border-gray-300 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950" placeholder="e.g., 5.5" value="5.5" step="0.1">
         </div>
         <div>
           <label class="block text-sm font-medium mb-1">Loan Term (years)</label>
-          <input type="number" id="years" class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="e.g., 5" value="5">
+          <input type="number" id="years" class="w-full px-4 py-2 rounded-full border border-gray-300 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950" placeholder="e.g., 5" value="5">
         </div>
-        <button id="calcBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 rounded-full transition-transform transform hover:scale-98">Calculate</button>
-        <div id="result" class="mt-4 p-4 bg-gray-100 rounded-xl text-center text-gray-800 hidden">
+        <button id="calcBtn" class="w-full bg-indigo-600 dark:bg-indigo-500 hover:bg-indigo-700 dark:hover:bg-indigo-600 text-white font-medium py-2 rounded-full transition-transform transform hover:scale-98">Calculate</button>
+        <div id="result" class="mt-4 p-4 bg-gray-100 dark:bg-slate-900 rounded-xl text-center text-gray-800 dark:text-gray-100 hidden">
           <p>Monthly Payment: $<span id="monthly">0.00</span></p>
           <p>Total Interest: $<span id="totalInterest">0.00</span></p>
           <p>Total Payment: $<span id="totalPayment">0.00</span></p>

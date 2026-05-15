@@ -1,65 +1,171 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ToolCard from '../components/ToolCard.astro';
+import { allTools } from '../data/tools';
 
 const title = "MetisTools - Free Online Converters & Calculators";
 const description = "All-in-one toolkit: file conversion, unit conversion, health, finance, and daily math tools. 100% free, no signup required.";
-const featuredTools = [
-  { title: 'PDF to Word', description: 'Convert PDF to editable DOCX', icon: '📄', href: '/tools/pdf-to-word' },
-  { title: 'BMI Calculator', description: 'Body Mass Index for adults', icon: '⚖️', href: '/tools/bmi' },
-  { title: 'Age Calculator', description: 'Exact age in years, months, days', icon: '🎂', href: '/tools/age' },
-  { title: 'Unit Converter', description: 'Length, weight, temperature', icon: '📏', href: '/tools/unit-converter' },
-  { title: 'Tip Calculator', description: 'Split bill with tip %', icon: '💵', href: '/tools/tip' },
-  { title: 'CM to Inches', description: 'Quick length conversion', icon: '📐', href: '/tools/cm-to-inches' },
-];
+const toolCount = allTools.length;
 ---
 
 <BaseLayout title={title} description={description} currentPath="/">
-  <!-- Hero 区域，包含搜索框 -->
-  <section class="text-center py-12 md:py-20" id="hero-section">
-    <h1 class="text-4xl md:text-6xl font-bold bg-gradient-to-r from-indigo-600 to-cyan-500 bg-clip-text text-transparent">
-      Convert Anything in Seconds
-    </h1>
-    <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
-      Free online file converters, unit converters, health and finance calculators — everything you need.
-    </p>
-    <div class="mt-8 max-w-lg mx-auto" id="search-container">
-      <input type="text" placeholder="Search 40+ tools..." class="w-full px-4 py-3 rounded-full border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" id="searchInput">
+  <style is:global>
+    /* 动画层1 - 大范围快速浮动 */
+    .hero-bg-animation {
+      position: absolute;
+      top: -40%;
+      left: -30%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at 30% 40%, 
+        rgba(79, 70, 229, 0.6) 0%, 
+        rgba(6, 182, 212, 0.5) 30%, 
+        rgba(236, 72, 153, 0.3) 60%,
+        transparent 85%);
+      border-radius: 50%;
+      filter: blur(100px);
+      animation: dramaticFloat 4s ease-in-out infinite alternate;
+      will-change: transform;
+      pointer-events: none;
+      z-index: 0;
+    }
+    /* 动画层2 - 相反方向 */
+    .hero-bg-animation-2 {
+      position: absolute;
+      bottom: -30%;
+      right: -25%;
+      width: 180%;
+      height: 180%;
+      background: radial-gradient(circle at 70% 60%, 
+        rgba(139, 92, 246, 0.55) 0%, 
+        rgba(59, 130, 246, 0.45) 40%, 
+        transparent 70%);
+      border-radius: 60%;
+      filter: blur(90px);
+      animation: dramaticFloatReverse 5s ease-in-out infinite alternate;
+      will-change: transform;
+      pointer-events: none;
+      z-index: 0;
+    }
+    /* 动画层3 - 第三层，增加丰富度 */
+    .hero-bg-animation-3 {
+      position: absolute;
+      top: 10%;
+      left: 20%;
+      width: 150%;
+      height: 150%;
+      background: radial-gradient(circle at 50% 50%, 
+        rgba(245, 158, 11, 0.3) 0%, 
+        rgba(16, 185, 129, 0.25) 50%, 
+        transparent 80%);
+      border-radius: 50%;
+      filter: blur(120px);
+      animation: slowWobble 6s ease-in-out infinite alternate;
+      will-change: transform;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    @keyframes dramaticFloat {
+      0% {
+        transform: translate(0%, 0%) scale(1);
+        opacity: 0.6;
+      }
+      100% {
+        transform: translate(20%, 20%) scale(1.6);
+        opacity: 1;
+      }
+    }
+    @keyframes dramaticFloatReverse {
+      0% {
+        transform: translate(0%, 0%) scale(1);
+        opacity: 0.4;
+      }
+      100% {
+        transform: translate(-18%, -18%) scale(1.5);
+        opacity: 0.9;
+      }
+    }
+    @keyframes slowWobble {
+      0% {
+        transform: rotate(0deg) scale(1);
+        opacity: 0.3;
+      }
+      100% {
+        transform: rotate(5deg) scale(1.4);
+        opacity: 0.9;
+      }
+    }
+
+    /* 深色模式增强 */
+    html.dark .hero-bg-animation {
+      background: radial-gradient(circle at 30% 40%, 
+        rgba(129, 140, 248, 0.7) 0%, 
+        rgba(34, 211, 238, 0.6) 30%, 
+        rgba(244, 114, 182, 0.4) 60%,
+        transparent 85%);
+    }
+    html.dark .hero-bg-animation-2 {
+      background: radial-gradient(circle at 70% 60%, 
+        rgba(167, 139, 250, 0.65) 0%, 
+        rgba(96, 165, 250, 0.55) 40%, 
+        transparent 70%);
+    }
+    html.dark .hero-bg-animation-3 {
+      background: radial-gradient(circle at 50% 50%, 
+        rgba(245, 158, 11, 0.4) 0%, 
+        rgba(16, 185, 129, 0.35) 50%, 
+        transparent 80%);
+    }
+  </style>
+
+  <!-- Hero 区域 -->
+  <section class="relative text-center py-12 md:py-20 overflow-hidden" id="hero-section">
+    <div class="hero-bg-animation"></div>
+    <div class="hero-bg-animation-2"></div>
+    <div class="hero-bg-animation-3"></div>
+    <div class="relative z-10">
+      <h1 class="text-4xl md:text-6xl font-bold bg-gradient-to-r from-indigo-600 to-cyan-500 bg-clip-text text-transparent">
+        Convert Anything in Seconds
+      </h1>
+      <p class="mt-4 text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+        Free online file converters, unit converters, health and finance calculators — everything you need.
+      </p>
+      <div class="mt-8 max-w-lg mx-auto" id="search-container">
+        <input type="text" placeholder={`Search ${toolCount} tools...`} class="w-full px-4 py-3 rounded-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" id="searchInput">
+      </div>
     </div>
   </section>
 
-  <!-- 热门工具网格 -->
+  <!-- 所有工具网格 -->
   <section class="py-8">
-    <h2 class="text-2xl font-bold mb-6">Popular Tools</h2>
-    <div class="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6" id="toolsGrid">
-      {featuredTools.map(tool => <ToolCard {...tool} />)}
+    <h2 class="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100">All Tools</h2>
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6" id="toolsGrid">
+      {allTools.map((tool) => <ToolCard {...tool} />)}
     </div>
   </section>
 
   <script>
-    // 高性能滚动监听：缓存 Hero 底部位置，使用 requestAnimationFrame 节流
+    // 滚动固定搜索框逻辑（修复导航栏固定问题）
     let heroBottomCache = null;
     let ticking = false;
     let floatingSearch = null;
-    const header = document.querySelector('header');
+    // 不需要再修改 header 的 position 属性
 
-    // 更新缓存（在加载和 resize 时调用）
     function updateHeroBottom() {
       const hero = document.getElementById('hero-section');
       if (hero) heroBottomCache = hero.offsetTop + hero.offsetHeight;
     }
 
-    // 添加浮动搜索框
     function addFloatingSearch() {
       if (floatingSearch) return;
       const searchContainer = document.getElementById('search-container');
-      if (!searchContainer || !header) return;
-
+      if (!searchContainer) return;
       const searchClone = searchContainer.cloneNode(true);
       searchClone.id = 'floating-search';
-      searchClone.classList.add('absolute', 'right-4', 'top-1/2', 'transform', '-translate-y-1/2', 'w-64', 'md:w-80', 'z-50');
-      
-      // 同步输入事件
+      searchClone.classList.add(
+        'fixed', 'right-4', 'top-20', 'z-50', 'w-64', 'md:w-80'
+      );
       const originalInput = document.getElementById('searchInput');
       const cloneInput = searchClone.querySelector('input');
       if (originalInput && cloneInput) {
@@ -69,17 +175,12 @@ const featuredTools = [
           originalInput.dispatchEvent(new Event('input'));
         });
       }
-      
-      header.style.position = 'relative';
-      header.appendChild(searchClone);
+      document.body.appendChild(searchClone);
       floatingSearch = searchClone;
-      
-      // 隐藏原始搜索框（避免重复）
       searchContainer.style.opacity = '0';
       searchContainer.style.pointerEvents = 'none';
     }
 
-    // 移除浮动搜索框
     function removeFloatingSearch() {
       if (!floatingSearch) return;
       floatingSearch.remove();
@@ -91,7 +192,6 @@ const featuredTools = [
       }
     }
 
-    // 滚动时的逻辑（不访问布局属性）
     function onScroll() {
       if (heroBottomCache === null) return;
       const scrollY = window.scrollY;
@@ -103,7 +203,6 @@ const featuredTools = [
       }
     }
 
-    // 节流包装
     function handleScroll() {
       if (!ticking) {
         requestAnimationFrame(() => {
@@ -114,7 +213,6 @@ const featuredTools = [
       }
     }
 
-    // 初始化
     window.addEventListener('load', () => {
       updateHeroBottom();
       onScroll();
@@ -125,16 +223,21 @@ const featuredTools = [
     });
     window.addEventListener('scroll', handleScroll);
 
-    // 原始搜索框的过滤逻辑
+    // 搜索过滤逻辑
     const searchInput = document.getElementById('searchInput');
-    if (searchInput) {
+    const toolsGrid = document.getElementById('toolsGrid');
+    if (searchInput && toolsGrid) {
       searchInput.addEventListener('input', (e) => {
-        const term = e.target.value.toLowerCase();
-        const cards = document.querySelectorAll('#toolsGrid > div');
-        cards.forEach(card => {
+        const term = e.target.value.toLowerCase().trim();
+        const cards = toolsGrid.querySelectorAll('a');
+        cards.forEach((card) => {
           const title = card.querySelector('h3')?.innerText.toLowerCase() || '';
           const desc = card.querySelector('p')?.innerText.toLowerCase() || '';
-          card.style.display = (title.includes(term) || desc.includes(term)) ? '' : 'none';
+          if (term === '' || title.includes(term) || desc.includes(term)) {
+            card.style.display = '';
+          } else {
+            card.style.display = 'none';
+          }
         });
       });
     }

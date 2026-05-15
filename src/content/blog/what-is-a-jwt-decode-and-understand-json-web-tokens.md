@@ -14,9 +14,7 @@ If you work with web APIs or modern authentication (OAuth, OpenID), you've likel
 
 ## JWT Structure
 
-A JWT consists of three parts separated by dots:header.payload.signature
-
-text
+A JWT consists of three parts separated by dots: `header.payload.signature`
 
 ### 1. Header
 Contains token type and signing algorithm (e.g., HS256, RS256).
@@ -42,23 +40,24 @@ Our [JWT Decoder](/tools/jwt-decoder) lets you inspect any JWT:
   "name": "John Doe",
   "iat": 1516239022
 }
-Common Use Cases
-API Authentication – Stateless login for SPAs and mobile apps.
+```
 
-Single Sign-On (SSO) – Share identity across domains.
+## Common Use Cases
 
-Information Exchange – Securely transmit data between services.
+- **API Authentication** – Stateless login for SPAs and mobile apps.
+- **Single Sign-On (SSO)** – Share identity across domains.
+- **Information Exchange** – Securely transmit data between services.
 
-Security Notes
+## Security Notes
+
 Never store sensitive data in the payload (it's base64url encoded, not encrypted).
 
 Use HTTPS to prevent token interception.
 
-Final Thoughts
+## Final Thoughts
+
 Understanding JWT structure is key to debugging authentication issues. Try our JWT Decoder to inspect your own tokens securely – everything stays in your browser.
 
-Related Tools:
-
-JSON Formatter
-
-UUID Generator
+**Related Tools:**
+- [JSON Formatter](/tools/json-formatter)
+- [UUID Generator](/tools/uuid-generator)

@@ -46,7 +46,6 @@ With **MetisTools**, you can [convert PDF to Word](/tools/pdf-converter) directl
 
 Stop worrying about PDF conversions. Bookmark [MetisTools PDF Converter](/tools/pdf-converter) and convert as many files as you need, whenever you need.
 
----
 **Related Tools:**
 - [PDF to Image](/tools/pdf-converter)
 - [Image Compressor](/tools/image-compressor)

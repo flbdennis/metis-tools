@@ -49,7 +49,6 @@ Our [Tip Calculator](/tools/tip-calculator) is designed for simplicity:
 
 Stop stressing over bill splitting. Use our [free tip calculator](/tools/tip-calculator) to enjoy your meal, not the math.
 
----
 **Related Tools:**
 - [Loan Calculator](/tools/loan-calculator)
 - [Percentage Calculator](/tools/percentage-calculator)

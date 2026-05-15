@@ -8,22 +8,22 @@ const description = "Convert between HEX, RGB, and HSL color formats. Free onlin
 
 <BaseLayout title={title} description={description} currentPath="/tools/color-converter">
   <div class="max-w-2xl mx-auto py-8">
-    <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+    <div class="bg-white dark:bg-slate-950 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-slate-800">
       <h1 class="text-3xl font-bold mb-2">🎨 Color Converter</h1>
-      <p class="text-gray-600 mb-6">Convert colors between HEX, RGB, and HSL formats. Instant preview.</p>
+      <p class="text-gray-600 dark:text-gray-300 mb-6">Convert colors between HEX, RGB, and HSL formats. Instant preview.</p>
 
       <div class="space-y-4">
         <div>
           <label class="block text-sm font-medium mb-1">HEX</label>
-          <input type="text" id="hex" class="w-full px-4 py-2 rounded-full border border-gray-300 font-mono" placeholder="#FF5733" value="#FF5733">
+          <input type="text" id="hex" class="w-full px-4 py-2 rounded-full border border-gray-300 dark:border-slate-700 font-mono text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950" placeholder="#FF5733" value="#FF5733">
         </div>
         <div>
           <label class="block text-sm font-medium mb-1">RGB</label>
-          <input type="text" id="rgb" class="w-full px-4 py-2 rounded-full border border-gray-300 font-mono" placeholder="rgb(255, 87, 51)">
+          <input type="text" id="rgb" class="w-full px-4 py-2 rounded-full border border-gray-300 dark:border-slate-700 font-mono text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950" placeholder="rgb(255, 87, 51)">
         </div>
         <div>
           <label class="block text-sm font-medium mb-1">HSL</label>
-          <input type="text" id="hsl" class="w-full px-4 py-2 rounded-full border border-gray-300 font-mono" placeholder="hsl(11, 100%, 60%)">
+          <input type="text" id="hsl" class="w-full px-4 py-2 rounded-full border border-gray-300 dark:border-slate-700 font-mono text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950" placeholder="hsl(11, 100%, 60%)">
         </div>
         <div id="preview" class="w-full h-20 rounded-xl border" style="background-color: #FF5733;"></div>
       </div>

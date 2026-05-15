@@ -51,7 +51,6 @@ Our [Unit Converter](/tools/unit-converter) is simple:
 
 Stop googling conversion formulas. Use our free [Unit Converter](/tools/unit-converter) for instant, accurate results.
 
----
 **Related Tools:**
 - [BMI Calculator](/tools/bmi)
 - [Temperature Converter (coming soon)](/tools/temperature-converter)

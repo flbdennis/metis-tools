@@ -1,41 +1,54 @@
 ---
-import Navigation from '../components/Navigation.astro';
-import Footer from '../components/Footer.astro';
+import Navigation from "../components/Navigation.astro";
+import Footer from "../components/Footer.astro";
 
-const { title, description, currentPath = '/' } = Astro.props;
+const { title, description, currentPath = "/" } = Astro.props;
 const siteUrl = Astro.site.href;
 ---
 
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{title}</title>
-  <meta name="description" content={description}>
-  <link rel="canonical" href={new URL(currentPath, siteUrl).href}>
-  <meta name="robots" content="index, follow">
-  
-  <!-- Open Graph / Twitter-->
-  <meta property="og:type" content="website">
-  <meta property="og:title" content={title}>
-  <meta property="og:description" content={description}>
-  <meta property="og:image" content={new URL('/og-default.jpg', siteUrl).href}>
-  <meta property="og:url" content={new URL(currentPath, siteUrl).href}>
-  <meta property="og:site_name" content="MetisTools">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content={title}>
-  <meta name="twitter:description" content={description}>
-  <meta name="twitter:image" content={new URL('/og-default.jpg', siteUrl).href}>
-  
-  <!-- 预连接 Google 服务 -->
-  <link rel="preconnect" href="https://www.googletagmanager.com">
-  <link rel="preconnect" href="https://www.google-analytics.com">
-  
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='80'%3E🛠️%3C/text%3E%3C/svg%3E">
-</head>
-<body class="bg-gradient-to-br from-gray-50 to-gray-100 text-gray-900 font-sans">
-  <Navigation currentPath={currentPath} />
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={new URL(currentPath, siteUrl).href} />
+    <meta name="robots" content="index, follow" />
+
+    <!-- Open Graph / Twitter-->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta
+      property="og:image"
+      content={new URL("/og-default.jpg", siteUrl).href}
+    />
+    <meta property="og:url" content={new URL(currentPath, siteUrl).href} />
+    <meta property="og:site_name" content="MetisTools" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta
+      name="twitter:image"
+      content={new URL("/og-default.jpg", siteUrl).href}
+    />
+
+    <!-- 预连接 Google 服务 -->
+    <link rel="preconnect" href="https://www.googletagmanager.com" />
+    <link rel="preconnect" href="https://www.google-analytics.com" />
+
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='80'%3E🛠️%3C/text%3E%3C/svg%3E"
+    />
+  </head>
+  <!-- <body class="bg-gradient-to-br from-gray-50 to-gray-100 text-gray-900 font-sans"> -->
+
+  <body
+    class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 font-sans"
+  ></body><Navigation currentPath={currentPath} />
   <main class="pt-16">
     <div class="container mx-auto px-4 sm:px-6 lg:px-8">
       <slot />
@@ -43,27 +56,28 @@ const siteUrl = Astro.site.href;
   </main>
   <Footer />
   <script defer src="/js/common.js"></script>
-  
+
   <!-- Google Analytics 延迟加载（不阻塞渲染） -->
   <script>
-    (function() {
+    (function () {
       function loadGA() {
-        const script = document.createElement('script');
-        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-87VGYW1H47';
+        const script = document.createElement("script");
+        script.src = "https://www.googletagmanager.com/gtag/js?id=G-87VGYW1H47";
         script.async = true;
         document.head.appendChild(script);
         window.dataLayer = window.dataLayer || [];
-        function gtag(){ dataLayer.push(arguments); }
-        gtag('js', new Date());
-        gtag('config', 'G-87VGYW1H47');
+        function gtag() {
+          dataLayer.push(arguments);
+        }
+        gtag("js", new Date());
+        gtag("config", "G-87VGYW1H47");
       }
       // 延迟 2 秒加载，或使用 requestIdleCallback
-      if ('requestIdleCallback' in window) {
+      if ("requestIdleCallback" in window) {
         requestIdleCallback(loadGA, { timeout: 2000 });
       } else {
         setTimeout(loadGA, 2000);
       }
     })();
   </script>
-</body>
 </html>

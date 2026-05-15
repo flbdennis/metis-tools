@@ -45,7 +45,6 @@ Our [Age Calculator](/tools/age-calculator) is straightforward:
 
 Stop counting on your fingers. Use our [free age calculator](/tools/age-calculator) for fast, accurate age calculations anytime.
 
----
 **Related Tools:**
 - [Date Difference](/tools/date-difference)
 - [Loan Calculator](/tools/loan-calculator)

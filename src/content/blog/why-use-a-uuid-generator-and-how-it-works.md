@@ -44,7 +44,6 @@ A UUID looks like this: `xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx` where `x` is any 
 
 UUIDs are essential for modern distributed systems. Generate as many as you need with our [free UUID Generator](/tools/uuid-generator) – no signup, no limits.
 
----
 **Related Tools:**
 - [Password Generator](/tools/password-generator)
 - [JWT Decoder](/tools/jwt-decoder)

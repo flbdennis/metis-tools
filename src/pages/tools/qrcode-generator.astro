@@ -8,24 +8,24 @@ const description = "Generate QR codes for any text or URL. Free, no signup requ
 
 <BaseLayout title={title} description={description} currentPath="/tools/qrcode-generator">
   <div class="max-w-2xl mx-auto py-8">
-    <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+    <div class="bg-white dark:bg-slate-950 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-slate-800">
       <h1 class="text-3xl font-bold mb-2">📱 QR Code Generator</h1>
-      <p class="text-gray-600 mb-6">Enter text or URL to generate a QR code. Download as PNG.</p>
+      <p class="text-gray-600 dark:text-gray-300 mb-6">Enter text or URL to generate a QR code. Download as PNG.</p>
 
       <div class="space-y-4">
         <div>
           <label class="block text-sm font-medium mb-1">Content</label>
-          <input type="text" id="content" class="w-full px-4 py-2 rounded-full border border-gray-300" placeholder="https:// or any text" value="https://metis-tools.pages.dev">
+          <input type="text" id="content" class="w-full px-4 py-2 rounded-full border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950" placeholder="https:// or any text" value="https://metis-tools.pages.dev">
         </div>
         <div class="flex gap-4">
           <div>
             <label class="block text-sm font-medium mb-1">Size (px)</label>
-            <input type="number" id="size" min="100" max="600" step="10" value="200" class="w-32 px-3 py-2 rounded-full border border-gray-300">
+            <input type="number" id="size" min="100" max="600" step="10" value="200" class="w-32 px-3 py-2 rounded-full border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950">
           </div>
         </div>
-        <button id="generate-btn" class="w-full bg-indigo-600 text-white py-2 rounded-full">Generate QR Code</button>
+        <button id="generate-btn" class="w-full bg-indigo-600 dark:bg-indigo-500 text-white py-2 rounded-full">Generate QR Code</button>
         <div id="qrcode-container" class="flex justify-center"></div>
-        <button id="download-btn" class="w-full bg-gray-200 hover:bg-gray-300 py-2 rounded-full text-sm hidden">Download PNG</button>
+        <button id="download-btn" class="w-full bg-gray-200 dark:bg-slate-800 hover:bg-gray-300 dark:hover:bg-slate-700 py-2 rounded-full text-sm hidden">Download PNG</button>
       </div>
     </div>
   </div>
