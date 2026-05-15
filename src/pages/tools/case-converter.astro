@@ -3,10 +3,10 @@ import Schema from '../../components/Schema.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getPageSeo } from '../../utils/seo.js';
 
-const { title, description } = getPageSeo('text-tools/case-converter'); // 根据页面修改键名
+const { title, description } = getPageSeo('tools/case-converter'); // 根据页面修改键名
 ---
 
-<BaseLayout title={title} description={description} currentPath="/text-tools/case-converter">
+<BaseLayout title={title} description={description} currentPath="/tools/case-converter">
   <div class="max-w-4xl mx-auto py-8">
     <div class="bg-white dark:bg-slate-950 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-slate-800">
       <h1 class="text-3xl font-bold mb-2">🔠 Case & Naming Converter</h1>

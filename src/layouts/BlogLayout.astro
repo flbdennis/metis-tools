@@ -1,5 +1,6 @@
 ---
 import BaseLayout from './BaseLayout.astro';
+const siteUrl = Astro.site?.href;
 
 const { title, description, pubDate, author, category, tags } = Astro.props;
 const currentPath = Astro.url.pathname;
@@ -47,7 +48,7 @@ const fullUrl = new URL(currentPath, Astro.site?.href).href;
       "name": "MetisTools",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://metis-tools.pages.dev/favicon.svg"
+        "url": siteUrl+"favicon.svg"
       }
     },
     "mainEntityOfPage": {

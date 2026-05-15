@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Schema from '../../components/Schema.astro';
+const siteUrl = Astro.site.href;
 
 const title = "About MetisTools – Free Online Toolbox";
 const description = "MetisTools provides free, private, all-in-one online converters, calculators, and developer tools. No signup required.";
@@ -61,6 +62,6 @@ const description = "MetisTools provides free, private, all-in-one online conver
   <Schema
     toolName="About MetisTools"
     description={description}
-    url="https://metis-tools.pages.dev/support/about"
+    url={siteUrl + "/support/about"}
   />
 </BaseLayout>

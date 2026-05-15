@@ -1,6 +1,6 @@
 export async function GET() {
     // 你的网站域名
-    const site = import.meta.env.SITE || 'https://metis-tools.pages.dev';
+    const site = import.meta.env.SITE || 'https://'; // 末尾无斜杠
 
     // 自动生成 sitemap 地址
     const sitemapUrl = new URL('/sitemap.xml', site).href;

@@ -95,30 +95,38 @@ export const seoData = {
     title: 'Image Cropper & Resizer – Crop, Resize Images | MetisTools',
     description: 'Crop or resize images to exact dimensions. Free online image editing tool. Supports drag-to-crop and custom width/height. No upload required.',
   },
+  'tools/mp4-to-gif': {
+    title: 'MP4 to GIF Converter – Convert Video Clips to GIF | MetisTools',
+    description: 'Convert short MP4 videos to animated GIFs. Free online MP4 to GIF converter with adjustable duration and download support.',
+  },
 
   // 文本工具类
-  'text-tools/case-converter': {
+  'tools/case-converter': {
     title: 'Case Converter – Convert Text to Uppercase, Lowercase, etc. | MetisTools',
     description: 'Convert text to uppercase, lowercase, sentence case, title case, and more. Free online case converter for writers, editors, and programmers.',
   },
-  'text-tools/encode-decode': {
+  'tools/encode-decode': {
     title: 'Encode / Decode – Base64, URL, HTML | MetisTools',
     description: 'Encode and decode Base64, URL, and HTML entities. Free online encoding/decoding tool for developers and security testers.',
   },
-  'text-tools/regex-tester': {
+  'tools/regex-tester': {
     title: 'Regex Tester – Test Regular Expressions Online | MetisTools',
     description: 'Test regular expressions with real-time matching and highlighting. Supports global, case-insensitive, multiline flags. Free online regex tester for developers.',
   },
-  'text-tools/remove-duplicates': {
+  'tools/remove-duplicates': {
     title: 'Remove Duplicate Lines – Text Cleaner | MetisTools',
     description: 'Remove duplicate lines, empty lines, and trim whitespace from text. Free online text cleaner for data processing, log files, and lists.',
   },
-  'text-tools/sort-shuffle': {
+  'tools/sort-shuffle': {
     title: 'Sort & Shuffle Lines – Alphabetical, Random Order | MetisTools',
     description: 'Sort lines alphabetically (A-Z or Z-A) or randomly shuffle line order. Free online text sorter for lists, to-do items, and data preparation.',
   },
-  'text-tools/text-statistics': {
+  'tools/text-statistics': {
     title: 'Text Statistics – Word, Character, Line Counter | MetisTools',
     description: 'Count words, characters (with/without spaces), lines, and paragraphs. Free online text statistics tool for writers, students, and SEO specialists.',
+  },
+  'tools/text-stats': {
+    title: 'Text Stats – Word, Character, Line Counter | MetisTools',
+    description: 'Count words, characters, lines, and paragraphs. Free online text stats tool for writers, editors, and students.',
   },
 };

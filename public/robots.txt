@@ -3,4 +3,4 @@ User-agent: *
 Allow: /
 
 # 指定站点地图位置
-Sitemap: https://metis-tools.pages.dev/sitemap.xml
+Sitemap: https://metistools.com/sitemap.xml

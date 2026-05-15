@@ -1,10 +1,11 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
-import ToolCard from '../components/ToolCard.astro';
-import { allTools } from '../data/tools';
+import BaseLayout from "../layouts/BaseLayout.astro";
+import ToolCard from "../components/ToolCard.astro";
+import { allTools } from "../data/tools";
 
 const title = "MetisTools - Free Online Converters & Calculators";
-const description = "All-in-one toolkit: file conversion, unit conversion, health, finance, and daily math tools. 100% free, no signup required.";
+const description =
+  "All-in-one toolkit: file conversion, unit conversion, health, finance, and daily math tools. 100% free, no signup required.";
 const toolCount = allTools.length;
 const siteUrl = Astro.site.href;
 ---
@@ -18,11 +19,13 @@ const siteUrl = Astro.site.href;
       left: -30%;
       width: 200%;
       height: 200%;
-      background: radial-gradient(circle at 30% 40%, 
-        rgba(79, 70, 229, 0.6) 0%, 
-        rgba(6, 182, 212, 0.5) 30%, 
+      background: radial-gradient(
+        circle at 30% 40%,
+        rgba(79, 70, 229, 0.6) 0%,
+        rgba(6, 182, 212, 0.5) 30%,
         rgba(236, 72, 153, 0.3) 60%,
-        transparent 85%);
+        transparent 85%
+      );
       border-radius: 50%;
       filter: blur(100px);
       animation: dramaticFloat 4s ease-in-out infinite alternate;
@@ -37,10 +40,12 @@ const siteUrl = Astro.site.href;
       right: -25%;
       width: 180%;
       height: 180%;
-      background: radial-gradient(circle at 70% 60%, 
-        rgba(139, 92, 246, 0.55) 0%, 
-        rgba(59, 130, 246, 0.45) 40%, 
-        transparent 70%);
+      background: radial-gradient(
+        circle at 70% 60%,
+        rgba(139, 92, 246, 0.55) 0%,
+        rgba(59, 130, 246, 0.45) 40%,
+        transparent 70%
+      );
       border-radius: 60%;
       filter: blur(90px);
       animation: dramaticFloatReverse 5s ease-in-out infinite alternate;
@@ -55,10 +60,12 @@ const siteUrl = Astro.site.href;
       left: 20%;
       width: 150%;
       height: 150%;
-      background: radial-gradient(circle at 50% 50%, 
-        rgba(245, 158, 11, 0.3) 0%, 
-        rgba(16, 185, 129, 0.25) 50%, 
-        transparent 80%);
+      background: radial-gradient(
+        circle at 50% 50%,
+        rgba(245, 158, 11, 0.3) 0%,
+        rgba(16, 185, 129, 0.25) 50%,
+        transparent 80%
+      );
       border-radius: 50%;
       filter: blur(120px);
       animation: slowWobble 6s ease-in-out infinite alternate;
@@ -100,160 +107,115 @@ const siteUrl = Astro.site.href;
 
     /* 深色模式增强 */
     html.dark .hero-bg-animation {
-      background: radial-gradient(circle at 30% 40%, 
-        rgba(129, 140, 248, 0.7) 0%, 
-        rgba(34, 211, 238, 0.6) 30%, 
+      background: radial-gradient(
+        circle at 30% 40%,
+        rgba(129, 140, 248, 0.7) 0%,
+        rgba(34, 211, 238, 0.6) 30%,
         rgba(244, 114, 182, 0.4) 60%,
-        transparent 85%);
+        transparent 85%
+      );
     }
     html.dark .hero-bg-animation-2 {
-      background: radial-gradient(circle at 70% 60%, 
-        rgba(167, 139, 250, 0.65) 0%, 
-        rgba(96, 165, 250, 0.55) 40%, 
-        transparent 70%);
+      background: radial-gradient(
+        circle at 70% 60%,
+        rgba(167, 139, 250, 0.65) 0%,
+        rgba(96, 165, 250, 0.55) 40%,
+        transparent 70%
+      );
     }
     html.dark .hero-bg-animation-3 {
-      background: radial-gradient(circle at 50% 50%, 
-        rgba(245, 158, 11, 0.4) 0%, 
-        rgba(16, 185, 129, 0.35) 50%, 
-        transparent 80%);
+      background: radial-gradient(
+        circle at 50% 50%,
+        rgba(245, 158, 11, 0.4) 0%,
+        rgba(16, 185, 129, 0.35) 50%,
+        transparent 80%
+      );
+    }
+    .hero-bg-animation,
+    .hero-bg-animation-2,
+    .hero-bg-animation-3 {
+      transform: translateZ(0);
+      backface-visibility: hidden;
     }
   </style>
 
-  <!-- Hero 区域 -->
-  <section class="relative text-center py-12 md:py-20 overflow-hidden" id="hero-section">
-    <div class="hero-bg-animation"></div>
-    <div class="hero-bg-animation-2"></div>
-    <div class="hero-bg-animation-3"></div>
-    <div class="relative z-10">
-      <h1 class="text-4xl md:text-6xl font-bold bg-gradient-to-r from-indigo-600 to-cyan-500 bg-clip-text text-transparent">
-        Convert Anything in Seconds
-      </h1>
-      <p class="mt-4 text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-        Free online file converters, unit converters, health and finance calculators — everything you need.
-      </p>
-      <div class="mt-8 max-w-lg mx-auto" id="search-container">
-        <input type="text" placeholder={`Search ${toolCount} tools...`} class="w-full px-4 py-3 rounded-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" id="searchInput">
-      </div>
+<!-- Hero 区域 -->
+<section
+  class="relative text-center pt-4 pb-4 md:pt-8 md:pb-12 overflow-hidden -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8"
+  id="hero-section"
+>
+  <div class="hero-bg-animation"></div>
+  <div class="hero-bg-animation-2"></div>
+  <div class="hero-bg-animation-3"></div>
+  <div class="relative z-10">
+    <!-- Logo 放大一倍 -->
+    <img src="/logo.png" alt="MetisTools Logo" class="mx-auto mb-4 h-20 md:h-24 w-auto">
+    
+    <h1
+      class="text-2xl md:text-4xl font-bold bg-gradient-to-r from-indigo-600 to-cyan-500 bg-clip-text text-transparent"
+    >
+      Convert Anything in Seconds
+    </h1>
+    <p class="mt-3 text-base text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+      Free online file converters, unit converters, health and finance calculators — everything you need.
+    </p>
+    <div class="mt-6 max-w-lg mx-auto px-4" id="search-container">
+      <input
+        type="text"
+        placeholder={`Search ${toolCount} tools...`}
+        class="w-full px-3 py-2 rounded-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+        id="searchInput"
+      />
     </div>
-  </section>
-
+  </div>
+</section>
   <!-- 所有工具网格 -->
   <section class="py-8">
-    <h2 class="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100">All Tools</h2>
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6" id="toolsGrid">
+    <h2 class="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100">
+      All Tools
+    </h2>
+    <div
+      class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6"
+      id="toolsGrid"
+    >
       {allTools.map((tool) => <ToolCard {...tool} />)}
     </div>
   </section>
 
   <script>
-    // 滚动固定搜索框逻辑（修复导航栏固定问题）
-    let heroBottomCache = null;
-    let ticking = false;
-    let floatingSearch = null;
-    // 不需要再修改 header 的 position 属性
-
-    function updateHeroBottom() {
-      const hero = document.getElementById('hero-section');
-      if (hero) heroBottomCache = hero.offsetTop + hero.offsetHeight;
-    }
-
-    function addFloatingSearch() {
-      if (floatingSearch) return;
-      const searchContainer = document.getElementById('search-container');
-      if (!searchContainer) return;
-      const searchClone = searchContainer.cloneNode(true);
-      searchClone.id = 'floating-search';
-      searchClone.classList.add(
-        'fixed', 'right-4', 'top-20', 'z-50', 'w-64', 'md:w-80'
-      );
-      const originalInput = document.getElementById('searchInput');
-      const cloneInput = searchClone.querySelector('input');
-      if (originalInput && cloneInput) {
-        cloneInput.value = originalInput.value;
-        cloneInput.addEventListener('input', (e) => {
-          originalInput.value = e.target.value;
-          originalInput.dispatchEvent(new Event('input'));
-        });
-      }
-      document.body.appendChild(searchClone);
-      floatingSearch = searchClone;
-      searchContainer.style.opacity = '0';
-      searchContainer.style.pointerEvents = 'none';
-    }
-
-    function removeFloatingSearch() {
-      if (!floatingSearch) return;
-      floatingSearch.remove();
-      floatingSearch = null;
-      const searchContainer = document.getElementById('search-container');
-      if (searchContainer) {
-        searchContainer.style.opacity = '';
-        searchContainer.style.pointerEvents = '';
-      }
-    }
-
-    function onScroll() {
-      if (heroBottomCache === null) return;
-      const scrollY = window.scrollY;
-      const isPastHero = scrollY > heroBottomCache - 80;
-      if (isPastHero && !floatingSearch) {
-        addFloatingSearch();
-      } else if (!isPastHero && floatingSearch) {
-        removeFloatingSearch();
-      }
-    }
-
-    function handleScroll() {
-      if (!ticking) {
-        requestAnimationFrame(() => {
-          onScroll();
-          ticking = false;
-        });
-        ticking = true;
-      }
-    }
-
-    window.addEventListener('load', () => {
-      updateHeroBottom();
-      onScroll();
-    });
-    window.addEventListener('resize', () => {
-      updateHeroBottom();
-      onScroll();
-    });
-    window.addEventListener('scroll', handleScroll);
-
-    // 搜索过滤逻辑
-    const searchInput = document.getElementById('searchInput');
-    const toolsGrid = document.getElementById('toolsGrid');
+    // 仅保留搜索过滤逻辑（删除所有浮动搜索框相关代码）
+    const searchInput = document.getElementById("searchInput");
+    const toolsGrid = document.getElementById("toolsGrid");
     if (searchInput && toolsGrid) {
-      searchInput.addEventListener('input', (e) => {
+      searchInput.addEventListener("input", (e) => {
         const term = e.target.value.toLowerCase().trim();
-        const cards = toolsGrid.querySelectorAll('a');
+        const cards = toolsGrid.querySelectorAll("a");
         cards.forEach((card) => {
-          const title = card.querySelector('h3')?.innerText.toLowerCase() || '';
-          const desc = card.querySelector('p')?.innerText.toLowerCase() || '';
-          if (term === '' || title.includes(term) || desc.includes(term)) {
-            card.style.display = '';
+          const title = card.querySelector("h3")?.innerText.toLowerCase() || "";
+          const desc = card.querySelector("p")?.innerText.toLowerCase() || "";
+          if (term === "" || title.includes(term) || desc.includes(term)) {
+            card.style.display = "";
           } else {
-            card.style.display = 'none';
+            card.style.display = "none";
           }
         });
       });
     }
   </script>
 
-  <script type="application/ld+json" set:html={JSON.stringify({
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  "url": siteUrl,
-  "name": "MetisTools",
-  "description": "Free online converters, calculators, developer tools",
-  "potentialAction": {
-    "@type": "SearchAction",
-    "target": siteUrl+"?q={search_term_string}",
-    "query-input": "required name=search_term_string"
-  }
-})} />
+  <script
+    type="application/ld+json"
+    set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      url: siteUrl,
+      name: "MetisTools",
+      description: "Free online converters, calculators, developer tools",
+      potentialAction: {
+        "@type": "SearchAction",
+        target: siteUrl + "?q={search_term_string}",
+        "query-input": "required name=search_term_string",
+      },
+    })}
+  />
 </BaseLayout>

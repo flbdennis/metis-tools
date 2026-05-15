@@ -1,0 +1,98 @@
+---
+import Schema from '../../components/Schema.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getPageSeo } from '../../utils/seo.js';
+
+const { title, description } = getPageSeo('tools/sort-shuffle');
+---
+
+<BaseLayout title={title} description={description} currentPath="/tools/sort-shuffle">
+  <div class="max-w-4xl mx-auto py-8">
+    <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+      <h1 class="text-3xl font-bold mb-2">🔀 Sort & Shuffle Lines</h1>
+      <p class="text-gray-600 mb-6">Sort lines alphabetically (A–Z or Z–A) or randomize the order. Each line must be separated by a newline (Enter key).</p>
+
+      <textarea id="input-text" rows="10" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono" placeholder="Enter each item on a new line..."></textarea>
+
+      <div class="mt-4 flex flex-wrap gap-2">
+        <button id="sort-asc" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-full text-sm font-medium transition">Sort A → Z</button>
+        <button id="sort-desc" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-full text-sm font-medium transition">Sort Z → A</button>
+        <button id="shuffle" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-full text-sm font-medium transition">Shuffle (Random)</button>
+      </div>
+
+      <div class="mt-4">
+        <label class="block text-sm font-medium mb-1">Result</label>
+        <textarea id="output-text" rows="10" class="w-full px-4 py-3 rounded-xl border border-gray-300 bg-gray-50 font-mono" readonly placeholder="Result will appear here..."></textarea>
+        <button id="copy-btn" class="mt-2 bg-indigo-600 text-white px-4 py-2 rounded-full text-sm transition hover:bg-indigo-700">Copy Result</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const inputEl = document.getElementById('input-text');
+      const outputEl = document.getElementById('output-text');
+      const sortAscBtn = document.getElementById('sort-asc');
+      const sortDescBtn = document.getElementById('sort-desc');
+      const shuffleBtn = document.getElementById('shuffle');
+      const copyBtn = document.getElementById('copy-btn');
+
+      function sortLines(text, ascending) {
+        if (!text.trim()) return '';
+        const lines = text.split(/\r?\n/);
+        // 去除最后空行（如果用户以换行结尾）
+        if (lines.length > 0 && lines[lines.length-1] === '') lines.pop();
+        if (lines.length <= 1) return text;
+        lines.sort((a, b) => {
+          // 使用 localeCompare 保证正确处理大小写和特殊字符，并保持稳定性
+          if (ascending) return a.localeCompare(b);
+          else return b.localeCompare(a);
+        });
+        return lines.join('\n');
+      }
+
+      function shuffleLines(text) {
+        if (!text.trim()) return '';
+        let lines = text.split(/\r?\n/);
+        if (lines.length > 0 && lines[lines.length-1] === '') lines.pop();
+        if (lines.length <= 1) return text;
+        for (let i = lines.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [lines[i], lines[j]] = [lines[j], lines[i]];
+        }
+        return lines.join('\n');
+      }
+
+      function copyResult() {
+        if (!outputEl.value) {
+          if (typeof showMessage === 'function') showMessage('Nothing to copy', 'error');
+          else alert('Nothing to copy');
+          return;
+        }
+        navigator.clipboard.writeText(outputEl.value).then(() => {
+          if (typeof showMessage === 'function') showMessage('Copied to clipboard!', 'success');
+          else alert('Copied!');
+        }).catch(() => {
+          if (typeof showMessage === 'function') showMessage('Failed to copy', 'error');
+          else alert('Failed to copy');
+        });
+      }
+
+      sortAscBtn.addEventListener('click', () => {
+        outputEl.value = sortLines(inputEl.value, true);
+      });
+      sortDescBtn.addEventListener('click', () => {
+        outputEl.value = sortLines(inputEl.value, false);
+      });
+      shuffleBtn.addEventListener('click', () => {
+        outputEl.value = shuffleLines(inputEl.value);
+      });
+      copyBtn.addEventListener('click', copyResult);
+    })();
+  </script>
+  <Schema
+    toolName="Sort & Shuffle"
+    description={description}
+    url={Astro.url.href}
+  />
+</BaseLayout>

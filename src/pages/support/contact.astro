@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Schema from '../../components/Schema.astro';
-
+const siteUrl = Astro.site.href;
 const title = "Contact MetisTools – Get in Touch";
 const description = "Contact MetisTools for feedback, bug reports, or tool suggestions. We respond within 2-3 business days.";
 ---
@@ -37,6 +37,6 @@ const description = "Contact MetisTools for feedback, bug reports, or tool sugge
   <Schema
     toolName="Contact Page"
     description={description}
-    url="https://metis-tools.pages.dev/support/contact"
+    url={siteUrl + "/support/contact"}
   />
 </BaseLayout>
