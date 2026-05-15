@@ -6,6 +6,7 @@ import { allTools } from '../data/tools';
 const title = "MetisTools - Free Online Converters & Calculators";
 const description = "All-in-one toolkit: file conversion, unit conversion, health, finance, and daily math tools. 100% free, no signup required.";
 const toolCount = allTools.length;
+const siteUrl = Astro.site.href;
 ---
 
 <BaseLayout title={title} description={description} currentPath="/">
@@ -242,4 +243,17 @@ const toolCount = allTools.length;
       });
     }
   </script>
+
+  <script type="application/ld+json" set:html={JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "url": siteUrl,
+  "name": "MetisTools",
+  "description": "Free online converters, calculators, developer tools",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": siteUrl+"?q={search_term_string}",
+    "query-input": "required name=search_term_string"
+  }
+})} />
 </BaseLayout>

@@ -1,9 +1,28 @@
 ---
 import Navigation from "../components/Navigation.astro";
 import Footer from "../components/Footer.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
 
 const { title, description, currentPath = "/" } = Astro.props;
 const siteUrl = Astro.site.href;
+
+// 自动生成面包屑数据（根据 currentPath）
+const pathSegments = currentPath.split("/").filter(Boolean);
+const breadcrumbItems = [{ name: "Home", url: "/" }];
+let accumulatedPath = "";
+for (const seg of pathSegments) {
+  accumulatedPath += `/${seg}`;
+  let name = seg.charAt(0).toUpperCase() + seg.slice(1).replace(/-/g, " ");
+  // 特殊处理一些路径名
+  if (seg === "tools") name = "Tools";
+  else if (seg === "support") name = "Support";
+  else if (seg === "blog") name = "Blog";
+  breadcrumbItems.push({ name, url: accumulatedPath });
+}
+// 最后一个没有链接
+if (breadcrumbItems.length > 1) {
+  breadcrumbItems[breadcrumbItems.length - 1].url = null;
+}
 ---
 
 <!doctype html>
@@ -51,6 +70,8 @@ const siteUrl = Astro.site.href;
   ></body><Navigation currentPath={currentPath} />
   <main class="pt-16">
     <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- 面包屑 -->
+      {breadcrumbItems.length > 1 && <Breadcrumbs items={breadcrumbItems} />}
       <slot />
     </div>
   </main>
