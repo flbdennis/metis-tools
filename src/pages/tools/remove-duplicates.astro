@@ -1,15 +1,13 @@
 ---
 import Schema from '../../components/Schema.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { removeDuplicateLines, removeEmptyLines, trimWhitespace } from '../../lib/text-tools';
 
 // 自定义压缩空格函数（去除首尾空白，并将连续空白替换为单个空格）
 function collapseSpaces(text) {
   return text.trim().replace(/\s+/g, ' ');
 }
-
-const title = "Text Cleaner - Remove Duplicates, Empty Lines, Trim & Collapse Spaces";
-const description = "Clean up your text: remove duplicate lines, empty lines, trim leading/trailing whitespace, or collapse multiple spaces.";
+import { getPageSeo } from '../../utils/seo.js';
+const { title, description } = getPageSeo('tools/remove-duplicates'); // 根据页面
 ---
 
 <BaseLayout title={title} description={description} currentPath="/text-tools/remove-duplicates">

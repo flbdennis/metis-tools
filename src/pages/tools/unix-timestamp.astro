@@ -1,9 +1,8 @@
 ---
 import Schema from '../../components/Schema.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-
-const title = "Unix Timestamp Converter - Epoch Time Converter";
-const description = "Convert Unix timestamps to human-readable dates and vice versa. Free online tool.";
+import { getPageSeo } from '../../utils/seo.js';
+const { title, description } = getPageSeo('tools/unix-timestamp'); // 根据页面修改键名
 ---
 
 <BaseLayout title={title} description={description} currentPath="/tools/unix-timestamp">

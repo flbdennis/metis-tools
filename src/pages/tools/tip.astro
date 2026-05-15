@@ -1,9 +1,8 @@
 ---
 import Schema from '../../components/Schema.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-
-const title = "Tip Calculator - Split Bill & Tip Percentage";
-const description = "Calculate tip amount, total bill, and per person share easily.";
+import { getPageSeo } from '../../utils/seo.js';
+const { title, description } = getPageSeo('tools/tip'); // 根据页面修改键名
 ---
 
 <BaseLayout title={title} description={description} currentPath="/tools/tip">

@@ -1,9 +1,9 @@
 ---
 import Schema from '../../components/Schema.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getPageSeo } from '../../utils/seo.js';
 
-const title = "JSON Formatter & Minifier - Pretty Print JSON";
-const description = "Format (beautify) or minify your JSON data online. Free and private.";
+const { title, description } = getPageSeo('tools/json-formatter'); // 根据页面修改键名
 ---
 
 <BaseLayout title={title} description={description} currentPath="/tools/json-formatter">

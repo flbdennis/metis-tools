@@ -1,9 +1,8 @@
 ---
 import Schema from '../../components/Schema.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-
-const title = "Image Cropper & Resizer - Crop, Resize Images Online";
-const description = "Crop or resize your images to exact dimensions. Free, private, no upload required.";
+import { getPageSeo } from '../../utils/seo.js';
+const { title, description } = getPageSeo('tools/image-crop-resize'); // 根据页面修改键名
 ---
 
 <BaseLayout title={title} description={description} currentPath="/tools/image-crop-resize">

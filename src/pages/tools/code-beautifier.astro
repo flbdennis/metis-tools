@@ -1,9 +1,9 @@
 ---
 import Schema from '../../components/Schema.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getPageSeo } from '../../utils/seo.js';
 
-const title = "Code Beautifier - Format HTML, CSS, JS Online";
-const description = "Beautify (pretty print) or minify your HTML, CSS, JavaScript code. Free online tool.";
+const { title, description } = getPageSeo('tools/code-beautifier'); // 根据页面修改键名
 ---
 
 <BaseLayout title={title} description={description} currentPath="/tools/code-beautifier">

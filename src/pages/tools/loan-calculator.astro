@@ -1,9 +1,8 @@
 ---
 import Schema from '../../components/Schema.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-
-const title = "Loan Calculator - Monthly Payment & Interest Calculator";
-const description = "Calculate your monthly loan payment, total interest, and total payment. Free online loan calculator.";
+import { getPageSeo } from '../../utils/seo.js';
+const { title, description } = getPageSeo('tools/loan-calculator'); // 根据页面修改键名
 ---
 
 <BaseLayout title={title} description={description} currentPath="/tools/loan-calculator">

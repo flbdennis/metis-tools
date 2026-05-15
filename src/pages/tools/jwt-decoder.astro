@@ -1,9 +1,8 @@
 ---
 import Schema from '../../components/Schema.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-
-const title = "JWT Decoder - Decode JSON Web Tokens Online";
-const description = "Decode JWT tokens and inspect header, payload, and signature. Free online tool.";
+import { getPageSeo } from '../../utils/seo.js';
+const { title, description } = getPageSeo('tools/jwt-decoder'); // 根据页面修改键名
 ---
 
 <BaseLayout title={title} description={description} currentPath="/tools/jwt-decoder">

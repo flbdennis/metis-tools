@@ -1,9 +1,9 @@
 ---
 import Schema from '../../components/Schema.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getPageSeo } from '../../utils/seo.js';
 
-const title = "Image Format Converter - PNG, JPEG, WebP";
-const description = "Convert images between PNG, JPEG, and WebP formats. Adjust quality for JPEG/WebP.";
+const { title, description } = getPageSeo('tools/image-format-converter'); // 根据页面修改键名
 ---
 
 <BaseLayout title={title} description={description} currentPath="/tools/image-format-converter">

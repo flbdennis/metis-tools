@@ -1,10 +1,9 @@
 ---
 import Schema from '../../components/Schema.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { encoders } from '../../lib/text-tools';
+import { getPageSeo } from '../../utils/seo';
 
-const title = "Encode / Decode - Base64, URL, HTML";
-const description = "Encode and decode Base64, URL, HTML entities online. Free, private, no data leaves your browser.";
+const { title, description } = getPageSeo('tools/encode-decode'); // 根据页面修改键名
 ---
 
 <BaseLayout title={title} description={description} currentPath="/text-tools/encode-decode">

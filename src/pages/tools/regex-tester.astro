@@ -1,10 +1,8 @@
 ---
 import Schema from '../../components/Schema.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { testRegex } from '../../lib/text-tools';
-
-const title = "Regex Tester - Test Regular Expressions Online";
-const description = "Test your regular expressions with real-time matching and highlighting. Supports flags g, i, m. Free and private.";
+import { getPageSeo } from '../../utils/seo.js';
+const { title, description } = getPageSeo('tools/regex-tester'); // 根据页面修改键名
 ---
 
 <BaseLayout title={title} description={description} currentPath="/text-tools/regex-tester">

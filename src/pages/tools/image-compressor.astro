@@ -1,9 +1,9 @@
 ---
 import Schema from '../../components/Schema.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getPageSeo } from '../../utils/seo.js';
 
-const title = "Image Compressor - Reduce Image Size Online";
-const description = "Compress JPEG, PNG, WebP images without losing quality. Free, private, all in your browser.";
+const { title, description } = getPageSeo('tools/image-compressor'); // 根据页面修改键名
 ---
 
 <BaseLayout title={title} description={description} currentPath="/tools/image-compressor">

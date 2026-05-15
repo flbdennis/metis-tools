@@ -1,9 +1,9 @@
 ---
 import Schema from '../../components/Schema.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getPageSeo } from '../../utils/seo.js';
 
-const title = "Date Difference Calculator - Days Between Dates";
-const description = "Calculate the number of days, weeks, months, or years between two dates. Free online date difference tool.";
+const { title, description } = getPageSeo('tools/date-difference'); // 根据页面修改键名
 ---
 
 <BaseLayout title={title} description={description} currentPath="/tools/date-difference">

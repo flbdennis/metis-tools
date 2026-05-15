@@ -1,9 +1,9 @@
 ---
 import Schema from '../../components/Schema.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getPageSeo } from '../../utils/seo.js';
 
-const title = "CM to Inches Converter - Length Converter";
-const description = "Convert centimeters to inches instantly. Accurate and free online tool.";
+const { title, description } = getPageSeo('tools/cm-to-inches'); // 根据页面修改键名
 ---
 
 <BaseLayout title={title} description={description} currentPath="/tools/cm-to-inches">

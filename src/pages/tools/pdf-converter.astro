@@ -1,9 +1,8 @@
 ---
 import Schema from '../../components/Schema.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-
-const title = "PDF Converter - Convert PDF to Any Format";
-const description = "Convert PDF to images, text, HTML, and more. Free, private, and all in your browser.";
+import { getPageSeo } from '../../utils/seo.js';
+const { title, description } = getPageSeo('tools/pdf-converter'); // 根据页面修改键名
 ---
 
 <BaseLayout title={title} description={description} currentPath="/tools/pdf-converter">

@@ -1,10 +1,8 @@
 ---
 import Schema from '../../components/Schema.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { textStats } from '../../lib/text-tools';
-
-const title = "Text Statistics - Word, Character, Line Counter";
-const description = "Count words, characters (with/without spaces), lines, and paragraphs in your text. Free online tool.";
+import { getPageSeo } from '../../utils/seo.js';
+const { title, description } = getPageSeo('tools/text-stats'); // 根据页面修改键名
 ---
 
 <BaseLayout title={title} description={description} currentPath="/text-tools/text-stats">

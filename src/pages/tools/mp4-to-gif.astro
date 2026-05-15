@@ -1,9 +1,8 @@
 ---
 import Schema from '../../components/Schema.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-
-const title = "MP4 to GIF Converter - Create GIFs from Video";
-const description = "Convert MP4 videos to animated GIFs online. Free, fast, and easy to use.";
+import { getPageSeo } from '../../utils/seo.js';
+const { title, description } = getPageSeo('tools/lbs-to-kg'); // 根据页面修改键名
 ---
 
 <BaseLayout title={title} description={description} currentPath="/tools/mp4-to-gif">

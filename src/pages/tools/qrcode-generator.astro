@@ -1,9 +1,8 @@
 ---
 import Schema from '../../components/Schema.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-
-const title = "QR Code Generator - Create QR Codes Online";
-const description = "Generate QR codes for any text or URL. Free, no signup required.";
+import { getPageSeo } from '../../utils/seo.js';
+const { title, description } = getPageSeo('tools/qrcode-generator'); // 根据页面
 ---
 
 <BaseLayout title={title} description={description} currentPath="/tools/qrcode-generator">

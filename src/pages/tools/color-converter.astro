@@ -1,9 +1,9 @@
 ---
 import Schema from '../../components/Schema.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getPageSeo } from '../../utils/seo.js';
 
-const title = "Color Converter - HEX, RGB, HSL Converter";
-const description = "Convert between HEX, RGB, and HSL color formats. Free online color tool.";
+const { title, description } = getPageSeo('tools/color-converter'); // 根据页面修改键名
 ---
 
 <BaseLayout title={title} description={description} currentPath="/tools/color-converter">

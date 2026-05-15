@@ -1,9 +1,9 @@
 ---
 import Schema from '../../components/Schema.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getPageSeo } from '../../utils/seo.js';
 
-const title = "Currency Converter - Real-Time Exchange Rates";
-const description = "Convert between 170+ currencies using the latest exchange rates. Free, no signup required.";
+const { title, description } = getPageSeo('tools/currency-converter'); // 根据页面修改键名
 ---
 
 <BaseLayout title={title} description={description} currentPath="/tools/currency-converter">

@@ -1,9 +1,8 @@
 ---
 import Schema from '../../components/Schema.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-
-const title = "lbs to kg Converter - Pounds to Kilograms";
-const description = "Convert pounds to kilograms instantly. Free online weight converter.";
+import { getPageSeo } from '../../utils/seo.js';
+const { title, description } = getPageSeo('tools/lbs-to-kg'); // 根据页面修改键名
 ---
 
 <BaseLayout title={title} description={description} currentPath="/tools/lbs-to-kg">

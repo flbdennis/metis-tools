@@ -1,10 +1,9 @@
 ---
 import Schema from "../../components/Schema.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getPageSeo } from '../../utils/seo.js';
 
-const title = "BMI Calculator - Body Mass Index Tool";
-const description =
-  "Calculate your Body Mass Index (BMI) instantly. Get your BMI score and weight category based on height and weight.";
+const { title, description } = getPageSeo('tools/bmi'); // 根据页面修改键名
 ---
 
 <BaseLayout title={title} description={description} currentPath="/tools/bmi">

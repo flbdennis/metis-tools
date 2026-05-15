@@ -1,9 +1,8 @@
 ---
 import Schema from '../../components/Schema.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-
-const title = "UUID / GUID Generator - Random UUID v4";
-const description = "Generate random UUID v4 (or custom number of UUIDs). Free online tool.";
+import { getPageSeo } from '../../utils/seo.js';
+const { title, description } = getPageSeo('tools/uuid-generator'); // 根据页面修改键名
 ---
 
 <BaseLayout title={title} description={description} currentPath="/tools/uuid-generator">

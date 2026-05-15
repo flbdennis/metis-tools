@@ -1,9 +1,8 @@
 ---
 import Schema from '../../components/Schema.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-
-const title = "Lorem Ipsum Generator - Dummy Text Generator";
-const description = "Generate random Lorem Ipsum placeholder text for designs, mockups, and content. Choose paragraphs or words.";
+import { getPageSeo } from '../../utils/seo.js';
+const { title, description } = getPageSeo('tools/lorem-ipsum-generator'); // 根据页面修改键名
 ---
 
 <BaseLayout title={title} description={description} currentPath="/tools/lorem-ipsum-generator">

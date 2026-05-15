@@ -1,9 +1,9 @@
 ---
 import Schema from '../../components/Schema.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getPageSeo } from '../../utils/seo.js';
 
-const title = "Case Converter - Convert Text to Different Cases";
-const description = "Convert text to uppercase, lowercase, sentence case, title case, camelCase, PascalCase, snake_case, kebab-case online. Free and private.";
+const { title, description } = getPageSeo('text-tools/case-converter'); // 根据页面修改键名
 ---
 
 <BaseLayout title={title} description={description} currentPath="/text-tools/case-converter">
