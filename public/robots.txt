@@ -1,6 +1,0 @@
-# 允许所有爬虫抓取所有内容
-User-agent: *
-Allow: /
-
-# 指定站点地图位置
-Sitemap: https://metistools.com/sitemap.xml
