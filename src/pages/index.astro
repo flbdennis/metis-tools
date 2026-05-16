@@ -139,51 +139,53 @@ const siteUrl = Astro.site.href;
     }
   </style>
 
-<!-- Hero 区域（Logo + 标题 + 描述） -->
-<section
-  class="relative text-center pt-8 pb-4 md:pt-12 md:pb-6 overflow-hidden -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8"
-  id="hero-section"
->
-  <div class="hero-bg-animation"></div>
-  <div class="hero-bg-animation-2"></div>
-  <div class="hero-bg-animation-3"></div>
-  <div class="relative z-10">
-    <!-- Logo 放大 -->
-    <img src="/logo.png" alt="MetisTools Logo" class="mx-auto mb-6 h-24 md:h-32 w-auto">
-    
-    <h1
-      class="text-4xl md:text-6xl font-bold bg-gradient-to-r from-indigo-600 to-cyan-500 bg-clip-text text-transparent mt-4"
-    >
-      Convert Anything in Seconds
-    </h1>
-    <p class="mt-4 text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-      Free online file converters, unit converters, health and finance calculators — everything you need.
-    </p>
-  </div>
-</section>
-
-<!-- 所有工具网格（标题 + 搜索框） -->
-<section class="py-8">
-  <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
-    <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">All Tools</h2>
-    <div class="w-full sm:w-auto" id="search-container">
-      <input
-        type="text"
-        placeholder={`Search ${toolCount} tools...`}
-        class="w-full sm:w-80 px-4 py-2 rounded-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-        id="searchInput"
+  <!-- Hero 区域（Logo + 标题 + 描述） -->
+  <section
+    class="relative text-center pt-8 pb-4 md:pt-12 md:pb-6 overflow-hidden -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8"
+    id="hero-section"
+  >
+    <div class="hero-bg-animation"></div>
+    <div class="hero-bg-animation-2"></div>
+    <div class="hero-bg-animation-3"></div>
+    <div class="relative z-10">
+      <!-- Logo 放大 -->
+      <img
+        src="/logo.png"
+        alt="MetisTools Logo"
+        class="mx-auto mb-6 h-24 md:h-32 w-auto"
       />
+
+      <h1
+        class="text-4xl md:text-6xl font-bold bg-gradient-to-r from-indigo-600 to-cyan-500 bg-clip-text text-transparent mt-4"
+      >
+        Convert Anything in Seconds
+      </h1>
+      <p
+        class="mt-4 text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto"
+      >
+        Free online file converters, unit converters, health and finance
+        calculators — everything you need.
+      </p>
     </div>
-  </div>
-  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6" id="toolsGrid">
-    {allTools.map((tool) => <ToolCard {...tool} />)}
-  </div>
-</section>
-  <!-- 所有工具网格 -->
+  </section>
+
+  <!-- 所有工具网格（标题 + 搜索框） -->
   <section class="py-8">
-    <h2 class="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100">
-      All Tools
-    </h2>
+    <div
+      class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6"
+    >
+      <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">
+        All Tools
+      </h2>
+      <div class="w-full sm:w-auto" id="search-container">
+        <input
+          type="text"
+          placeholder={`Search ${toolCount} tools...`}
+          class="w-full sm:w-80 px-4 py-2 rounded-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+          id="searchInput"
+        />
+      </div>
+    </div>
     <div
       class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6"
       id="toolsGrid"
