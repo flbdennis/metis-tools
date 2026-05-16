@@ -125,3 +125,15 @@ const breadcrumbItems = generateBreadcrumbs(currentPath);
     </script>
   </body>
 </html>
+
+
+<body>
+  <Navigation currentPath={currentPath} />
+  <main class="flex-1 pt-16">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+      {breadcrumbItems.length > 1 && <Breadcrumbs items={breadcrumbItems} />}
+      <slot />
+    </div>
+  </main>
+  <Footer />
+</body>
