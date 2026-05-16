@@ -8,8 +8,6 @@ tags: ["UUID", "GUID", "Unique ID", "Identifier"]
 readingTime: "3 min read"
 ---
 
-# Why Use a UUID Generator? (And How It Works)
-
 **Universally Unique Identifiers (UUIDs)** are 128-bit labels used to uniquely identify information in computer systems. They are also known as GUIDs (Globally Unique Identifiers).
 
 ## Why Use UUIDs?

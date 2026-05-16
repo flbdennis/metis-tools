@@ -8,8 +8,6 @@ tags: ["JSON", "Formatter", "Minifier", "API"]
 readingTime: "4 min read"
 ---
 
-# Mastering JSON: How to Format and Minify Your Data
-
 JSON (JavaScript Object Notation) is the lingua franca of web APIs. But raw, minified JSON is hard to read. A **JSON formatter** (or pretty printer) makes it human-friendly.
 
 ## Why Format JSON?

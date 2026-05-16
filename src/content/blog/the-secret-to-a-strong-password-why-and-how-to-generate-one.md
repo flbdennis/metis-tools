@@ -8,8 +8,6 @@ tags: ["Password", "Security", "Generator", "Privacy"]
 readingTime: "4 min read"
 ---
 
-# The Secret to a Strong Password: Why and How to Generate One
-
 Using `123456` or `password` as your password is like leaving your front door unlocked. **Weak passwords** are the number one cause of account breaches.
 
 ## What Makes a Password Strong?

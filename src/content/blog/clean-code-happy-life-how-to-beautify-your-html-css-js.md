@@ -8,8 +8,6 @@ tags: ["Code", "Formatter", "Beautifier", "HTML", "CSS", "JS"]
 readingTime: "4 min read"
 ---
 
-# Clean Code, Happy Life: How to Beautify Your HTML/CSS/JS
-
 Reading unformatted, minified code is painful. A **code beautifier** (also called pretty printer) transforms messy code into a well-structured, readable format.
 
 ## Why Beautify Your Code?

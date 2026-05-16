@@ -8,8 +8,6 @@ tags: ["JWT", "JSON", "Security", "Authentication"]
 readingTime: "5 min read"
 ---
 
-# What Is a JWT? Decode and Understand JSON Web Tokens
-
 If you work with web APIs or modern authentication (OAuth, OpenID), you've likely heard of **JSON Web Tokens (JWT)**. They are compact, URL-safe tokens used to transmit information between parties.
 
 ## JWT Structure

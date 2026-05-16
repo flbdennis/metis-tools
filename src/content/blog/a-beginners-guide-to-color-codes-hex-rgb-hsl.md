@@ -8,8 +8,6 @@ tags: ["Color", "HEX", "RGB", "HSL", "Design"]
 readingTime: "4 min read"
 ---
 
-# A Beginner's Guide to Color Codes: HEX, RGB, and HSL Explained
-
 Whether you're a web designer, developer, or digital artist, understanding color codes is essential. The three most common formats are **HEX**, **RGB**, and **HSL**.
 
 ## What Are These Formats?

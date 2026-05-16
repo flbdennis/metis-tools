@@ -8,8 +8,6 @@ tags: ["Age", "Calculator", "Birthday", "Date"]
 readingTime: "3 min read"
 ---
 
-# Age Calculator: More Than Just a Birthday Countdown
-
 An **age calculator** tells you exactly how old you are – down to the day. But its uses go far beyond satisfying curiosity.
 
 ## Practical Applications

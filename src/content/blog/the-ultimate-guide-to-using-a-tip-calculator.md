@@ -8,8 +8,6 @@ tags: ["Tip", "Calculator", "Bill Split", "Dining"]
 readingTime: "4 min read"
 ---
 
-# The Ultimate Guide to Using a Tip Calculator (Never Split Bill Again)
-
 Dining out with friends or family is fun, but splitting the bill can sometimes be awkward or complicated. A **tip calculator** takes the guesswork out of the equation, ensuring everyone pays their fair share including gratuity.
 
 ## Why You Need a Tip Calculator

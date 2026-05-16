@@ -8,8 +8,6 @@ tags: ["PDF", "Word", "Converter", "Document"]
 readingTime: "3 min read"
 ---
 
-# How to Convert PDF to Word for Free (And Keep Formatting)
-
 Converting a PDF to a Word document used to be a headache – either you paid for expensive software or accepted weird formatting and missing images. Not anymore!
 
 With **MetisTools**, you can [convert PDF to Word](/tools/pdf-converter) directly in your browser, for free, and without uploading your files anywhere (privacy first).
