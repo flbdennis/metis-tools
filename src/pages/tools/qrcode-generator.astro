@@ -1,89 +1,204 @@
 ---
-import Schema from '../../components/Schema.astro';
-import BaseLayout from '../../layouts/BaseLayout.astro';
-const title = "QR Code Generator - Create QR Codes Online";
-const description = "Generate QR codes for any text or URL. Free, no signup required.";
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import TextareaInput from '../../components/ui/TextareaInput.astro';
+import SelectInput from '../../components/ui/SelectInput.astro';
+import NumberInput from '../../components/ui/NumberInput.astro';
+import ResultDisplay from '../../components/tool/ResultDisplay.astro';
+
+const pageTitle = 'QR Code Generator – Create QR Codes for Free | MetisTools';
+const pageDescription = 'Generate QR codes for URLs, text, WiFi credentials, vCards, and more. Customize colors and download as PNG or SVG. Free online QR code generator.';
+
+const typeOptions = [
+  { value: 'url', label: 'URL' },
+  { value: 'text', label: 'Plain Text' },
+  { value: 'email', label: 'Email' },
+  { value: 'phone', label: 'Phone' },
+  { value: 'wifi', label: 'WiFi Network' },
+];
+
+const sizeOptions = [
+  { value: '200', label: 'Small (200px)' },
+  { value: '300', label: 'Medium (300px)' },
+  { value: '500', label: 'Large (500px)' },
+];
 ---
 
-<BaseLayout title={title} description={description} currentPath="/tools/qrcode-generator">
-  <div class="max-w-2xl mx-auto py-8">
-    <div class="bg-white dark:bg-slate-950 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-slate-800">
-      <h1 class="text-3xl font-bold mb-2">📱 QR Code Generator</h1>
-      <p class="text-gray-600 dark:text-gray-300 mb-6">Enter text or URL to generate a QR code. Download as PNG.</p>
+<ToolLayout title={pageTitle} description={pageDescription} toolHref="/tools/qrcode-generator">
+  <div slot="input">
+    <div class="space-y-4">
+      <SelectInput id="qr-type" label="Content Type" options={typeOptions} selected="url" />
 
-      <div class="space-y-4">
-        <div>
-          <label class="block text-sm font-medium mb-1">Content</label>
-          <input type="text" id="content" class="w-full px-4 py-2 rounded-full border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950" placeholder="https:// or any text" value={Astro.url.href}>
-        </div>
-        <div class="flex gap-4">
-          <div>
-            <label class="block text-sm font-medium mb-1">Size (px)</label>
-            <input type="number" id="size" min="100" max="600" step="10" value="200" class="w-32 px-3 py-2 rounded-full border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950">
-          </div>
-        </div>
-        <button id="generate-btn" class="w-full bg-indigo-600 dark:bg-indigo-500 text-white py-2 rounded-full">Generate QR Code</button>
-        <div id="qrcode-container" class="flex justify-center"></div>
-        <button id="download-btn" class="w-full bg-gray-200 dark:bg-slate-800 hover:bg-gray-300 dark:hover:bg-slate-700 py-2 rounded-full text-sm hidden">Download PNG</button>
+      <!-- URL / Text 输入 -->
+      <div id="input-url-text">
+        <label for="qr-content" class="tool-label">Content <span class="text-red-500 ml-0.5">*</span></label>
+        <input type="text" id="qr-content" placeholder="https://example.com" value="https://metistools.com" class="tool-input font-mono" autocomplete="off" />
+        <p class="field-error hidden text-xs text-red-500 mt-1"></p>
       </div>
+
+      <!-- Email 输入 -->
+      <div id="input-email" class="hidden space-y-3">
+        <label for="qr-email" class="tool-label">Email Address <span class="text-red-500 ml-0.5">*</span></label>
+        <input type="text" id="qr-email" placeholder="hello@example.com" class="tool-input" autocomplete="off" />
+      </div>
+
+      <!-- Phone 输入 -->
+      <div id="input-phone" class="hidden space-y-3">
+        <label for="qr-phone" class="tool-label">Phone Number <span class="text-red-500 ml-0.5">*</span></label>
+        <input type="text" id="qr-phone" placeholder="+1234567890" class="tool-input" autocomplete="off" />
+      </div>
+
+      <!-- WiFi 输入 -->
+      <div id="input-wifi" class="hidden space-y-3">
+        <label for="qr-ssid" class="tool-label">SSID (Network Name) <span class="text-red-500 ml-0.5">*</span></label>
+        <input type="text" id="qr-ssid" placeholder="MyWiFi" class="tool-input" autocomplete="off" />
+
+        <label for="qr-wifi-pass" class="tool-label">Password</label>
+        <input type="text" id="qr-wifi-pass" placeholder="WiFi password" class="tool-input" autocomplete="off" />
+
+        <SelectInput id="qr-encryption" label="Encryption" options={[{ value: 'WPA', label: 'WPA/WPA2' }, { value: 'WEP', label: 'WEP' }, { value: 'nopass', label: 'No Password' }]} selected="WPA" />
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <SelectInput id="qr-size" label="Size" options={sizeOptions} selected="300" />
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label for="qr-fg" class="tool-label">Foreground Color</label>
+          <input type="color" id="qr-fg" value="#000000" class="w-full h-10 rounded-lg border border-gray-200 cursor-pointer" />
+        </div>
+        <div>
+          <label for="qr-bg" class="tool-label">Background Color</label>
+          <input type="color" id="qr-bg" value="#ffffff" class="w-full h-10 rounded-lg border border-gray-200 cursor-pointer" />
+        </div>
+      </div>
+
+      <button type="button" id="btn-generate" class="tool-btn-primary w-full">
+        Generate QR Code
+      </button>
     </div>
   </div>
 
-  <script>
-    const contentInput = document.getElementById('content');
-    const sizeInput = document.getElementById('size');
-    const generateBtn = document.getElementById('generate-btn');
-    const qrContainer = document.getElementById('qrcode-container');
-    const downloadBtn = document.getElementById('download-btn');
-    let currentImageUrl = null;
+  <div slot="result">
+    <ResultDisplay emptyMessage="Enter content and click <strong>Generate QR Code</strong>." onDownload={true}>
+      <div slot="result-content" class="space-y-4">
+        <div class="flex justify-center">
+          <div id="qr-container" class="bg-white p-4 rounded-lg border border-gray-200 inline-block">
+            <img id="qr-image" src="" alt="QR Code" class="max-w-full" />
+            <canvas id="qr-canvas" class="hidden"></canvas>
+          </div>
+        </div>
 
-    function generateQR() {
-      const text = encodeURIComponent(contentInput.value.trim());
-      if (!text) {
-        showMessage('Please enter some content', 'error');
-        return;
-      }
-      const size = parseInt(sizeInput.value);
-      const apiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${text}`;
-      // 显示图片
-      qrContainer.innerHTML = '';
-      const img = document.createElement('img');
-      img.src = apiUrl;
-      img.style.width = `${size}px`;
-      img.style.height = `${size}px`;
-      img.alt = 'QR Code';
-      qrContainer.appendChild(img);
-      currentImageUrl = apiUrl;
-      downloadBtn.classList.remove('hidden');
+        <div id="qr-info" class="text-xs text-gray-400 text-center">
+        </div>
+      </div>
+    </ResultDisplay>
+  </div>
+
+  <div slot="description">
+    <p>
+      QR Codes (Quick Response Codes) are two-dimensional barcodes that can store various types of data and be scanned quickly by smartphone cameras. This generator creates high-quality QR codes for URLs, text, email addresses, phone numbers, and WiFi networks — all generated directly in your browser.
+    </p>
+    <p>
+      <strong>Content Types:</strong> Choose from URL (opens a website), Plain Text (any text), Email (composes an email), Phone (dials a number), or WiFi (connects to a network without typing a password). Each type formats the data correctly so that scanners interpret it properly.
+    </p>
+    <p>
+      <strong>WiFi QR Codes:</strong> Generate a QR code that guests can scan to connect to your WiFi instantly — no need to manually type the SSID and password. Supports WPA/WPA2 and WEP encryption, as well as open networks.
+    </p>
+    <p>
+      <strong>Customization:</strong> Choose between small (200px), medium (300px), and large (500px) output sizes. Customize the foreground and background colors to match your brand or design.
+    </p>
+    <p>
+      <strong>Download:</strong> Download the generated QR code as a PNG image file. The download button saves the QR code at the exact size and colors you configured. Perfect for embedding in documents, websites, business cards, or printing.
+    </p>
+  </div>
+</ToolLayout>
+
+<script>
+  let currentDataUrl = '';
+
+  function getContent() {
+    const type = document.getElementById('qr-type')?.value || 'url';
+    switch (type) {
+      case 'url':
+      case 'text':
+        return document.getElementById('qr-content')?.value?.trim() || '';
+      case 'email':
+        return 'mailto:' + (document.getElementById('qr-email')?.value?.trim() || '');
+      case 'phone':
+        return 'tel:' + (document.getElementById('qr-phone')?.value?.trim() || '');
+      case 'wifi':
+        const ssid = document.getElementById('qr-ssid')?.value?.trim() || '';
+        const pass = document.getElementById('qr-wifi-pass')?.value?.trim() || '';
+        const enc = document.getElementById('qr-encryption')?.value || 'WPA';
+        return `WIFI:T:${enc};S:${ssid};P:${pass};;`;
+      default:
+        return '';
     }
+  }
 
-    generateBtn.addEventListener('click', generateQR);
-    downloadBtn.addEventListener('click', async () => {
-      if (currentImageUrl) {
-        try {
-          const response = await fetch(currentImageUrl);
-          const blob = await response.blob();
-          const url = URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.download = 'qrcode.png';
-          link.href = url;
-          link.click();
-          URL.revokeObjectURL(url);
-          showMessage('QR code downloaded!', 'success');
-        } catch (err) {
-          showMessage('Failed to download', 'error');
-        }
-      } else {
-        showMessage('Generate a QR code first', 'error');
-      }
+  function generateQR() {
+    const content = getContent();
+    if (!content) { showToast('Please enter content for the QR code.', 'error'); return; }
+
+    const size = parseInt(document.getElementById('qr-size')?.value) || 300;
+    const fg = document.getElementById('qr-fg')?.value || '#000000';
+    const bg = document.getElementById('qr-bg')?.value || '#ffffff';
+
+    // 动态 import qrcode
+    import('qrcode').then((QRCode) => {
+      const canvas = document.getElementById('qr-canvas');
+      QRCode.toCanvas(canvas, content, {
+        width: size,
+        margin: 1,
+        color: { dark: fg, light: bg },
+        errorCorrectionLevel: 'M',
+      });
+
+      const img = document.getElementById('qr-image');
+      currentDataUrl = canvas.toDataURL('image/png');
+      img.src = currentDataUrl;
+      img.style.width = size + 'px';
+
+      document.getElementById('result-empty').classList.add('hidden');
+      document.getElementById('result-data').classList.remove('hidden');
+      document.getElementById('qr-info').textContent = `${size}×${size}px QR Code`;
+    }).catch((err) => {
+      showToast('Error generating QR code: ' + err.message, 'error');
     });
-    
-    generateQR();
-  </script>
-  <Schema
-    toolName="QR Code Generator"
-    description={description}
-    url={Astro.url.href}
-    category="Math"
-  />
-</BaseLayout>
+  }
+
+  function toggleInputs() {
+    const type = document.getElementById('qr-type')?.value || 'url';
+    const ids = ['input-url-text', 'input-email', 'input-phone', 'input-wifi'];
+    ids.forEach(id => document.getElementById(id)?.classList.add('hidden'));
+    switch (type) {
+      case 'url':
+      case 'text': document.getElementById('input-url-text')?.classList.remove('hidden'); break;
+      case 'email': document.getElementById('input-email')?.classList.remove('hidden'); break;
+      case 'phone': document.getElementById('input-phone')?.classList.remove('hidden'); break;
+      case 'wifi': document.getElementById('input-wifi')?.classList.remove('hidden'); break;
+    }
+    // 清空结果
+    document.getElementById('result-data')?.classList.add('hidden');
+    document.getElementById('result-empty')?.classList.remove('hidden');
+  }
+
+  document.getElementById('qr-type')?.addEventListener('change', toggleInputs);
+  document.addEventListener('select-change', (e) => {
+    if (e.target?.closest('.custom-select-wrapper')?.dataset?.selectId === 'qr-type') {
+      toggleInputs();
+    }
+  });
+
+  document.getElementById('btn-generate')?.addEventListener('click', generateQR);
+
+  // 下载按钮
+  document.getElementById('btn-download-result')?.addEventListener('click', () => {
+    if (!currentDataUrl) return;
+    const a = document.createElement('a');
+    a.href = currentDataUrl;
+    a.download = 'qrcode.png';
+    a.click();
+  });
+</script>

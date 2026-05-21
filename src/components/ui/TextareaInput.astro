@@ -1,0 +1,61 @@
+---
+// 自定义文本域 —— 统一样式的 textarea
+export interface Props {
+  id: string;
+  label?: string;
+  placeholder?: string;
+  value?: string;
+  rows?: number;
+  required?: boolean;
+  disabled?: boolean;
+  class?: string;
+  helperText?: string;
+  monospace?: boolean;
+}
+
+const {
+  id,
+  label = '',
+  placeholder = '',
+  value = '',
+  rows = 6,
+  required = false,
+  disabled = false,
+  class: extraClass = '',
+  helperText = '',
+  monospace = false,
+} = Astro.props;
+---
+
+<div class={`${extraClass}`}>
+  {label && (
+    <label for={id} class="tool-label">
+      {label}
+      {required && <span class="text-red-500 ml-0.5">*</span>}
+    </label>
+  )}
+  <textarea
+    id={id}
+    name={id}
+    rows={rows}
+    placeholder={placeholder}
+    required={required}
+    disabled={disabled}
+    class="tool-input textarea-input"
+    class:list={[{ 'font-mono text-sm': monospace }]}
+  >{value}</textarea>
+  <p class="field-error hidden text-xs text-red-500 mt-1"></p>
+  {helperText && <p class="text-xs text-gray-400 mt-1">{helperText}</p>}
+</div>
+
+<style>
+  .textarea-input {
+    resize: vertical;
+    min-height: 100px;
+    line-height: 1.5;
+  }
+  .textarea-input.font-mono {
+    font-size: 0.8125rem;
+    line-height: 1.6;
+  }
+</style>

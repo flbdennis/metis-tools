@@ -1,10 +1,43 @@
 ---
-import CategoryLayout from '../components/CategoryLayout.astro';
-import { allTools } from '../data/tools';
+// 开发者工具分类页
+import BaseLayout from '../layouts/BaseLayout.astro';
+import CategoryGrid from '../components/ui/CategoryGrid.astro';
+import AdPlaceholder from '../components/ui/AdPlaceholder.astro';
+import { getToolsByCategory } from '../data/tools';
 
-const title = "Developer Tools - Online Utilities for Coders";
-const description = "Free online tools for developers: timestamp converter, JSON formatter, JWT decoder, UUID generator, color converter, code beautifier.";
-const devTools = allTools.filter(tool => tool.category === "dev");
+const tools = getToolsByCategory('dev');
+const pageTitle = 'Free Developer Tools — JSON, JWT, UUID, Regex & More';
+const pageDescription = 'Essential developer tools: JSON formatter, JWT decoder, UUID generator, regex tester, code beautifier, and more. Free, fast, and private — no data leaves your browser.';
 ---
 
-<CategoryLayout title={title} description={description} currentPath="/dev-tools" tools={devTools} />
+<BaseLayout title={pageTitle} description={pageDescription} currentPath="/dev-tools">
+  <section class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">Developer Tools</h1>
+    <p class="mt-2 text-gray-500 max-w-2xl">
+      A collection of essential utilities for web developers and programmers. Format JSON, decode JWT tokens, generate UUIDs, test regex patterns, and more — all in your browser.
+    </p>
+  </section>
+
+  <div class="mb-8"><AdPlaceholder position="hero-banner" /></div>
+
+  <section class="mb-8">
+    <div class="flex items-center justify-between mb-5">
+      <h2 class="text-lg font-semibold text-gray-700">{tools.length} Tools</h2>
+    </div>
+    <CategoryGrid category="dev" />
+  </section>
+
+  <section class="max-w-3xl pb-12">
+    <div class="prose prose-gray max-w-none text-sm text-gray-600 leading-relaxed">
+      <h2 class="text-xl font-semibold text-gray-900">Browser-Based Developer Utilities</h2>
+      <p>
+        Format and minify JSON with tree view, decode JWT tokens with expiration alerts, generate UUIDs in bulk,
+        convert colors between HEX/RGB/HSL with live preview, beautify HTML/CSS/JS code, create strong passwords
+        with entropy analysis, and generate QR codes for any content type. All tools run client-side for maximum
+        privacy and speed.
+      </p>
+    </div>
+  </section>
+
+  <div class="mb-12"><AdPlaceholder position="footer-banner" /></div>
+</BaseLayout>

@@ -1,0 +1,61 @@
+---
+// SEO Meta 标签组件 —— 所有页面的 head 统一由此生成
+import { siteConfig } from '../../data/site';
+
+export interface Props {
+  title: string;
+  description: string;
+  canonical?: string;
+  ogImage?: string;
+  ogType?: 'website' | 'article';
+  noIndex?: boolean;
+}
+
+const {
+  title,
+  description,
+  canonical,
+  ogImage = `${siteConfig.url}/og/home.jpg`,
+  ogType = 'website',
+  noIndex = false,
+} = Astro.props;
+
+const fullTitle = `${title} | ${siteConfig.name}`;
+const canonicalUrl = canonical ? new URL(canonical, siteConfig.url).href : Astro.url.href;
+---
+
+<!-- 基础 Meta -->
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>{fullTitle}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonicalUrl} />
+<meta name="robots" content={noIndex ? 'noindex, follow' : 'index, follow'} />
+<link rel="icon" type="image/x-icon" href="/favicon.ico" />
+
+<!-- Open Graph -->
+<meta property="og:type" content={ogType} />
+<meta property="og:title" content={fullTitle} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={ogImage} />
+<meta property="og:url" content={canonicalUrl} />
+<meta property="og:site_name" content={siteConfig.name} />
+<meta property="og:locale" content={siteConfig.locale} />
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={fullTitle} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImage} />
+
+<!-- 预连接第三方域名（性能优化） -->
+<link rel="preconnect" href="https://www.googletagmanager.com" />
+<link rel="preconnect" href="https://www.google-analytics.com" />
+<link rel="preconnect" href="https://pagead2.googlesyndication.com" />
+
+<!-- Google AdSense（异步加载，受 Cookie 同意控制） -->
+<script async src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${siteConfig.googleAdsenseId}`} crossorigin="anonymous"></script>
+
+<!-- Inter 字体预加载 -->
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" as="style" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" />

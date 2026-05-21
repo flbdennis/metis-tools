@@ -1,0 +1,178 @@
+---
+// 自定义日期选择器 —— 点击任意部分打开日期面板，自定义样式
+export interface Props {
+  id: string;
+  label?: string;
+  value?: string;
+  placeholder?: string;
+  required?: boolean;
+  disabled?: boolean;
+  class?: string;
+  helperText?: string;
+}
+
+const {
+  id,
+  label = '',
+  value = '',
+  placeholder = 'Select a date',
+  required = false,
+  disabled = false,
+  class: extraClass = '',
+  helperText = '',
+} = Astro.props;
+---
+
+<div class={`date-input-wrapper ${extraClass}`}>
+  {label && (
+    <label for={id} class="tool-label">
+      {label}
+      {required && <span class="text-red-500 ml-0.5">*</span>}
+    </label>
+  )}
+  <div class="date-input-trigger-area">
+    <div class="date-input-trigger" tabindex="0" role="button">
+      <!-- 日历图标 -->
+      <svg class="date-calendar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+      </svg>
+      <span id={`${id}-display`} class="date-display-text">{value || placeholder}</span>
+      <input
+        type="date"
+        id={id}
+        name={id}
+        value={value}
+        required={required}
+        disabled={disabled}
+        class="date-hidden-input"
+        data-date-input
+      />
+    </div>
+  </div>
+  <p class="field-error hidden text-xs text-red-500 mt-1"></p>
+  {helperText && <p class="text-xs text-gray-400 mt-1">{helperText}</p>}
+</div>
+
+<style>
+  .date-input-wrapper {
+    position: relative;
+  }
+  .date-input-trigger-area {
+    position: relative;
+  }
+  .date-input-trigger {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.625rem 1rem;
+    background: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    color: #111827;
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    outline: none;
+  }
+  .date-input-trigger:hover {
+    border-color: #9ca3af;
+  }
+  .date-input-trigger:focus-within,
+  .date-input-trigger:focus {
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+  }
+  .date-input-trigger:has(:disabled) {
+    background: #f3f4f6;
+    cursor: not-allowed;
+  }
+  .date-calendar-icon {
+    width: 1.125rem;
+    height: 1.125rem;
+    color: #9ca3af;
+    flex-shrink: 0;
+  }
+  .date-display-text {
+    flex: 1;
+    line-height: 1.5;
+  }
+  .date-display-text:empty::before {
+    content: attr(data-placeholder);
+    color: #9ca3af;
+  }
+  /* 隐藏原生日期输入框（覆盖在触发器上方，透明但可交互） */
+  .date-hidden-input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    font-size: inherit;
+    font-family: inherit;
+    color: transparent;
+    background: transparent;
+    border: none;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+    padding: 0;
+  }
+  /* 隐藏原生日期选择器的文本输入部分 */
+  .date-hidden-input::-webkit-date-and-time-value {
+    display: none;
+  }
+  .date-hidden-input::-webkit-calendar-picker-indicator {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    color: transparent;
+    background: transparent;
+  }
+  /* 日期面板已有值时更新显示文字 */
+  .date-input-wrapper.has-value .date-display-text {
+    color: #111827;
+  }
+</style>
+
+<script>
+  function initDateInputs() {
+    document.querySelectorAll('[data-date-input]').forEach(input => {
+      if (input.dataset._initDate) return;
+      input.dataset._initDate = '1';
+
+      const wrapper = input.closest('.date-input-wrapper');
+      const display = wrapper?.querySelector('.date-display-text');
+
+      input.addEventListener('change', () => {
+        if (display && input.value) {
+          const date = new Date(input.value + 'T00:00:00');
+          display.textContent = date.toLocaleDateString('en-US', {
+            year: 'numeric', month: 'short', day: 'numeric'
+          });
+          wrapper?.classList.add('has-value');
+        } else if (display) {
+          display.textContent = '';
+          wrapper?.classList.remove('has-value');
+        }
+      });
+
+      // 初始值
+      if (input.value && display) {
+        const date = new Date(input.value + 'T00:00:00');
+        display.textContent = date.toLocaleDateString('en-US', {
+          year: 'numeric', month: 'short', day: 'numeric'
+        });
+        wrapper?.classList.add('has-value');
+      }
+    });
+  }
+
+  initDateInputs();
+  document.addEventListener('astro:page-load', initDateInputs);
+</script>

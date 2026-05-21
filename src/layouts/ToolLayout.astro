@@ -1,0 +1,105 @@
+---
+// 工具页统一布局 —— 左右分栏（桌面端），input 区 + result 区
+import BaseLayout from './BaseLayout.astro';
+import AdPlaceholder from '../components/ui/AdPlaceholder.astro';
+import Schema from '../components/seo/Schema.astro';
+import { allTools } from '../data/tools';
+
+export interface Props {
+  title: string;
+  description: string;
+  toolHref: string;
+  ogImage?: string;
+}
+
+const { title, description, toolHref, ogImage } = Astro.props;
+
+const tool = allTools.find(t => t.href === toolHref);
+const blogSlug = tool?.blogSlug || null;
+const toolSlug = toolHref.replace('/tools/', '');
+const pageOgImage = ogImage || `/og/${toolSlug}.jpg`;
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  currentPath={toolHref}
+  ogImage={pageOgImage}
+>
+  <div class="mb-4">
+    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">{tool?.title || title}</h1>
+    <p class="mt-1 text-sm text-gray-500">{tool?.description || description}</p>
+  </div>
+
+  <div class="mb-6">
+    <AdPlaceholder position="tool-top" />
+  </div>
+
+  <!-- 左右分栏区：输入 | 结果 -->
+  <div class="tool-page-grid grid grid-cols-1 lg:grid-cols-5 gap-6 mb-8">
+    <!-- 输入区（桌面端占 3 列） -->
+    <div class="lg:col-span-3 tool-input-panel">
+      <slot name="input" />
+    </div>
+
+    <!-- 结果区（桌面端占 2 列，高度自动匹配输入区） -->
+    <div class="lg:col-span-2 tool-result-panel">
+      <slot name="result" />
+    </div>
+  </div>
+
+  <div class="mb-8">
+    <AdPlaceholder position="tool-result" />
+  </div>
+
+  <div class="max-w-3xl pb-12">
+    <h2 class="text-xl font-semibold text-gray-900 mb-3">About This Tool</h2>
+    <div class="prose prose-gray max-w-none text-sm text-gray-600 leading-relaxed">
+      <slot name="description" />
+    </div>
+
+    {blogSlug && (
+      <a href={`/blog/${blogSlug}`} class="inline-flex items-center gap-1.5 mt-4 text-sm font-medium text-primary-600 hover:text-primary-700 transition-colors">
+        Read the full guide
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+      </a>
+    )}
+  </div>
+
+  <Schema type="HowTo" toolName={tool?.title || title} data={{ description, steps: [] }} />
+</BaseLayout>
+
+<style>
+  .tool-page-grid {
+    align-items: stretch;
+  }
+  .tool-result-panel {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+  }
+  .tool-result-panel > :global(div) {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  /* 结果区空状态占位 —— 相对于左侧表单高度上下居中 */
+  .tool-result-panel .result-placeholder {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.75rem;
+    border: 2px dashed #e5e7eb;
+    background: #fafafa;
+    padding: 2rem;
+    text-align: center;
+    min-height: 200px;
+  }
+  .tool-result-panel .result-placeholder p {
+    font-size: 0.9375rem;
+    color: #9ca3af;
+    line-height: 1.6;
+    max-width: 280px;
+  }
+</style>

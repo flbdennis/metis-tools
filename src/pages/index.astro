@@ -1,249 +1,133 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
-import ToolCard from "../components/ToolCard.astro";
-import { allTools } from "../data/tools";
+// 首页 —— 精选工具 + 分类导航 + 博客推荐
+import BaseLayout from '../layouts/BaseLayout.astro';
+import AdPlaceholder from '../components/ui/AdPlaceholder.astro';
+import ToolIcon from '../components/ui/ToolIcon.astro';
+import { navigationConfig } from '../data/navigation';
+import { siteConfig } from '../data/site';
+import { allTools, getFeaturedTools, getCategories } from '../data/tools';
 
-const title = "MetisTools - Free Online Converters & Calculators";
-const description =
-  "All-in-one toolkit: file conversion, unit conversion, health, finance, and daily math tools. 100% free, no signup required.";
-const toolCount = allTools.length;
-const siteUrl = Astro.site.href;
+const pageTitle = `${siteConfig.name} — Free Online Converters & Calculators`;
+const pageDescription = siteConfig.description;
+
+const featuredTools = getFeaturedTools();
+const categories = getCategories();
 ---
 
-<BaseLayout title={title} description={description} currentPath="/">
-  <style is:global>
-    /* 动画层1 - 大范围快速浮动 */
-    .hero-bg-animation {
-      position: absolute;
-      top: -40%;
-      left: -30%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(
-        circle at 30% 40%,
-        rgba(79, 70, 229, 0.6) 0%,
-        rgba(6, 182, 212, 0.5) 30%,
-        rgba(236, 72, 153, 0.3) 60%,
-        transparent 85%
-      );
-      border-radius: 50%;
-      filter: blur(100px);
-      animation: dramaticFloat 4s ease-in-out infinite alternate;
-      will-change: transform;
-      pointer-events: none;
-      z-index: 0;
-    }
-    /* 动画层2 - 相反方向 */
-    .hero-bg-animation-2 {
-      position: absolute;
-      bottom: -30%;
-      right: -25%;
-      width: 180%;
-      height: 180%;
-      background: radial-gradient(
-        circle at 70% 60%,
-        rgba(139, 92, 246, 0.55) 0%,
-        rgba(59, 130, 246, 0.45) 40%,
-        transparent 70%
-      );
-      border-radius: 60%;
-      filter: blur(90px);
-      animation: dramaticFloatReverse 5s ease-in-out infinite alternate;
-      will-change: transform;
-      pointer-events: none;
-      z-index: 0;
-    }
-    /* 动画层3 - 第三层，增加丰富度 */
-    .hero-bg-animation-3 {
-      position: absolute;
-      top: 10%;
-      left: 20%;
-      width: 150%;
-      height: 150%;
-      background: radial-gradient(
-        circle at 50% 50%,
-        rgba(245, 158, 11, 0.3) 0%,
-        rgba(16, 185, 129, 0.25) 50%,
-        transparent 80%
-      );
-      border-radius: 50%;
-      filter: blur(120px);
-      animation: slowWobble 6s ease-in-out infinite alternate;
-      will-change: transform;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    @keyframes dramaticFloat {
-      0% {
-        transform: translate(0%, 0%) scale(1);
-        opacity: 0.6;
-      }
-      100% {
-        transform: translate(20%, 20%) scale(1.6);
-        opacity: 1;
-      }
-    }
-    @keyframes dramaticFloatReverse {
-      0% {
-        transform: translate(0%, 0%) scale(1);
-        opacity: 0.4;
-      }
-      100% {
-        transform: translate(-18%, -18%) scale(1.5);
-        opacity: 0.9;
-      }
-    }
-    @keyframes slowWobble {
-      0% {
-        transform: rotate(0deg) scale(1);
-        opacity: 0.3;
-      }
-      100% {
-        transform: rotate(5deg) scale(1.4);
-        opacity: 0.9;
-      }
-    }
-
-    /* 深色模式增强 */
-    html.dark .hero-bg-animation {
-      background: radial-gradient(
-        circle at 30% 40%,
-        rgba(129, 140, 248, 0.7) 0%,
-        rgba(34, 211, 238, 0.6) 30%,
-        rgba(244, 114, 182, 0.4) 60%,
-        transparent 85%
-      );
-    }
-    html.dark .hero-bg-animation-2 {
-      background: radial-gradient(
-        circle at 70% 60%,
-        rgba(167, 139, 250, 0.65) 0%,
-        rgba(96, 165, 250, 0.55) 40%,
-        transparent 70%
-      );
-    }
-    html.dark .hero-bg-animation-3 {
-      background: radial-gradient(
-        circle at 50% 50%,
-        rgba(245, 158, 11, 0.4) 0%,
-        rgba(16, 185, 129, 0.35) 50%,
-        transparent 80%
-      );
-    }
-    .hero-bg-animation,
-    .hero-bg-animation-2,
-    .hero-bg-animation-3 {
-      transform: translateZ(0);
-      backface-visibility: hidden;
-    }
-  </style>
-
-  <!-- Hero 区域（Logo + 标题 + 描述） -->
-  <section
-    class="relative text-center pt-8 pb-4 md:pt-12 md:pb-6 overflow-hidden -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8"
-    id="hero-section"
-  >
-    <div class="hero-bg-animation"></div>
-    <div class="hero-bg-animation-2"></div>
-    <div class="hero-bg-animation-3"></div>
-    <div class="relative z-10">
-      <!-- Logo 放大 -->
-      <img
-        src="/logo.webp"
-        alt="MetisTools Logo"
-        class="mx-auto mb-6 h-24 md:h-32 w-auto"
-      />
-
-      <h1
-        class="text-4xl md:text-6xl font-bold bg-gradient-to-r from-indigo-600 to-cyan-500 bg-clip-text text-transparent mt-4"
-      >
-        Convert Anything in Seconds
+<BaseLayout
+  title={pageTitle}
+  description={pageDescription}
+  currentPath="/"
+>
+  <!-- ===== Hero Section ===== -->
+  <section class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary-600 via-primary-700 to-indigo-900 px-6 py-16 sm:py-20 text-center text-white mb-12">
+    <div class="relative z-10 max-w-2xl mx-auto">
+      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight leading-tight">
+        {siteConfig.tagline}
       </h1>
-      <p
-        class="mt-4 text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto"
-      >
-        Free online file converters, unit converters, health and finance
-        calculators — everything you need.
+      <p class="mt-4 text-lg text-primary-100 leading-relaxed">
+        {pageDescription}
       </p>
-    </div>
-  </section>
-
-  <!-- 所有工具网格（标题 + 搜索框） -->
-  <section class="py-8">
-    <div
-      class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6"
-    >
-      <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">
-        All Tools
-      </h2>
-      <div class="w-full sm:w-auto" id="search-container">
-        <input
-          type="text"
-          placeholder={`Search ${toolCount} tools...`}
-          class="w-full sm:w-80 px-4 py-2 rounded-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-          id="searchInput"
-        />
+      <div class="mt-8 flex flex-col sm:flex-row justify-center gap-3">
+        <a href="#all-tools" class="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-white text-primary-700 font-semibold hover:bg-gray-100 transition-colors shadow-md">
+          Explore All Tools
+          <svg class="ml-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+        </a>
+        <a href="/blog" class="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-primary-500/30 text-white font-semibold hover:bg-primary-500/40 transition-colors border border-primary-400/30">
+          Read Our Blog
+        </a>
       </div>
     </div>
-    <div
-      class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6"
-      id="toolsGrid"
-    >
-      {allTools.map((tool) => <ToolCard {...tool} />)}
+    <!-- 背景装饰 -->
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.1),transparent_70%)]" aria-hidden="true"></div>
+  </section>
+
+  <!-- [AdSense 广告位]: Hero 下方横幅 -->
+  <div class="mb-12">
+    <AdPlaceholder position="hero-banner" />
+  </div>
+
+  <!-- ===== 精选工具区（按市场需求排序的 6 个工具） ===== -->
+  <section class="mb-12">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-2xl font-bold text-gray-900">Popular Tools</h2>
+      <span class="text-xs text-gray-400">Most used by our visitors</span>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {featuredTools.map((tool, index) => (
+        <a href={tool.href} class="tool-card group flex items-start gap-4">
+          <!-- 热度排名角标 -->
+          <span class="shrink-0 flex items-center justify-center w-10 h-10 rounded-lg bg-primary-50 text-primary-600 text-sm font-bold group-hover:bg-primary-100 transition-colors">
+            {index + 1}
+          </span>
+          <div class="min-w-0">
+            <h3 class="font-semibold text-gray-900 group-hover:text-primary-700 transition-colors truncate">
+              {tool.title}
+            </h3>
+            <p class="mt-0.5 text-xs text-gray-500 line-clamp-2">{tool.description}</p>
+          </div>
+        </a>
+      ))}
     </div>
   </section>
 
-  <!-- ========== 新增：网站介绍区块（约550字，用于丰富内容，符合 AdSense 审核） ========== -->
-  <section class="mt-16 py-8 border-t border-gray-200 dark:border-gray-700">
-    <div class="max-w-4xl mx-auto text-center">
-      <h2 class="text-2xl md:text-3xl font-bold text-gray-800 dark:text-gray-100 mb-4">Why Choose MetisTools?</h2>
-      <div class="space-y-4 text-gray-600 dark:text-gray-300 text-left md:text-center">
-        <p>MetisTools is a carefully curated collection of free online utilities designed to simplify everyday tasks. Whether you need to convert PDF to Word, calculate your BMI, format JSON, or generate a strong password, we provide instant results without requiring registration or uploading sensitive data.</p>
-        <p>Unlike many tool sites that bombard you with intrusive ads or hidden fees, MetisTools is 100% free and privacy-focused. All file processing happens locally in your browser – your documents, images, and text never leave your device. This means you get fast, secure conversions without worrying about data leaks.</p>
-        <p>Our toolbox currently includes over 30 essential tools across categories like file conversion, calculators, developer utilities, text processing, and image editing. We continuously add new tools based on user feedback.</p>
-        <p>For developers, we offer JSON formatters, JWT decoders, timestamp converters, and code beautifiers. For students and professionals, there are unit converters, loan calculators, and age calculators. Everyone will find something useful here.</p>
-        <p>Accessibility matters to us. The entire website is fully responsive, works on any device, and supports dark mode for comfortable night-time use. We also avoid tracking scripts except for anonymized analytics to improve performance.</p>
-        <p>MetisTools is built by a solo developer with a passion for clean, fast, and reliable web tools. If you have suggestions or find a bug, please <a href="/support/contact" class="text-indigo-600 hover:underline">contact us</a>. Your feedback directly shapes the future of this platform.</p>
-        <p>Thank you for choosing MetisTools. We hope our tools make your day a little easier.</p>
-      </div>
+  <!-- ===== 分类区 ===== -->
+  <section class="mb-12">
+    <h2 class="text-2xl font-bold text-gray-900 mb-6">Browse by Category</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      {categories.map(cat => (
+        <a href={`/${cat.key === 'calculators' ? 'calculators' : cat.key === 'converters' ? 'converters' : cat.key === 'dev' ? 'dev-tools' : cat.key === 'image' ? 'image-tools' : 'text-tools'}`} class="tool-card text-center py-6">
+          <h3 class="font-semibold text-gray-900">{cat.name}</h3>
+          <p class="mt-1 text-xs text-gray-500">{cat.description}</p>
+        </a>
+      ))}
     </div>
   </section>
 
-  <script>
-    // 仅保留搜索过滤逻辑（删除所有浮动搜索框相关代码）
-    const searchInput = document.getElementById("searchInput");
-    const toolsGrid = document.getElementById("toolsGrid");
-    if (searchInput && toolsGrid) {
-      searchInput.addEventListener("input", (e) => {
-        const term = e.target.value.toLowerCase().trim();
-        const cards = toolsGrid.querySelectorAll("a");
-        cards.forEach((card) => {
-          const title = card.querySelector("h3")?.innerText.toLowerCase() || "";
-          const desc = card.querySelector("p")?.innerText.toLowerCase() || "";
-          if (term === "" || title.includes(term) || desc.includes(term)) {
-            card.style.display = "";
-          } else {
-            card.style.display = "none";
-          }
-        });
-      });
-    }
-  </script>
+  <!-- [AdSense 广告位]: 工具列表中间 -->
+  <div class="mb-12">
+    <AdPlaceholder position="content-middle" />
+  </div>
 
-  <script
-    type="application/ld+json"
-    set:html={JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "WebSite",
-      url: siteUrl,
-      name: "MetisTools",
-      description: "Free online converters, calculators, developer tools",
-      potentialAction: {
-        "@type": "SearchAction",
-        target: siteUrl + "?q={search_term_string}",
-        "query-input": "required name=search_term_string",
-      },
+  <!-- ===== 全部工具区 ===== -->
+  <section id="all-tools" class="mb-12">
+    <h2 class="text-2xl font-bold text-gray-900 mb-6">All Tools</h2>
+
+    {Object.entries(navigationConfig.categoryMap).map(([catKey, catInfo]) => {
+      const catTools = allTools.filter(t => t.category === catKey);
+
+      return (
+        <div class="mb-8">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-lg font-semibold text-gray-800">{catInfo.name}</h3>
+            <a href={catInfo.href} class="text-sm text-primary-600 hover:text-primary-700 font-medium">View all →</a>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {catTools.map(tool => (
+              <a href={tool.href} class="flex items-center gap-3 rounded-lg border border-gray-300 bg-white p-3.5 hover:border-primary-400 hover:shadow-sm transition-all">
+                <span class="shrink-0 text-primary-500">
+                  <ToolIcon name={tool.icon} class="h-4 w-4" />
+                </span>
+                <span class="text-sm font-medium text-gray-800 truncate">{tool.title}</span>
+              </a>
+            ))}
+          </div>
+        </div>
+      );
     })}
-  />
+  </section>
+
+  <!-- ===== 博客区（预留） ===== -->
+  <section class="mb-12">
+    <h2 class="text-2xl font-bold text-gray-900 mb-6">Latest from Our Blog</h2>
+    <p class="text-sm text-gray-500">Tips, guides, and tutorials to help you get the most out of our tools.</p>
+    <div class="mt-4">
+      <a href="/blog" class="text-sm font-medium text-primary-600 hover:text-primary-700">Browse all articles →</a>
+    </div>
+  </section>
+
+  <!-- [AdSense 广告位]: Footer 上方 -->
+  <div class="mb-12">
+    <AdPlaceholder position="footer-banner" />
+  </div>
 </BaseLayout>

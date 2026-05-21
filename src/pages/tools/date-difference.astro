@@ -1,97 +1,183 @@
 ---
-import Schema from '../../components/Schema.astro';
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getPageSeo } from '../../utils/seo.js';
+// 日期差计算器页面 —— 日期差天数/周/月/年，工作日模式，日期加减
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import DateInput from '../../components/ui/DateInput.astro';
+import NumberInput from '../../components/ui/NumberInput.astro';
+import ResultDisplay from '../../components/tool/ResultDisplay.astro';
 
-const { title, description } = getPageSeo('tools/date-difference'); // 根据页面修改键名
+const pageTitle = 'Date Difference Calculator — Days Between Dates';
+const pageDescription = 'Calculate the exact number of days, weeks, months, and years between two dates. Includes business day calculation mode and date addition/subtraction features.';
+
+const calcModes = [
+  { id: 'difference', label: 'Date Difference' },
+  { id: 'add-subtract', label: 'Add / Subtract Days' },
+];
 ---
 
-<BaseLayout title={title} description={description} currentPath="/tools/date-difference">
-  <div class="max-w-2xl mx-auto py-8">
-    <div class="bg-white dark:bg-slate-950 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-slate-800">
-      <h1 class="text-3xl font-bold mb-2">📅 Date Difference Calculator</h1>
-      <p class="text-gray-600 dark:text-gray-300 mb-6">Calculate the exact difference between two dates.</p>
-      <div class="space-y-4">
-        <div>
-          <label class="block text-sm font-medium mb-1">Start Date</label>
-          <input type="date" id="startDate" class="w-full px-4 py-2 rounded-full border border-gray-300 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950">
-        </div>
-        <div>
-          <label class="block text-sm font-medium mb-1">End Date</label>
-          <input type="date" id="endDate" class="w-full px-4 py-2 rounded-full border border-gray-300 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950">
-        </div>
-        <div>
-          <label class="block text-sm font-medium mb-1">Result Unit</label>
-          <select id="unit" class="w-full px-4 py-2 rounded-full border border-gray-300 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950">
-            <option value="days">Days</option>
-            <option value="weeks">Weeks</option>
-            <option value="months">Months</option>
-            <option value="years">Years</option>
-          </select>
-        </div>
-        <button id="calcBtn" class="w-full bg-indigo-600 dark:bg-indigo-500 hover:bg-indigo-700 dark:hover:bg-indigo-600 text-white font-medium py-2 rounded-full transition-transform transform hover:scale-98">Calculate Difference</button>
-        <div id="result" class="mt-4 p-4 bg-gray-100 dark:bg-slate-900 rounded-xl text-center text-gray-800 dark:text-gray-100 hidden">
-          <span id="resultText">--</span>
+<ToolLayout title={pageTitle} description={pageDescription} toolHref="/tools/date-difference">
+  <div slot="input">
+    <div class="space-y-4">
+      <div>
+        <label class="tool-label">Mode</label>
+        <div class="flex rounded-lg border border-gray-300 bg-gray-50 p-1 gap-1" id="calc-mode">
+          {calcModes.map((mode, i) => (
+            <button type="button" class={`mode-toggle flex-1 py-2 text-sm font-medium rounded-md transition-all ${i === 0 ? 'active bg-white text-primary-600 shadow-sm' : 'text-gray-500'}`} data-mode={mode.id}>
+              {mode.label}
+            </button>
+          ))}
         </div>
       </div>
+
+      <div id="diff-inputs">
+        <DateInput id="start-date" label="Start Date" required={true} />
+        <div class="mt-3">
+          <DateInput id="end-date" label="End Date" required={true} />
+        </div>
+        <div class="mt-3 flex items-center gap-2">
+          <input type="checkbox" id="business-days" />
+          <label for="business-days" class="text-sm text-gray-600 cursor-pointer">Count business days only (Mon–Fri)</label>
+        </div>
+      </div>
+
+      <div id="addsub-inputs" class="hidden">
+        <DateInput id="base-date" label="Base Date" required={true} />
+        <div class="mt-3 grid grid-cols-2 gap-3">
+          <NumberInput id="add-days" label="Days to Add" placeholder="e.g. 90" decimalPlaces={0} />
+          <NumberInput id="sub-days" label="Days to Subtract" placeholder="e.g. 30" decimalPlaces={0} />
+        </div>
+      </div>
+
+      <button type="button" id="calc-date" class="tool-btn-primary w-full">Calculate</button>
     </div>
   </div>
-  <script>
-    const startInput = document.getElementById('startDate');
-    const endInput = document.getElementById('endDate');
-    const unitSelect = document.getElementById('unit');
-    const calcBtn = document.getElementById('calcBtn');
-    const resultDiv = document.getElementById('result');
-    const resultSpan = document.getElementById('resultText');
 
-    // 设置默认值：今天和一周后
-    const today = new Date();
-    const nextWeek = new Date(today);
-    nextWeek.setDate(today.getDate() + 7);
-    startInput.value = today.toISOString().split('T')[0];
-    endInput.value = nextWeek.toISOString().split('T')[0];
+  <div slot="result">
+    <ResultDisplay emptyMessage="Select dates or enter a date to add/subtract from, then click <strong>Calculate</strong>.">
+      <div slot="result-content">
+        <div class="text-center mb-5">
+          <div class="text-5xl font-bold text-primary-600" id="diff-days">--</div>
+          <div class="text-sm text-gray-400 mt-1" id="diff-label">days</div>
+        </div>
 
-    function dateDiffInDays(date1, date2) {
-      const oneDay = 24 * 60 * 60 * 1000;
-      return Math.round(Math.abs((date2 - date1) / oneDay));
+        <div id="diff-grid" class="grid grid-cols-2 gap-2 mb-4">
+          <div class="bg-primary-50 rounded-lg p-3 text-center border border-primary-100">
+            <div class="text-base font-bold text-primary-700" id="diff-weeks">--</div>
+            <div class="text-[10px] text-primary-500">weeks</div>
+          </div>
+          <div class="bg-primary-50 rounded-lg p-3 text-center border border-primary-100">
+            <div class="text-base font-bold text-primary-700" id="diff-months">--</div>
+            <div class="text-[10px] text-primary-500">months</div>
+          </div>
+          <div class="bg-primary-50 rounded-lg p-3 text-center border border-primary-100">
+            <div class="text-base font-bold text-primary-700" id="diff-years">--</div>
+            <div class="text-[10px] text-primary-500">years</div>
+          </div>
+          <div class="bg-primary-50 rounded-lg p-3 text-center border border-primary-100">
+            <div class="text-base font-bold text-primary-700" id="diff-hours">--</div>
+            <div class="text-[10px] text-primary-500">hours</div>
+          </div>
+        </div>
+
+        <div class="mt-auto bg-gray-50 rounded-lg p-3">
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-gray-600" id="result-date-label">End date</span>
+            <span class="font-semibold text-gray-800" id="result-date-display">--</span>
+          </div>
+        </div>
+      </div>
+    </ResultDisplay>
+  </div>
+
+  <div slot="description">
+    <p>
+      Calculate the exact number of days between any two dates, or add/subtract days from a base date.
+      Use business day mode to count only Monday–Friday. Results include breakdown in days, weeks, months,
+      and years. All date math is done locally in your browser.
+    </p>
+  </div>
+</ToolLayout>
+
+<style>
+  .mode-toggle { background: transparent; border: none; cursor: pointer; }
+</style>
+
+<script>
+  let currentCalcMode = 'difference';
+
+  function countBusinessDays(start, end) {
+    let count = 0;
+    const current = new Date(start);
+    while (current <= end) {
+      const day = current.getDay();
+      if (day !== 0 && day !== 6) count++;
+      current.setDate(current.getDate() + 1);
     }
+    return count;
+  }
 
-    function formatResult(days, unit) {
-      switch(unit) {
-        case 'days': return `${days} days`;
-        case 'weeks': return `${(days / 7).toFixed(2)} weeks`;
-        case 'months': return `${(days / 30.44).toFixed(2)} months (approx)`;
-        case 'years': return `${(days / 365.25).toFixed(2)} years (approx)`;
-        default: return `${days} days`;
-      }
+  function initModeToggle() {
+    const toggle = document.getElementById('calc-mode');
+    if (!toggle || toggle.dataset._init) return;
+    toggle.dataset._init = '1';
+    toggle.querySelectorAll('.mode-toggle').forEach(btn => {
+      btn.addEventListener('click', () => {
+        toggle.querySelectorAll('.mode-toggle').forEach(b => { b.className = 'mode-toggle flex-1 py-2 text-sm font-medium rounded-md transition-all text-gray-500'; });
+        btn.className = 'mode-toggle flex-1 py-2 text-sm font-medium rounded-md transition-all active bg-white text-primary-600 shadow-sm';
+        currentCalcMode = btn.dataset.mode;
+        document.getElementById('diff-inputs').classList.toggle('hidden', currentCalcMode !== 'difference');
+        document.getElementById('addsub-inputs').classList.toggle('hidden', currentCalcMode !== 'add-subtract');
+        document.getElementById('result-data')?.classList.add('hidden');
+        document.getElementById('result-empty')?.classList.remove('hidden');
+      });
+    });
+  }
+
+  function calculate() {
+    if (currentCalcMode === 'difference') {
+      const startVal = document.getElementById('start-date')?.value;
+      const endVal = document.getElementById('end-date')?.value;
+      if (!startVal || !endVal) { showToast('Please select both dates.', 'error'); return; }
+
+      const start = new Date(startVal + 'T00:00:00');
+      const end = new Date(endVal + 'T00:00:00');
+      if (end < start) { showToast('End date must be on or after start date.', 'error'); return; }
+
+      const businessOnly = document.getElementById('business-days')?.checked;
+      const totalDays = businessOnly ? countBusinessDays(start, end) : Math.floor((end - start) / 86400000);
+
+      document.getElementById('result-empty').classList.add('hidden');
+      document.getElementById('result-data').classList.remove('hidden');
+      document.getElementById('diff-days').textContent = totalDays;
+      document.getElementById('diff-label').textContent = businessOnly ? 'business days' : 'calendar days';
+      document.getElementById('diff-weeks').textContent = (totalDays / 7).toFixed(1);
+      document.getElementById('diff-months').textContent = (totalDays / 30.44).toFixed(1);
+      document.getElementById('diff-years').textContent = (totalDays / 365.25).toFixed(2);
+      document.getElementById('diff-hours').textContent = (totalDays * 24).toLocaleString();
+      document.getElementById('diff-grid').classList.remove('hidden');
+      document.getElementById('result-date-label').textContent = 'End date';
+      document.getElementById('result-date-display').textContent = end.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+    } else {
+      const baseVal = document.getElementById('base-date')?.value;
+      if (!baseVal) { showToast('Please select a base date.', 'error'); return; }
+
+      const base = new Date(baseVal + 'T00:00:00');
+      const addDays = parseInt(document.getElementById('add-days')?.value) || 0;
+      const subDays = parseInt(document.getElementById('sub-days')?.value) || 0;
+      const netDays = addDays - subDays;
+      const resultDate = new Date(base);
+      resultDate.setDate(resultDate.getDate() + netDays);
+
+      document.getElementById('result-empty').classList.add('hidden');
+      document.getElementById('result-data').classList.remove('hidden');
+      document.getElementById('diff-days').textContent = Math.abs(netDays);
+      document.getElementById('diff-label').textContent = netDays >= 0 ? 'days forward' : 'days backward';
+      document.getElementById('diff-grid').classList.add('hidden');
+      document.getElementById('result-date-label').textContent = 'Resulting date';
+      document.getElementById('result-date-display').textContent = resultDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
     }
+  }
 
-    function calculate() {
-      const startVal = startInput.value;
-      const endVal = endInput.value;
-      if (!startVal || !endVal) {
-        showMessage('Please select both dates.', 'error');
-        return;
-      }
-      const startDate = new Date(startVal);
-      const endDate = new Date(endVal);
-      if (isNaN(startDate) || isNaN(endDate)) {
-        showMessage('Invalid date format.', 'error');
-        return;
-      }
-      const days = dateDiffInDays(startDate, endDate);
-      const unit = unitSelect.value;
-      const resultText = formatResult(days, unit);
-      resultSpan.textContent = resultText;
-      resultDiv.classList.remove('hidden');
-    }
-
-    calcBtn.addEventListener('click', calculate);
-  </script>
-  <Schema
-    toolName="Date Difference Calculator"
-    description={description}
-    url={Astro.url.href}
-    category="Utility"
-  />
-</BaseLayout>
+  initModeToggle();
+  document.addEventListener('astro:page-load', initModeToggle);
+  document.getElementById('calc-date')?.addEventListener('click', calculate);
+</script>

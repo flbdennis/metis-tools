@@ -1,56 +1,45 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import Schema from '../../components/Schema.astro';
-const siteUrl = Astro.site.href;
-const title = "Contact MetisTools – Get in Touch";
-const description = "Contact MetisTools for feedback, bug reports, tool suggestions, or business inquiries. We respond within 2-3 business days.";
+import Schema from '../../components/seo/Schema.astro';
+import TextInput from '../../components/ui/TextInput.astro';
+import TextareaInput from '../../components/ui/TextareaInput.astro';
+import { seoData } from '../../data/seo';
+import { siteConfig } from '../../data/site';
+
+const { title, description } = seoData.support.contact;
 ---
 
 <BaseLayout title={title} description={description} currentPath="/support/contact">
   <div class="max-w-2xl mx-auto px-4 py-12 sm:py-16">
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+    <div class="rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
       <div class="px-6 py-10 sm:p-12">
         <div class="text-center">
-          <div class="text-5xl mb-4">📬</div>
-          <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-gray-100">Contact Us</h1>
-          <p class="mt-3 text-gray-500 dark:text-gray-400">We'd love to hear from you</p>
+          <h1 class="text-3xl sm:text-4xl font-bold text-gray-900">Contact Us</h1>
+          <p class="mt-3 text-gray-500">We'd love to hear from you</p>
         </div>
 
         <div class="mt-8 space-y-6">
-          <!-- 联系表单（简单表单，提交后发送邮件，需要后端处理） -->
-          <!-- 注意：此表单需配合后端 API 或 Netlify Forms 使用。如果你尚未配置，可以先保留邮箱。 -->
           <div>
-            <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 text-center">Send a Message</h2>
+            <h2 class="text-xl font-semibold text-gray-800 text-center">Send a Message</h2>
             <form action="/api/contact" method="POST" class="mt-4 space-y-3">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
-                <input type="text" name="name" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
-                <input type="email" name="email" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Message</label>
-                <textarea name="message" rows="4" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"></textarea>
-              </div>
-              <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 rounded-full transition">Send Message</button>
+              <TextInput id="contact-name" label="Name" type="text" required />
+              <TextInput id="contact-email" label="Email" type="email" required />
+              <TextareaInput id="contact-message" label="Message" rows={4} required />
+              <button type="submit" class="tool-btn-primary w-full">Send Message</button>
             </form>
-            <p class="text-xs text-gray-500 dark:text-gray-400 text-center mt-2">* This form is a placeholder. In production, it will send an email to the site owner.</p>
+            <p class="text-xs text-gray-500 text-center mt-2">* This form is a placeholder. In production, it will send an email to the site owner.</p>
           </div>
 
-          <!-- 直接邮箱联系方式 -->
-          <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-6 text-center">
-            <div class="text-4xl mb-2">📧</div>
-            <p class="text-gray-700 dark:text-gray-300 font-medium">Email (Direct)</p>
-            <a href="mailto:flbdennis.fan@gmail.com" class="text-indigo-600 dark:text-indigo-400 hover:underline text-lg break-all">flbdennis.fan@gmail.com</a>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-3">We aim to respond within 2-3 business days.</p>
+          <div class="bg-gray-50 rounded-xl p-6 text-center">
+            <p class="text-gray-700 font-medium">Email (Direct)</p>
+            <a href={`mailto:${siteConfig.email}`} class="text-indigo-600 hover:underline text-lg break-all">{siteConfig.email}</a>
+            <p class="text-sm text-gray-500 mt-3">{siteConfig.contact.responseTime} response time.</p>
           </div>
         </div>
 
         <div class="mt-10">
-          <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 text-center">💡 What to Include</h2>
-          <ul class="mt-4 list-disc list-inside text-gray-600 dark:text-gray-300 space-y-1 text-center">
+          <h2 class="text-xl font-semibold text-gray-800 text-center">What to Include</h2>
+          <ul class="mt-4 list-disc list-inside text-gray-600 space-y-1 text-center">
             <li>Tool suggestions</li>
             <li>Bug reports (please include browser version and steps)</li>
             <li>General feedback</li>
@@ -60,9 +49,5 @@ const description = "Contact MetisTools for feedback, bug reports, tool suggesti
       </div>
     </div>
   </div>
-  <Schema
-    toolName="Contact Page"
-    description={description}
-    url={siteUrl + "/support/contact"}
-  />
+  <Schema type="WebSite" />
 </BaseLayout>

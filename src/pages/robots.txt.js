@@ -1,18 +1,19 @@
+// robots.txt 生成 —— SEO 爬虫指引
+import { siteConfig } from '../data/site';
+
 export async function GET() {
-    // 你的网站域名
-    const site = import.meta.env.SITE || 'https://'; // 末尾无斜杠
+  const sitemapUrl = new URL('/sitemap.xml', siteConfig.url).href;
 
-    // 自动生成 sitemap 地址
-    const sitemapUrl = new URL('/sitemap.xml', site).href;
+  const content = [
+    'User-agent: *',
+    'Allow: /',
+    '',
+    `Sitemap: ${sitemapUrl}`,
+  ].join('\n');
 
-    // 生成 robots.txt 内容
-    const body = `User-agent: *
-Allow: /
-Sitemap: ${sitemapUrl}`;
-
-    return new Response(body, {
-        headers: {
-            'Content-Type': 'text/plain',
-        },
-    });
+  return new Response(content, {
+    headers: {
+      'Content-Type': 'text/plain; charset=utf-8',
+    },
+  });
 }

@@ -1,98 +1,224 @@
+/* ===== 全局样式 ===== */
+/* Tailwind 基础层 */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --primary: #4f46e5;
-  --primary-dark: #4338ca;
-  --gray-50: #f9fafb;
-  --gray-100: #f3f4f6;
-  --gray-200: #e5e7eb;
-  --gray-300: #d1d5db;
-  --gray-500: #6b7280;
-  --gray-700: #374151;
-  --gray-900: #111827;
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-}
+/* ===== 基础层样式 ===== */
+@layer base {
+  /* 平滑滚动 */
+  html {
+    scroll-behavior: smooth;
+  }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+  /* 页面背景色：浅灰，避免纯白刺眼 */
+  body {
+    @apply bg-gray-50 text-gray-900 antialiased;
+  }
 
-body {
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  background: linear-gradient(135deg, var(--gray-50) 0%, var(--gray-100) 100%);
-  color: var(--gray-900);
-  line-height: 1.5;
-}
+  /* 选中文本颜色 */
+  ::selection {
+    @apply bg-primary-200 text-primary-900;
+  }
 
-.container {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 0 1rem;
-}
+  /* 焦点环样式 */
+  *:focus-visible {
+    @apply outline-2 outline-offset-2 outline-primary-500;
+  }
 
-@media (min-width: 640px) {
-  .container {
-    padding: 0 1.5rem;
+  /* ===== 表单元素全局重置 ===== */
+  /* 移除所有浏览器默认样式 */
+  input,
+  textarea,
+  select,
+  button {
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+  }
+
+  /* 重置 number 类型 spinner */
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+
+  /* 重置 select 默认箭头（全局，防止漏网之鱼） */
+  select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: none;
+    background-color: transparent;
+    cursor: pointer;
+  }
+  /* IE 的 select 箭头 */
+  select::-ms-expand {
+    display: none;
+  }
+
+  /* 重置 option 样式 */
+  option {
+    font-family: inherit;
+    font-size: inherit;
+  }
+
+  /* 重置输入框 placeholder */
+  input::placeholder,
+  textarea::placeholder {
+    color: #9ca3af;
+    opacity: 1;
+  }
+
+  /* 禁用状态统一 */
+  input:disabled,
+  textarea:disabled,
+  select:disabled,
+  button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  /* checkbox / radio 重置为可自定义 */
+  input[type="checkbox"],
+  input[type="radio"] {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    width: 1rem;
+    height: 1rem;
+    border: 1.5px solid #d1d5db;
+    border-radius: 0.25rem;
+    background: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  input[type="radio"] {
+    border-radius: 50%;
+  }
+  input[type="checkbox"]:checked {
+    background: #4f46e5;
+    border-color: #4f46e5;
+  }
+  input[type="radio"]:checked {
+    border-color: #4f46e5;
+    background: #fff;
+  }
+  input[type="checkbox"]:checked::after {
+    content: '';
+    display: block;
+    width: 0.35rem;
+    height: 0.6rem;
+    border: solid #fff;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    margin-top: -1px;
+  }
+  input[type="radio"]:checked::after {
+    content: '';
+    display: block;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: #4f46e5;
+  }
+  input[type="checkbox"]:focus,
+  input[type="radio"]:focus {
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+    outline: none;
   }
 }
 
-@media (min-width: 1024px) {
-  .container {
-    padding: 0 2rem;
+/* ===== 组件层样式 ===== */
+@layer components {
+  /* 工具卡片 hover 效果（提高边框对比度） */
+  .tool-card {
+    @apply rounded-xl border border-gray-300 bg-white p-5 shadow-sm
+           transition-all duration-200 hover:shadow-md hover:border-primary-400
+           hover:-translate-y-0.5;
+  }
+
+  /* 工具页面输入框统一样式 */
+  .tool-input {
+    @apply w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5
+           text-gray-900 placeholder-gray-400 transition-colors
+           focus:border-primary-500 focus:ring-2 focus:ring-primary-200
+           disabled:bg-gray-100 disabled:text-gray-500;
+  }
+
+  /* 工具页面标签统一样式 */
+  .tool-label {
+    @apply block text-sm font-medium text-gray-700 mb-1.5;
+  }
+
+  /* 工具页面主按钮 */
+  .tool-btn-primary {
+    @apply rounded-lg bg-primary-600 px-6 py-2.5 text-sm font-medium text-white
+           transition-all hover:bg-primary-700 active:bg-primary-800
+           disabled:opacity-50 disabled:cursor-not-allowed;
+    border: none;
+    cursor: pointer;
+  }
+
+  /* 工具页面次按钮 */
+  .tool-btn-secondary {
+    @apply rounded-lg border border-gray-300 bg-white px-6 py-2.5 text-sm
+           font-medium text-gray-700 transition-all hover:bg-gray-50
+           active:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed;
+    border: none;
+    cursor: pointer;
+  }
+
+  /* 结果展示区 */
+  .tool-result {
+    @apply rounded-xl border border-gray-200 bg-gray-50 p-5;
+  }
+
+  /* 广告位占位 */
+  .ad-placeholder {
+    @apply flex items-center justify-center rounded-xl border-2
+           border-dashed border-gray-300 bg-gray-100/50 text-sm text-gray-400
+           min-h-[90px];
+  }
+
+  /* 表单验证错误 */
+  .input-error {
+    @apply border-red-500 focus:border-red-500 focus:ring-red-200;
+  }
+
+  /* 表单验证成功 */
+  .input-success {
+    @apply border-emerald-500 focus:border-emerald-500 focus:ring-emerald-200;
+  }
+
+  /* Toast 通知 */
+  .toast-success {
+    @apply bg-emerald-50 border-emerald-500 text-emerald-800;
+  }
+
+  .toast-error {
+    @apply bg-red-50 border-red-500 text-red-800;
+  }
+
+  .toast-warning {
+    @apply bg-amber-50 border-amber-500 text-amber-800;
   }
 }
 
-.card {
-  background: white;
-  border-radius: 1.5rem;
-  box-shadow: var(--shadow-md);
-  padding: 1.5rem;
-  transition: transform 0.2s, box-shadow 0.2s;
-  border: 1px solid var(--gray-200);
-}
-
-.card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 20px 25px -12px rgba(0, 0, 0, 0.1);
-}
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.6rem 1.2rem;
-  font-weight: 500;
-  border-radius: 9999px;
-  transition: all 0.2s;
-  cursor: pointer;
-  border: none;
-}
-
-.btn-primary {
-  background: var(--primary);
-  color: white;
-}
-
-.btn-primary:hover {
-  background: var(--primary-dark);
-  transform: scale(0.98);
-}
-
-.input {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  border: 1px solid var(--gray-300);
-  border-radius: 9999px;
-  font-size: 1rem;
-  transition: all 0.2s;
-}
-
-.input:focus {
-  outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+/* ===== 工具类层 ===== */
+@layer utilities {
+  /* 内容区最小高度（确保 footer 在底部） */
+  .min-content-height {
+    min-height: calc(100vh - 64px - 300px);
+  }
 }

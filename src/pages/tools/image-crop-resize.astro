@@ -1,258 +1,391 @@
 ---
-import Schema from '../../components/Schema.astro';
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getPageSeo } from '../../utils/seo.js';
-const { title, description } = getPageSeo('tools/image-crop-resize'); // 根据页面修改键名
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import FileUpload from '../../components/ui/FileUpload.astro';
+import NumberInput from '../../components/ui/NumberInput.astro';
+import SelectInput from '../../components/ui/SelectInput.astro';
+import ProgressBar from '../../components/ui/ProgressBar.astro';
+import ResultDisplay from '../../components/tool/ResultDisplay.astro';
+
+const pageTitle = 'Image Cropper & Resizer – Crop, Resize Images | MetisTools';
+const pageDescription = 'Crop or resize images to exact dimensions. Free online image editing tool with drag-to-crop and social media presets.';
+
+const ratioOptions = [
+  { value: 'free', label: 'Freeform' },
+  { value: '1:1', label: 'Square (1:1)' },
+  { value: '4:3', label: 'Standard (4:3)' },
+  { value: '16:9', label: 'Widescreen (16:9)' },
+  { value: '3:2', label: 'Photo (3:2)' },
+  { value: '2:3', label: 'Portrait (2:3)' },
+  { value: '9:16', label: 'Story (9:16)' },
+];
+
+const socialPresets = [
+  { label: 'Instagram Post', w: 1080, h: 1080 },
+  { label: 'Instagram Story', w: 1080, h: 1920 },
+  { label: 'Twitter Post', w: 1200, h: 675 },
+  { label: 'Facebook Post', w: 1200, h: 630 },
+  { label: 'LinkedIn Post', w: 1200, h: 627 },
+  { label: 'YouTube Thumbnail', w: 1280, h: 720 },
+];
+
+const rotateOptions = [
+  { value: '0', label: 'No Rotation' },
+  { value: '90', label: '90° CW' },
+  { value: '180', label: '180°' },
+  { value: '270', label: '90° CCW' },
+];
 ---
 
-<BaseLayout title={title} description={description} currentPath="/tools/image-crop-resize">
-  <div class="max-w-4xl mx-auto py-8">
-    <div class="bg-white dark:bg-slate-950 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-slate-800">
-      <h1 class="text-3xl font-bold mb-2">✂️ Image Cropper & Resizer</h1>
-      <p class="text-gray-600 dark:text-gray-300 mb-6">Drag to crop, adjust selection box, then apply resize (optional). Image zoom is disabled.</p>
+<ToolLayout title={pageTitle} description={pageDescription} toolHref="/tools/image-crop-resize">
+  <div slot="input">
+    <div class="space-y-4">
+      <FileUpload id="cr-file" label="Upload Image" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" maxSize={100 * 1024 * 1024} required={true} helperText="JPEG, PNG, or WebP — up to 100MB" />
 
-      <!-- 上传区域 -->
-      <div id="upload-zone" class="border-2 border-dashed border-gray-300 dark:border-slate-700 rounded-xl p-6 text-center cursor-pointer hover:border-indigo-500 transition">
-        <svg class="mx-auto h-10 w-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-        </svg>
-        <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">Drag & drop an image here, or <span class="text-indigo-600 dark:text-indigo-400 font-medium">browse</span></p>
-        <input type="file" id="file-input" accept="image/*" class="hidden text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950">
-      </div>
+      <!-- Crop Area Selector -->
+      <div id="cr-crop-section" class="hidden space-y-3">
+        <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Crop</p>
+        <SelectInput id="cr-ratio" label="Aspect Ratio" options={ratioOptions} selected="free" />
 
-      <!-- 图片容器 -->
-      <div id="image-container" class="mt-4 hidden">
-        <div class="bg-gray-100 dark:bg-slate-900 rounded-xl p-2">
-          <img id="source-image" class="max-w-full" style="max-height: 400px; margin: 0 auto;" />
+        <div class="bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden relative" style="min-height: 200px; max-height: 350px;">
+          <canvas id="cr-crop-canvas" class="max-w-full max-h-[350px] cursor-crosshair"></canvas>
+        </div>
+
+        <div class="grid grid-cols-4 gap-2">
+          <NumberInput id="cr-crop-x" label="X" value="0" min={0} required={false} decimalPlaces={0} />
+          <NumberInput id="cr-crop-y" label="Y" value="0" min={0} required={false} decimalPlaces={0} />
+          <NumberInput id="cr-crop-w" label="Width" value="0" min={1} required={false} decimalPlaces={0} />
+          <NumberInput id="cr-crop-h" label="Height" value="0" min={1} required={false} decimalPlaces={0} />
         </div>
       </div>
 
-      <!-- 裁剪和调整控制 -->
-      <div id="controls" class="mt-4 hidden">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium mb-1">Crop Aspect Ratio</label>
-            <select id="aspect-ratio" class="w-full px-4 py-2 rounded-full border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950">
-              <option value="0">Free</option>
-              <option value="1">1:1 (Square)</option>
-              <option value="1.3333333333333333">4:3</option>
-              <option value="1.7777777777777777">16:9</option>
-              <option value="1.5">3:2</option>
-            </select>
+      <!-- Resize Section -->
+      <details id="cr-resize-section" class="group hidden">
+        <summary class="text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:text-gray-700">Resize</summary>
+        <div class="mt-3 space-y-3">
+          <div class="grid grid-cols-2 gap-3">
+            <NumberInput id="cr-resize-w" label="Width (px)" value="" min={1} max={10000} decimalPlaces={0} required={false} helperText="New width" />
+            <NumberInput id="cr-resize-h" label="Height (px)" value="" min={1} max={10000} decimalPlaces={0} required={false} helperText="New height" />
           </div>
-          <div>
-            <label class="block text-sm font-medium mb-1">Resize (optional)</label>
-            <div class="flex gap-2">
-              <input type="number" id="resize-width" placeholder="Width (px)" class="w-full px-4 py-2 rounded-full border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950">
-              <span class="self-center">×</span>
-              <input type="number" id="resize-height" placeholder="Height (px)" class="w-full px-4 py-2 rounded-full border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950">
-            </div>
-            <label class="flex items-center mt-1"><input type="checkbox" id="keep-aspect" class="mr-2 text-gray-900 dark:text-gray-100"> Keep aspect ratio</label>
+          <div class="flex flex-wrap gap-1.5">
+            {socialPresets.map(p => (
+              <button type="button" class="social-chip text-xs bg-gray-100 hover:bg-indigo-100 text-gray-600 hover:text-indigo-700 rounded-full px-2.5 py-1 transition-colors" data-w={p.w} data-h={p.h}>
+                {p.label}
+              </button>
+            ))}
           </div>
         </div>
-        <button id="apply-btn" class="w-full bg-indigo-600 dark:bg-indigo-500 text-white py-2 rounded-full mt-4">Apply Crop & Resize</button>
-      </div>
+      </details>
 
-      <!-- 结果区域 -->
-      <div id="result-area" class="mt-6 hidden">
-        <p class="font-semibold text-green-600">✓ Processing completed</p>
-        <div class="flex gap-4 mt-2">
-          <img id="result-image" class="max-h-48 rounded border" />
-          <button id="download-btn" class="bg-indigo-600 dark:bg-indigo-500 text-white px-4 py-2 rounded-full text-sm self-end">Download</button>
+      <!-- Transform Section -->
+      <details id="cr-transform-section" class="group hidden">
+        <summary class="text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:text-gray-700">Transform</summary>
+        <div class="mt-3 space-y-3">
+          <SelectInput id="cr-rotate" label="Rotate" options={rotateOptions} selected="0" />
+          <div class="flex gap-2">
+            <button type="button" id="btn-flip-h" class="tool-btn-secondary flex-1 text-xs">Flip Horizontal</button>
+            <button type="button" id="btn-flip-v" class="tool-btn-secondary flex-1 text-xs">Flip Vertical</button>
+          </div>
         </div>
-      </div>
+      </details>
+
+      <button type="button" id="btn-apply" class="tool-btn-primary w-full" disabled>
+        Apply Crop
+      </button>
     </div>
   </div>
 
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+  <div slot="result">
+    <ResultDisplay emptyMessage="Upload an image, adjust crop/resize/transform, then click <strong>Apply Crop</strong>.">
+      <div slot="result-content" class="space-y-4">
+        <ProgressBar visible={false} />
 
-  <script>
-    let cropper = null;
-    let currentFile = null;
-    let currentResultBlob = null;
-    let currentImageUrl = null;
+        <div class="bg-gray-100 rounded-lg border border-gray-200 aspect-video flex items-center justify-center overflow-hidden">
+          <img id="cr-output-img" src="" alt="Result" class="max-w-full max-h-full object-contain hidden" />
+          <span id="cr-output-placeholder" class="text-sm text-gray-400">Result will appear here</span>
+        </div>
 
-    // DOM 元素
-    const uploadZone = document.getElementById('upload-zone');
-    const fileInput = document.getElementById('file-input');
-    const imageContainer = document.getElementById('image-container');
-    const sourceImg = document.getElementById('source-image');
-    const controls = document.getElementById('controls');
-    const aspectRatioSelect = document.getElementById('aspect-ratio');
-    const resizeWidth = document.getElementById('resize-width');
-    const resizeHeight = document.getElementById('resize-height');
-    const keepAspect = document.getElementById('keep-aspect');
-    const applyBtn = document.getElementById('apply-btn');
-    const resultArea = document.getElementById('result-area');
-    const resultImage = document.getElementById('result-image');
-    const downloadBtn = document.getElementById('download-btn');
+        <div class="flex gap-4 text-xs text-gray-400 pt-3 border-t border-gray-100">
+          <span>Size: <strong id="cr-size">--</strong></span>
+          <span>Dimensions: <strong id="cr-dims">--</strong></span>
+        </div>
 
-    function showMsg(msg, type) {
-      if (typeof showMessage === 'function') showMessage(msg, type);
-      else alert(msg);
+        <!-- Download button below result content -->
+        <button type="button" id="btn-download-cr" class="inline-flex items-center justify-center gap-1.5 rounded-lg border border-primary-200 bg-primary-50 px-4 py-2.5 text-sm font-medium text-primary-700 hover:bg-primary-100 transition-colors" onclick="downloadResult()">
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+          Download
+        </button>
+      </div>
+    </ResultDisplay>
+  </div>
+
+  <div slot="description">
+    <p>
+      This free online image cropper and resizer lets you crop, resize, rotate, and flip images directly in your browser. Your images stay local — nothing is uploaded to any server. All processing uses the Canvas API.
+    </p>
+    <p>
+      <strong>Crop with Preset Ratios:</strong> Choose from common aspect ratios including Square (1:1) for Instagram, Widescreen (16:9) for video thumbnails, Photo (3:2) for prints, and Story (9:16) for stories. Drag on the canvas to select your crop area, and fine-tune with the X/Y/Width/Height inputs.
+    </p>
+    <p>
+      <strong>Resize to Exact Dimensions:</strong> Enter a custom width and height in pixels, or click any social media preset chip (Instagram Post, Twitter, Facebook, LinkedIn, YouTube) to auto-fill the recommended dimensions.
+    </p>
+    <p>
+      <strong>Rotate &amp; Flip:</strong> Rotate in 90° increments or flip horizontally/vertically. All transformations are applied in a single step when you click Apply.
+    </p>
+    <p>
+      <strong>One-Click Download:</strong> Download your edited image in its original format. The result preview shows exact dimensions and file size before you save.
+    </p>
+  </div>
+</ToolLayout>
+
+<script>
+  import { loadImage, cropImage, resizeImage, rotateImage, flipImage, formatFileSize } from '../../lib/image-tools.js';
+
+  const showToast = window.showToast || (() => {});
+  const updateProgress = window.updateProgress || (() => {});
+  const hideProgress = window.hideProgress || (() => {});
+
+  let currentFile = null;
+  let currentImg = null;
+  let currentResult = null;
+  let cropArea = { x: 0, y: 0, w: 1, h: 1 };
+
+  const canvas = document.getElementById('cr-crop-canvas');
+  const ctx = canvas?.getContext('2d');
+
+  function clearResults() {
+    currentResult = null;
+    document.getElementById('result-data').classList.add('hidden');
+    document.getElementById('result-empty').classList.remove('hidden');
+    document.getElementById('cr-output-img').classList.add('hidden');
+    document.getElementById('cr-output-placeholder').classList.remove('hidden');
+    document.getElementById('cr-size').textContent = '--';
+    document.getElementById('cr-dims').textContent = '--';
+    hideProgress();
+  }
+
+  window.downloadResult = function() {
+    if (!currentResult) return;
+    const a = document.createElement('a');
+    a.href = currentResult.url;
+    a.download = 'edited-' + (currentFile?.name || 'image.png');
+    a.click();
+  };
+
+  // File selection
+  document.getElementById('cr-file')?.addEventListener('file-selected', async (e) => {
+    currentFile = e.detail.file;
+    clearResults();
+    try {
+      const { img } = await loadImage(currentFile);
+      currentImg = img;
+      showEditor();
+    } catch (err) {
+      showToast('Failed to load image.', 'error');
     }
+  });
 
-    function destroyCropper() {
-      if (cropper) {
-        cropper.destroy();
-        cropper = null;
-      }
-    }
+  document.getElementById('cr-file')?.addEventListener('file-cleared', () => {
+    currentFile = null;
+    currentImg = null;
+    hideEditor();
+    clearResults();
+  });
 
-    // 裁剪框相对于图片显示区域居中（仅在初始化时调用一次）
-    function centerCropBoxOnce() {
-      if (!cropper) return;
-      const imageData = cropper.getImageData();
-      const containerData = cropper.getContainerData();
-      if (!imageData || !containerData) return;
-      const imgLeft = imageData.left;
-      const imgTop = imageData.top;
-      const imgWidth = imageData.width;
-      const imgHeight = imageData.height;
-      let cropWidth = Math.min(imgWidth * 0.8, containerData.width * 0.8);
-      let cropHeight = cropWidth / (cropper.getAspectRatio() || 1);
-      if (cropHeight > imgHeight * 0.8) {
-        cropHeight = imgHeight * 0.8;
-        cropWidth = cropHeight * (cropper.getAspectRatio() || 1);
-      }
-      const centerX = imgLeft + imgWidth / 2;
-      const centerY = imgTop + imgHeight / 2;
-      let left = centerX - cropWidth / 2;
-      let top = centerY - cropHeight / 2;
-      left = Math.max(imgLeft, Math.min(left, imgLeft + imgWidth - cropWidth));
-      top = Math.max(imgTop, Math.min(top, imgTop + imgHeight - cropHeight));
-      cropper.setCropBoxData({ left, top, width: cropWidth, height: cropHeight });
-    }
+  function showEditor() {
+    document.getElementById('cr-crop-section').classList.remove('hidden');
+    document.getElementById('cr-resize-section').classList.remove('hidden');
+    document.getElementById('cr-transform-section').classList.remove('hidden');
+    document.getElementById('btn-apply').disabled = false;
+    drawCropCanvas();
+  }
 
-    function initCropper() {
-      destroyCropper();
-      const ratio = parseFloat(aspectRatioSelect.value);
-      cropper = new Cropper(sourceImg, {
-        aspectRatio: isNaN(ratio) || ratio === 0 ? NaN : ratio,
-        viewMode: 1,
-        autoCropArea: 0.8,
-        responsive: true,
-        background: false,
-        dragMode: 'crop',
-        cropBoxMovable: true,
-        cropBoxResizable: true,
-        wheel: false,          // 禁用鼠标滚轮缩放
-        zoomable: false,       // 禁止缩放功能
-        ready() {
-          centerCropBoxOnce(); // 初始化时居中裁剪框
-        }
-      });
-    }
+  function hideEditor() {
+    document.getElementById('cr-crop-section').classList.add('hidden');
+    document.getElementById('cr-resize-section').classList.add('hidden');
+    document.getElementById('cr-transform-section').classList.add('hidden');
+    document.getElementById('btn-apply').disabled = true;
+  }
 
-    function loadImage(file) {
-      if (currentImageUrl) URL.revokeObjectURL(currentImageUrl);
-      currentImageUrl = URL.createObjectURL(file);
-      sourceImg.onload = () => {
-        imageContainer.classList.remove('hidden');
-        controls.classList.remove('hidden');
-        initCropper();
-        resultArea.classList.add('hidden');
-      };
-      sourceImg.src = currentImageUrl;
-      currentFile = file;
-    }
+  function drawCropCanvas() {
+    if (!currentImg || !canvas) return;
+    const maxW = 500, maxH = 350;
+    let w = currentImg.width, h = currentImg.height;
+    if (w > maxW) { h = h * (maxW / w); w = maxW; }
+    if (h > maxH) { w = w * (maxH / h); h = maxH; }
+    canvas.width = w;
+    canvas.height = h;
+    ctx.drawImage(currentImg, 0, 0, w, h);
 
-    function handleFile(file) {
-      if (!file || !file.type.startsWith('image/')) {
-        showMsg('Please upload an image file', 'error');
-        return;
-      }
-      loadImage(file);
-    }
+    document.getElementById('cr-crop-x').value = '0';
+    document.getElementById('cr-crop-y').value = '0';
+    document.getElementById('cr-crop-w').value = Math.round(w);
+    document.getElementById('cr-crop-h').value = Math.round(h);
+  }
 
-    async function apply() {
-      if (!cropper) return;
-      applyBtn.disabled = true;
-      try {
-        const croppedCanvas = cropper.getCroppedCanvas();
-        if (!croppedCanvas) throw new Error('Unable to crop');
-        let canvas = croppedCanvas;
-        let targetWidth = parseInt(resizeWidth.value);
-        let targetHeight = parseInt(resizeHeight.value);
-        if ((targetWidth && targetWidth > 0) || (targetHeight && targetHeight > 0)) {
-          const originalWidth = canvas.width;
-          const originalHeight = canvas.height;
-          if (keepAspect.checked) {
-            if (targetWidth && !targetHeight) {
-              targetHeight = Math.round(originalHeight * (targetWidth / originalWidth));
-            } else if (targetHeight && !targetWidth) {
-              targetWidth = Math.round(originalWidth * (targetHeight / originalHeight));
-            } else if (targetWidth && targetHeight) {
-              const ratio = originalWidth / originalHeight;
-              const newRatio = targetWidth / targetHeight;
-              if (newRatio > ratio) {
-                targetWidth = Math.round(targetHeight * ratio);
-              } else {
-                targetHeight = Math.round(targetWidth / ratio);
-              }
-            }
-          }
-          if (targetWidth && targetHeight && targetWidth > 0 && targetHeight > 0) {
-            const tempCanvas = document.createElement('canvas');
-            tempCanvas.width = targetWidth;
-            tempCanvas.height = targetHeight;
-            const ctx = tempCanvas.getContext('2d');
-            ctx.drawImage(canvas, 0, 0, canvas.width, canvas.height, 0, 0, targetWidth, targetHeight);
-            canvas = tempCanvas;
-          }
-        }
-        const blob = await new Promise(resolve => canvas.toBlob(resolve, currentFile.type));
-        currentResultBlob = blob;
-        const url = URL.createObjectURL(blob);
-        resultImage.src = url;
-        resultArea.classList.remove('hidden');
-        showMsg('Image processed successfully', 'success');
-      } catch (err) {
-        showMsg('Processing failed: ' + err.message, 'error');
-      } finally {
-        applyBtn.disabled = false;
-      }
-    }
+  // Drag to crop
+  let dragging = false, dragStart = { x: 0, y: 0 };
+  canvas?.addEventListener('mousedown', (e) => {
+    dragging = true;
+    const rect = canvas.getBoundingClientRect();
+    dragStart = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+  });
+  canvas?.addEventListener('mousemove', (e) => {
+    if (!dragging) return;
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+    drawCropCanvas();
+    ctx.strokeStyle = '#4f46e5';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([6, 3]);
+    const x = Math.min(dragStart.x, mx), y = Math.min(dragStart.y, my);
+    const w = Math.abs(mx - dragStart.x), h = Math.abs(my - dragStart.y);
+    ctx.strokeRect(x, y, w, h);
+    ctx.setLineDash([]);
+    document.getElementById('cr-crop-x').value = Math.round(x);
+    document.getElementById('cr-crop-y').value = Math.round(y);
+    document.getElementById('cr-crop-w').value = Math.round(w);
+    document.getElementById('cr-crop-h').value = Math.round(h);
+  });
+  canvas?.addEventListener('mouseup', () => { dragging = false; });
+  canvas?.addEventListener('mouseleave', () => { dragging = false; });
 
-    aspectRatioSelect.addEventListener('change', () => {
-      if (cropper) {
-        const ratio = parseFloat(aspectRatioSelect.value);
-        cropper.setAspectRatio(isNaN(ratio) || ratio === 0 ? NaN : ratio);
-        // 比例改变后重新居中裁剪框（确保视觉效果）
-        setTimeout(() => centerCropBoxOnce(), 50);
-      }
+  // Aspect ratio constraint via inputs
+  function updateCropFromInputs() {
+    const ratio = document.getElementById('cr-ratio')?.value || 'free';
+    if (ratio === 'free' || !currentImg) return;
+
+    const [rw, rh] = ratio.split(':').map(Number);
+    const aspectRatio = rw / rh;
+
+    const wInput = document.getElementById('cr-crop-w');
+    const hInput = document.getElementById('cr-crop-h');
+    wInput?.addEventListener('input', () => {
+      hInput.value = Math.round(parseInt(wInput.value) / aspectRatio);
+      drawCropWithOverlay();
     });
+    hInput?.addEventListener('input', () => {
+      wInput.value = Math.round(parseInt(hInput.value) * aspectRatio);
+      drawCropWithOverlay();
+    });
+  }
 
-    uploadZone.addEventListener('click', () => fileInput.click());
-    fileInput.addEventListener('change', (e) => {
-      if (e.target.files.length) handleFile(e.target.files[0]);
+  function drawCropWithOverlay() {
+    drawCropCanvas();
+    const x = parseInt(document.getElementById('cr-crop-x')?.value) || 0;
+    const y = parseInt(document.getElementById('cr-crop-y')?.value) || 0;
+    const w = parseInt(document.getElementById('cr-crop-w')?.value) || 0;
+    const h = parseInt(document.getElementById('cr-crop-h')?.value) || 0;
+    ctx.strokeStyle = '#4f46e5';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([6, 3]);
+    ctx.strokeRect(x, y, w, h);
+    ctx.setLineDash([]);
+  }
+
+  document.getElementById('cr-ratio')?.addEventListener('change', updateCropFromInputs);
+
+  // Social presets
+  document.querySelectorAll('.social-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.getElementById('cr-resize-w').value = chip.dataset.w;
+      document.getElementById('cr-resize-h').value = chip.dataset.h;
     });
-    uploadZone.addEventListener('dragover', (e) => e.preventDefault());
-    uploadZone.addEventListener('drop', (e) => {
-      e.preventDefault();
-      const file = e.dataTransfer.files[0];
-      if (file && file.type.startsWith('image/')) handleFile(file);
-      else showMsg('Please drop an image file', 'error');
-    });
-    applyBtn.addEventListener('click', apply);
-    downloadBtn.addEventListener('click', () => {
-      if (currentResultBlob) {
-        const url = URL.createObjectURL(currentResultBlob);
-        const a = document.createElement('a');
-        a.download = `processed.${currentResultBlob.type.split('/')[1] || 'png'}`;
-        a.href = url;
-        a.click();
-        URL.revokeObjectURL(url);
-      } else {
-        showMsg('No processed image', 'error');
+  });
+
+  // Flip buttons
+  let flipDir = null;
+  document.getElementById('btn-flip-h')?.addEventListener('click', () => flipDir = 'horizontal');
+  document.getElementById('btn-flip-v')?.addEventListener('click', () => flipDir = 'vertical');
+
+  // Apply
+  async function doApply() {
+    if (!currentFile) { showToast('Please upload an image.', 'error'); return; }
+
+    const btn = document.getElementById('btn-apply');
+    btn.disabled = true;
+    btn.textContent = 'Processing...';
+
+    clearResults();
+    document.getElementById('result-empty').classList.add('hidden');
+    document.getElementById('result-data').classList.remove('hidden');
+    updateProgress(30, 'Applying transformations...');
+
+    try {
+      let file = currentFile;
+      let url = null;
+
+      // Step 1: Crop
+      const cropX = parseInt(document.getElementById('cr-crop-x')?.value) || 0;
+      const cropY = parseInt(document.getElementById('cr-crop-y')?.value) || 0;
+      const cropW = parseInt(document.getElementById('cr-crop-w')?.value) || (currentImg?.width || 0);
+      const cropH = parseInt(document.getElementById('cr-crop-h')?.value) || (currentImg?.height || 0);
+
+      if (currentImg && (cropX > 0 || cropY > 0 || cropW < currentImg.width || cropH < currentImg.height)) {
+        updateProgress(45, 'Cropping...');
+        const scaleX = currentImg.width / canvas.width;
+        const scaleY = currentImg.height / canvas.height;
+        const cropResult = await cropImage(file, {
+          x: (cropX * scaleX) / currentImg.width,
+          y: (cropY * scaleY) / currentImg.height,
+          width: (cropW * scaleX) / currentImg.width,
+          height: (cropH * scaleY) / currentImg.height,
+        });
+        url = cropResult.url;
+        file = new File([cropResult.blob], 'cropped.png', { type: 'image/png' });
       }
-    });
-  </script>
-  <Schema
-    toolName="Image Cropper & Resizer"
-    description={description}
-    url={Astro.url.href}
-    category="ImageEditing"
-  />
-</BaseLayout>
+
+      // Step 2: Resize
+      const rw = parseInt(document.getElementById('cr-resize-w')?.value) || 0;
+      const rh = parseInt(document.getElementById('cr-resize-h')?.value) || 0;
+      if (rw > 0 && rh > 0) {
+        updateProgress(60, 'Resizing...');
+        const resizeResult = await resizeImage(file, rw, rh, true);
+        url = resizeResult.url;
+        file = new File([resizeResult.blob], 'resized.png', { type: 'image/png' });
+      }
+
+      // Step 3: Rotate
+      const rot = parseInt(document.getElementById('cr-rotate')?.value) || 0;
+      if (rot > 0) {
+        updateProgress(75, 'Rotating...');
+        const rotResult = await rotateImage(file, rot);
+        url = rotResult.url;
+        file = new File([rotResult.blob], 'rotated.png', { type: 'image/png' });
+      }
+
+      // Step 4: Flip
+      if (flipDir) {
+        updateProgress(85, 'Flipping...');
+        const flipResult = await flipImage(file, flipDir);
+        url = flipResult.url;
+        file = new File([flipResult.blob], 'flipped.png', { type: 'image/png' });
+        flipDir = null;
+      }
+
+      updateProgress(100, 'Done!');
+
+      if (url) {
+        currentResult = { url, file, size: file.size, width: 0, height: 0 };
+        const img = await loadImage(file);
+        currentResult.width = img.img.width;
+        currentResult.height = img.img.height;
+
+        document.getElementById('cr-output-img').src = url;
+        document.getElementById('cr-output-img').classList.remove('hidden');
+        document.getElementById('cr-output-placeholder').classList.add('hidden');
+        document.getElementById('cr-size').textContent = formatFileSize(file.size);
+        document.getElementById('cr-dims').textContent = `${currentResult.width} x ${currentResult.height}`;
+      }
+
+      setTimeout(() => hideProgress(), 1500);
+    } catch (err) {
+      hideProgress();
+      showToast('Processing failed: ' + (err.message || 'Unknown error'), 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Apply Crop';
+    }
+  }
+
+  document.getElementById('btn-apply')?.addEventListener('click', doApply);
+</script>

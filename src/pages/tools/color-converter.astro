@@ -1,142 +1,205 @@
 ---
-import Schema from '../../components/Schema.astro';
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getPageSeo } from '../../utils/seo.js';
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import ResultDisplay from '../../components/tool/ResultDisplay.astro';
 
-const { title, description } = getPageSeo('tools/color-converter'); // 根据页面修改键名
+const pageTitle = 'Color Converter – HEX, RGB, HSL Converter | MetisTools';
+const pageDescription = 'Convert between HEX, RGB, and HSL color formats with live preview. Includes color picker. Free online color converter for designers and developers.';
 ---
 
-<BaseLayout title={title} description={description} currentPath="/tools/color-converter">
-  <div class="max-w-2xl mx-auto py-8">
-    <div class="bg-white dark:bg-slate-950 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-slate-800">
-      <h1 class="text-3xl font-bold mb-2">🎨 Color Converter</h1>
-      <p class="text-gray-600 dark:text-gray-300 mb-6">Convert colors between HEX, RGB, and HSL formats. Instant preview.</p>
-
-      <div class="space-y-4">
-        <div>
-          <label class="block text-sm font-medium mb-1">HEX</label>
-          <input type="text" id="hex" class="w-full px-4 py-2 rounded-full border border-gray-300 dark:border-slate-700 font-mono text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950" placeholder="#FF5733" value="#FF5733">
-        </div>
-        <div>
-          <label class="block text-sm font-medium mb-1">RGB</label>
-          <input type="text" id="rgb" class="w-full px-4 py-2 rounded-full border border-gray-300 dark:border-slate-700 font-mono text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950" placeholder="rgb(255, 87, 51)">
-        </div>
-        <div>
-          <label class="block text-sm font-medium mb-1">HSL</label>
-          <input type="text" id="hsl" class="w-full px-4 py-2 rounded-full border border-gray-300 dark:border-slate-700 font-mono text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950" placeholder="hsl(11, 100%, 60%)">
-        </div>
-        <div id="preview" class="w-full h-20 rounded-xl border" style="background-color: #FF5733;"></div>
+<ToolLayout title={pageTitle} description={pageDescription} toolHref="/tools/color-converter">
+  <div slot="input">
+    <div class="space-y-4">
+      <div>
+        <label for="color-picker" class="tool-label">Color Picker</label>
+        <input type="color" id="color-picker" value="#4f46e5" class="w-full h-10 rounded-lg border border-gray-200 cursor-pointer" />
       </div>
+
+      <div>
+        <label for="color-value" class="tool-label">Color Value (HEX / RGB / HSL)</label>
+        <input type="text" id="color-value" placeholder="#4f46e5" value="#4f46e5" class="tool-input font-mono" autocomplete="off" />
+        <p class="field-error hidden text-xs text-red-500 mt-1"></p>
+      </div>
+
+      <button type="button" id="btn-convert" class="tool-btn-primary w-full">
+        Convert Color
+      </button>
     </div>
   </div>
 
-  <script>
-    const hexInput = document.getElementById('hex');
-    const rgbInput = document.getElementById('rgb');
-    const hslInput = document.getElementById('hsl');
-    const preview = document.getElementById('preview');
+  <div slot="result">
+    <ResultDisplay emptyMessage="Enter a color value and click <strong>Convert Color</strong> to see all formats." onCopy={true}>
+      <div slot="result-content" class="space-y-4">
+        <div id="color-preview" class="w-full h-20 rounded-lg border border-gray-200"></div>
+        <div class="space-y-2">
+          <div class="flex items-center justify-between py-2 border-b border-gray-50">
+            <span class="text-xs text-gray-500">HEX</span>
+            <span id="val-hex" class="font-mono text-sm font-medium text-gray-800">--</span>
+          </div>
+          <div class="flex items-center justify-between py-2 border-b border-gray-50">
+            <span class="text-xs text-gray-500">RGB</span>
+            <span id="val-rgb" class="font-mono text-sm font-medium text-gray-800">--</span>
+          </div>
+          <div class="flex items-center justify-between py-2 border-b border-gray-50">
+            <span class="text-xs text-gray-500">HSL</span>
+            <span id="val-hsl" class="font-mono text-sm font-medium text-gray-800">--</span>
+          </div>
+        </div>
+      </div>
+    </ResultDisplay>
+  </div>
 
-    function hexToRgb(hex) {
-      let h = hex.replace('#', '');
-      if (h.length === 3) h = h.split('').map(c => c+c).join('');
-      const bigint = parseInt(h, 16);
-      const r = (bigint >> 16) & 255;
-      const g = (bigint >> 8) & 255;
-      const b = bigint & 255;
-      return { r, g, b };
+  <div slot="description">
+    <p>Convert between HEX, RGB, and HSL color formats with live preview. Just paste any color value — it’s automatically detected.</p>
+    <p><strong>HEX</strong> (#RRGGBB or #RGB) is the standard for web design. <strong>RGB</strong> (red, green, blue) uses 0–255 values. <strong>HSL</strong> (hue, saturation, lightness) is more intuitive for creating color schemes.</p>
+    <p>Use the color picker to visually select any color, or type a value in any format. The converter works both ways.</p>
+  </div>
+</ToolLayout>
+
+<script>
+// ---- 颜色转换函数（完整保留） ----
+function hexToRgb(hex) {
+  hex = hex.replace('#', '');
+  if (hex.length === 3) hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+  if (hex.length === 4) hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2]+hex[3]+hex[3];
+  if (hex.length < 6) return null;
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+  if (isNaN(r) || isNaN(g) || isNaN(b)) return null;
+  return { r, g, b };
+}
+
+function rgbToHex(r, g, b) {
+  return '#' + [r, g, b].map(x => {
+    const h = Math.max(0, Math.min(255, Math.round(x))).toString(16);
+    return h.length === 1 ? '0' + h : h;
+  }).join('').toUpperCase();
+}
+
+function rgbToHsl(r, g, b) {
+  r /= 255; g /= 255; b /= 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  let h = 0, s = 0, l = (max + min) / 2;
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    switch (max) {
+      case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+      case g: h = ((b - r) / d + 2) / 6; break;
+      case b: h = ((r - g) / d + 4) / 6; break;
     }
+  }
+  return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) };
+}
 
-    function rgbToHex(r, g, b) {
-      return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
-    }
+function hslToRgb(h, s, l) {
+  h = ((h % 360) + 360) % 360;
+  s = Math.max(0, Math.min(100, s)) / 100;
+  l = Math.max(0, Math.min(100, l)) / 100;
+  if (s === 0) {
+    const v = Math.round(l * 255);
+    return { r: v, g: v, b: v };
+  }
+  const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+  const p = 2 * l - q;
+  const hue2rgb = (t) => {
+    if (t < 0) t += 1;
+    if (t > 1) t -= 1;
+    if (t < 1/6) return p + (q-p)*6*t;
+    if (t < 1/2) return q;
+    if (t < 2/3) return p + (q-p)*(2/3-t)*6;
+    return p;
+  };
+  return {
+    r: Math.round(hue2rgb(h/360 + 1/3) * 255),
+    g: Math.round(hue2rgb(h/360) * 255),
+    b: Math.round(hue2rgb(h/360 - 1/3) * 255)
+  };
+}
 
-    function rgbToHsl(r, g, b) {
-      r /= 255, g /= 255, b /= 255;
-      const max = Math.max(r, g, b), min = Math.min(r, g, b);
-      let h, s, l = (max + min) / 2;
-      if (max === min) {
-        h = s = 0;
-      } else {
-        const d = max - min;
-        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-        switch (max) {
-          case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-          case g: h = (b - r) / d + 2; break;
-          case b: h = (r - g) / d + 4; break;
-        }
-        h /= 6;
-      }
-      return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) };
-    }
+function parseRgbString(str) {
+  const m = str.match(/rgba?\s*\(\s*(\d+)[,\s]+(\d+)[,\s]+(\d+)[,\s/]*([\d.]*)\s*\)/i);
+  if (!m) return null;
+  return { r: parseInt(m[1]), g: parseInt(m[2]), b: parseInt(m[3]) };
+}
 
-    function hslToRgb(h, s, l) {
-      h /= 360, s /= 100, l /= 100;
-      let r, g, b;
-      if (s === 0) {
-        r = g = b = l;
-      } else {
-        const hue2rgb = (p, q, t) => {
-          if (t < 0) t += 1;
-          if (t > 1) t -= 1;
-          if (t < 1/6) return p + (q - p) * 6 * t;
-          if (t < 1/2) return q;
-          if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
-          return p;
-        };
-        const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-        const p = 2 * l - q;
-        r = hue2rgb(p, q, h + 1/3);
-        g = hue2rgb(p, q, h);
-        b = hue2rgb(p, q, h - 1/3);
-      }
-      return { r: Math.round(r * 255), g: Math.round(g * 255), b: Math.round(b * 255) };
-    }
+function parseHslString(str) {
+  const m = str.match(/hsla?\s*\(\s*(\d+)[,\s]+(\d+)%?[,\s]+(\d+)%?[,\s/]*([\d.]*)\s*\)/i);
+  if (!m) return null;
+  return { h: parseInt(m[1]), s: parseInt(m[2]), l: parseInt(m[3]) };
+}
 
-    function updateFromHex() {
-      let hex = hexInput.value.trim();
-      if (!hex.startsWith('#')) hex = '#' + hex;
-      try {
-        const rgb = hexToRgb(hex);
-        const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
-        rgbInput.value = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
-        hslInput.value = `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`;
-        preview.style.backgroundColor = hex;
-      } catch(e) { /* ignore */ }
-    }
+function detectAndParse(val) {
+  val = val.trim();
+  if (/^#/.test(val)) {
+    const rgb = hexToRgb(val);
+    return rgb ? { rgb, source: 'hex' } : null;
+  }
+  if (/^rgb/i.test(val)) {
+    const rgb = parseRgbString(val);
+    return rgb ? { rgb, source: 'rgb' } : null;
+  }
+  if (/^hsl/i.test(val)) {
+    const hsl = parseHslString(val);
+    return hsl ? { rgb: hslToRgb(hsl.h, hsl.s, hsl.l), source: 'hsl' } : null;
+  }
+  // 纯6位或3位十六进制（无#）
+  if (/^[0-9A-Fa-f]{6}$/.test(val)) {
+    return { rgb: hexToRgb('#' + val), source: 'hex' };
+  }
+  if (/^[0-9A-Fa-f]{3}$/.test(val)) {
+    return { rgb: hexToRgb('#' + val), source: 'hex' };
+  }
+  return null;
+}
 
-    function updateFromRgb() {
-      const match = rgbInput.value.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
-      if (match) {
-        const r = parseInt(match[1]), g = parseInt(match[2]), b = parseInt(match[3]);
-        const hex = rgbToHex(r, g, b);
-        const hsl = rgbToHsl(r, g, b);
-        hexInput.value = hex;
-        hslInput.value = `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`;
-        preview.style.backgroundColor = hex;
-      }
-    }
+function convert() {
+  const val = document.getElementById('color-value')?.value?.trim();
+  if (!val) { showToast('Please enter a color value.', 'error'); return; }
 
-    function updateFromHsl() {
-      const match = hslInput.value.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
-      if (match) {
-        const h = parseInt(match[1]), s = parseInt(match[2]), l = parseInt(match[3]);
-        const rgb = hslToRgb(h, s, l);
-        const hex = rgbToHex(rgb.r, rgb.g, rgb.b);
-        hexInput.value = hex;
-        rgbInput.value = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
-        preview.style.backgroundColor = hex;
-      }
-    }
+  const result = detectAndParse(val);
+  if (!result || !result.rgb) {
+    showToast('Invalid color format. Use HEX, RGB, or HSL.', 'error');
+    return;
+  }
 
-    hexInput.addEventListener('input', updateFromHex);
-    rgbInput.addEventListener('input', updateFromRgb);
-    hslInput.addEventListener('input', updateFromHsl);
-    updateFromHex();
-  </script>
-  <Schema
-    category="Design"
-    toolName="Color Converter"
-    description={description}
-    url={Astro.url.href}
-  />
-</BaseLayout>
+  const { r, g, b } = result.rgb;
+  const hex = rgbToHex(r, g, b);
+  const hsl = rgbToHsl(r, g, b);
+
+  document.getElementById('result-empty').classList.add('hidden');
+  document.getElementById('result-data').classList.remove('hidden');
+
+  document.getElementById('color-preview').style.backgroundColor = `rgb(${r},${g},${b})`;
+  document.getElementById('val-hex').textContent = hex;
+  document.getElementById('val-rgb').textContent = `rgb(${r}, ${g}, ${b})`;
+  document.getElementById('val-hsl').textContent = `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`;
+
+  const picker = document.getElementById('color-picker');
+  if (picker) picker.value = hex.toLowerCase();
+
+  window._colorResult = `HEX: ${hex}\nRGB: rgb(${r}, ${g}, ${b})\nHSL: hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`;
+}
+
+function syncFromPicker() {
+  const pickerVal = document.getElementById('color-picker')?.value;
+  if (pickerVal) {
+    document.getElementById('color-value').value = pickerVal;
+    convert();
+  }
+}
+
+document.getElementById('btn-convert')?.addEventListener('click', convert);
+document.getElementById('color-picker')?.addEventListener('input', syncFromPicker);
+document.getElementById('color-value')?.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') convert();
+});
+
+document.getElementById('btn-copy-result')?.addEventListener('click', () => {
+  const text = window._colorResult;
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('Color values copied!', 'success');
+  }).catch(() => showToast('Failed to copy.', 'error'));
+});
+</script>

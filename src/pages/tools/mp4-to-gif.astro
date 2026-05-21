@@ -1,65 +1,258 @@
 ---
-import Schema from '../../components/Schema.astro';
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getPageSeo } from '../../utils/seo.js';
-const { title, description } = getPageSeo('tools/mp4-to-gif'); // 根据页面修改键名
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import FileUpload from '../../components/ui/FileUpload.astro';
+import NumberInput from '../../components/ui/NumberInput.astro';
+import ResultDisplay from '../../components/tool/ResultDisplay.astro';
+
+const pageTitle = 'MP4 to GIF Converter – Convert Video Clips to GIF | MetisTools';
+const pageDescription = 'Convert short MP4 videos to animated GIFs. Adjustable frame rate, output size, and quality. Free online MP4 to GIF converter.';
 ---
 
-<BaseLayout title={title} description={description} currentPath="/tools/mp4-to-gif">
-  <div class="max-w-2xl mx-auto py-8">
-    <div class="bg-white dark:bg-slate-950 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-slate-800">
-      <h1 class="text-3xl font-bold mb-2">🎬 MP4 to GIF Converter</h1>
-      <p class="text-gray-600 dark:text-gray-300 mb-6">Convert short MP4 clips into high-quality animated GIFs.</p>
-      
-      <div id="upload-container"></div>
-      
-      <div class="mt-4 grid grid-cols-2 gap-4">
-        <div>
-          <label class="block text-sm font-medium mb-1">Start time (seconds)</label>
-          <input type="number" id="start-time" class="w-full px-3 py-2 rounded-full border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950" value="0" step="0.5">
+<ToolLayout title={pageTitle} description={pageDescription} toolHref="/tools/mp4-to-gif">
+  <div slot="input">
+    <div class="space-y-4">
+      <FileUpload id="mg-file" label="Upload MP4 Video" accept=".mp4,video/mp4" maxSize={100 * 1024 * 1024} required={true} helperText="MP4 video — up to 100MB. Short clips (under 10s) work best." />
+
+      <div id="mg-settings" class="hidden space-y-4">
+        <div class="grid grid-cols-2 gap-3">
+          <NumberInput id="mg-start" label="Start Time (seconds)" value="0" min={0} decimalPlaces={1} allowNegative={false} helperText="Start of segment" />
+          <NumberInput id="mg-end" label="End Time (seconds)" value="5" min={0.1} decimalPlaces={1} allowNegative={false} helperText="End of segment" />
         </div>
-        <div>
-          <label class="block text-sm font-medium mb-1">Duration (seconds)</label>
-          <input type="number" id="duration" class="w-full px-3 py-2 rounded-full border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950" value="5" step="0.5">
-        </div>
-      </div>
-      
-      <div id="result-area" class="mt-6 hidden">
-        <div class="p-4 bg-gray-100 dark:bg-slate-900 rounded-xl text-center">
-          <p class="text-green-600 font-semibold">✓ Conversion completed (simulated)</p>
-          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">In production, you would get a GIF download link.</p>
-          <button id="download-btn" class="mt-2 bg-indigo-600 dark:bg-indigo-500 text-white px-4 py-2 rounded-full text-sm">Download GIF</button>
+
+        <div class="grid grid-cols-2 gap-3">
+          <NumberInput id="mg-fps" label="Frame Rate (fps)" value="10" min={1} max={30} decimalPlaces={0} helperText="1–30 fps. Lower = smaller file" />
+          <NumberInput id="mg-width" label="Max Width (px)" value="480" min={100} max={1920} decimalPlaces={0} helperText="100–1920 px" />
+          <NumberInput id="mg-quality" label="Quality (1-20)" value="10" min={1} max={20} decimalPlaces={0} helperText="Lower = better quality but slower" />
         </div>
       </div>
+
+      <button type="button" id="btn-convert" class="tool-btn-primary w-full" disabled>
+        Convert to GIF
+      </button>
     </div>
   </div>
-  
-  <script>
-    function handleFile(file) {
-      if (file.type !== 'video/mp4') {
-        showMessage('Please upload an MP4 video file.', 'error');
-        return;
-      }
-      showMessage('Converting MP4 to GIF... (simulated)', 'info');
-      setTimeout(() => {
-        document.getElementById('result-area').classList.remove('hidden');
-        const downloadBtn = document.getElementById('download-btn');
-        downloadBtn.addEventListener('click', () => {
-          showMessage('In production, the GIF would be downloaded.', 'info');
-        });
-      }, 2000);
+
+  <div slot="result">
+    <ResultDisplay emptyMessage="Upload an MP4 video and click <strong>Convert to GIF</strong>." onDownload={true}>
+      <div slot="result-content" class="space-y-4">
+        <div id="progress-container"></div>
+        <!-- Preview -->
+        <div class="bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center overflow-hidden" style="min-height: 200px;">
+          <img id="mg-output-img" src="" alt="GIF Preview" class="max-w-full max-h-[400px] object-contain hidden" />
+          <span id="mg-output-placeholder" class="text-sm text-gray-400">GIF preview will appear here</span>
+        </div>
+
+        <div class="flex gap-4 text-xs text-gray-400 pt-3 border-t border-gray-100">
+          <span>Frames: <strong id="mg-frames">--</strong></span>
+          <span>Size: <strong id="mg-size">--</strong></span>
+          <span>Duration: <strong id="mg-duration">--</strong></span>
+          <span>Dimensions: <strong id="mg-dims">--</strong></span>
+        </div>
+      </div>
+    </ResultDisplay>
+  </div>
+
+  <div slot="description">
+    <p>This free online MP4 to GIF converter turns short video clips into animated GIFs directly in your browser. Your video is never uploaded to any server — all processing happens locally using the Canvas and Video APIs, ensuring your files stay private.</p>
+    <p><strong>Select Video Segment:</strong> Use the Start Time and End Time controls to trim your video to the exact segment you want to convert. Only the selected portion will be processed, which saves time and keeps the resulting GIF focused.</p>
+    <p><strong>Frame Rate Control:</strong> Lower frame rates (5-10 fps) produce smaller GIFs with a "stop motion" feel. Higher frame rates (15-30 fps) create smoother animation but result in much larger files. 10 fps is a good default for most use cases.</p>
+    <p><strong>Output Size:</strong> Control the maximum width of the output GIF. The height scales proportionally to maintain the original aspect ratio. Smaller dimensions = smaller file size. 480px is recommended for sharing in messaging apps and social media.</p>
+    <p><strong>Quality:</strong> The quality parameter (1-20) controls color quantization. Lower values preserve more detail but increase encoding time and file size. 10 is a good balance.</p>
+    <p><strong>Tips:</strong> Short clips (under 10 seconds) work best for GIF conversion. Videos with minimal motion and solid backgrounds compress better. If the output GIF is too large, try reducing the frame rate or output width, or shortening the segment.</p>
+  </div>
+</ToolLayout>
+
+<script>
+import { createGifFromVideo, formatFileSize } from '../../lib/image-tools.js';
+
+let currentFile = null;
+let currentResult = null;
+let videoDuration = 0;
+let progressBarElement = null;
+
+function createProgressBar() {
+  if (progressBarElement) return;
+  const container = document.getElementById('progress-container');
+  if (!container) return;
+  const wrapper = document.createElement('div');
+  wrapper.className = 'mb-4';
+  wrapper.innerHTML = `
+    <div class="w-full bg-gray-200 rounded-full h-2 mb-2 overflow-hidden">
+      <div id="progress-fill" class="bg-primary-600 h-2 rounded-full" style="width: 0%"></div>
+    </div>
+    <div id="progress-status" class="text-xs text-gray-500 mb-2"></div>
+  `;
+  container.appendChild(wrapper);
+  progressBarElement = wrapper;
+}
+
+function showProgress(percent, status) {
+  createProgressBar();
+  const fill = document.getElementById('progress-fill');
+  const statusDiv = document.getElementById('progress-status');
+  if (fill) fill.style.width = Math.min(100, Math.max(0, percent)) + '%';
+  if (statusDiv) statusDiv.textContent = status;
+  if (progressBarElement) progressBarElement.style.display = 'block';
+}
+
+function hideProgress() {
+  if (progressBarElement) progressBarElement.style.display = 'none';
+}
+
+function clearResults() {
+  currentResult = null;
+  const resultData = document.getElementById('result-data');
+  const resultEmpty = document.getElementById('result-empty');
+  if (resultData) resultData.classList.add('hidden');
+  if (resultEmpty) resultEmpty.classList.remove('hidden');
+  const img = document.getElementById('mg-output-img');
+  const placeholder = document.getElementById('mg-output-placeholder');
+  if (img) img.classList.add('hidden');
+  if (placeholder) placeholder.classList.remove('hidden');
+  document.getElementById('mg-frames').textContent = '--';
+  document.getElementById('mg-size').textContent = '--';
+  document.getElementById('mg-duration').textContent = '--';
+  document.getElementById('mg-dims').textContent = '--';
+  hideProgress();
+}
+
+// 修复：增加超时处理，确保按钮在元数据加载失败时不会永远禁用
+document.getElementById('mg-file')?.addEventListener('file-selected', async (e) => {
+  currentFile = e.detail.file;
+  console.log('[MP4] file-selected event received', currentFile.name);
+  clearResults();
+
+  const url = URL.createObjectURL(currentFile);
+  const video = document.createElement('video');
+  video.preload = 'metadata';
+  video.muted = true;
+  video.crossOrigin = 'anonymous'; // 避免跨域问题
+
+  let resolved = false;
+  const timeout = setTimeout(() => {
+    if (!resolved) {
+      console.error('Video metadata loading timeout after 15s');
+      URL.revokeObjectURL(url);
+      showToast('Failed to load video metadata. Please try a different file.', 'error');
     }
-    
-    document.addEventListener('DOMContentLoaded', () => {
-      if (typeof initFileUpload === 'function') {
-        initFileUpload('upload-container', ['video/mp4'], handleFile);
-      }
-    });
-  </script>
-  <Schema
-    toolName="MP4 to GIF Converter"
-    description={description}
-    url={Astro.url.href}
-    category="Media"
-  />
-</BaseLayout>
+  }, 15000); // 延长到 15 秒
+
+  const onSuccess = () => {
+    if (resolved) return;
+    resolved = true;
+    clearTimeout(timeout);
+    videoDuration = video.duration;
+    console.log('[MP4] Video metadata loaded, duration:', videoDuration);
+    const endInput = document.getElementById('mg-end');
+    if (endInput) endInput.value = Math.min(5, Math.round(videoDuration * 10) / 10);
+    URL.revokeObjectURL(url);
+    document.getElementById('mg-settings').classList.remove('hidden');
+    document.getElementById('btn-convert').disabled = false;
+  };
+
+  const onError = () => {
+    if (resolved) return;
+    resolved = true;
+    clearTimeout(timeout);
+    URL.revokeObjectURL(url);
+    console.error('Video load error');
+    showToast('Invalid video file.', 'error');
+  };
+
+  video.addEventListener('loadedmetadata', onSuccess);
+  video.addEventListener('canplay', () => {
+    // 如果 loadedmetadata 没触发但视频已经可以播放，且时长有效
+    if (!resolved && video.duration && isFinite(video.duration)) {
+      console.log('[MP4] canplay triggered before loadedmetadata, forcing success');
+      onSuccess();
+    }
+  });
+  video.addEventListener('error', onError);
+
+  video.src = url;
+  video.load(); // 显式加载
+});
+
+document.getElementById('mg-file')?.addEventListener('file-cleared', () => {
+  currentFile = null;
+  videoDuration = 0;
+  document.getElementById('mg-settings').classList.add('hidden');
+  document.getElementById('btn-convert').disabled = true;
+  clearResults();
+});
+
+async function doConvert() {
+  if (!currentFile) { showToast('Please select an MP4 video.', 'error'); return; }
+
+  const btn = document.getElementById('btn-convert');
+  btn.disabled = true;
+  btn.textContent = 'Converting...';
+
+  clearResults();
+  const resultData = document.getElementById('result-data');
+  const resultEmpty = document.getElementById('result-empty');
+  if (resultEmpty) resultEmpty.classList.add('hidden');
+  if (resultData) resultData.classList.remove('hidden');
+
+  showProgress(10, 'Loading video...');
+
+  try {
+    const startTime = parseFloat(document.getElementById('mg-start')?.value) || 0;
+    const endTime = parseFloat(document.getElementById('mg-end')?.value) || 5;
+    const fps = parseInt(document.getElementById('mg-fps')?.value) || 10;
+    const maxWidth = parseInt(document.getElementById('mg-width')?.value) || 480;
+    const quality = parseInt(document.getElementById('mg-quality')?.value) || 10;
+
+    console.log('[MP4] Starting conversion', { startTime, endTime, fps, maxWidth, quality });
+
+    const result = await createGifFromVideo(
+      currentFile,
+      startTime,
+      endTime,
+      fps,
+      maxWidth,
+      (current, total) => {
+        const percent = Math.round(30 + (current / total) * 70);
+        showProgress(percent, `Extracting frames (${current}/${total})...`);
+      },
+      quality
+    );
+
+    currentResult = result;
+
+    showProgress(100, 'Done!');
+    setTimeout(() => hideProgress(), 1500);
+
+    const img = document.getElementById('mg-output-img');
+    const placeholder = document.getElementById('mg-output-placeholder');
+    if (img) {
+      img.src = result.url;
+      img.classList.remove('hidden');
+    }
+    if (placeholder) placeholder.classList.add('hidden');
+
+    document.getElementById('mg-frames').textContent = result.frameCount;
+    document.getElementById('mg-size').textContent = formatFileSize(result.size);
+    document.getElementById('mg-duration').textContent = result.duration.toFixed(1) + 's';
+    document.getElementById('mg-dims').textContent = `${result.width} x ${result.height}`;
+  } catch (e) {
+    console.error('[MP4] Conversion error', e);
+    hideProgress();
+    showToast('Conversion failed: ' + (e.message || 'Unknown error'), 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Convert to GIF';
+  }
+}
+
+document.getElementById('btn-convert')?.addEventListener('click', doConvert);
+
+document.getElementById('btn-download-result')?.addEventListener('click', () => {
+  if (!currentResult) return;
+  const origName = (currentFile?.name || 'video').replace(/\.[^.]+$/, '');
+  const a = document.createElement('a');
+  a.href = currentResult.url;
+  a.download = `${origName}.gif`;
+  a.click();
+});
+</script>

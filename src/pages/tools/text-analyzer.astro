@@ -1,0 +1,186 @@
+---
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import TextareaInput from '../../components/ui/TextareaInput.astro';
+import ResultDisplay from '../../components/tool/ResultDisplay.astro';
+
+const pageTitle = 'Text Analyzer – Word, Character, Readability Counter | MetisTools';
+const pageDescription = 'Count words, characters, sentences, and paragraphs. Includes readability scores, keyword density, and reading time. Free online text analyzer.';
+---
+
+<ToolLayout title={pageTitle} description={pageDescription} toolHref="/tools/text-analyzer">
+  <div slot="input">
+    <div class="space-y-4">
+      <TextareaInput id="ta-input" label="Enter Text" placeholder="Paste or type your text here to analyze..." rows={10} required={true} />
+
+      <button type="button" id="btn-analyze" class="tool-btn-primary w-full">
+        Analyze Text
+      </button>
+    </div>
+  </div>
+
+  <div slot="result">
+    <ResultDisplay emptyMessage="Paste your text and click <strong>Analyze Text</strong> to see detailed statistics." onCopy={false} onDownload={false}>
+      <div slot="result-content" class="space-y-4">
+        <!-- Basic Stats -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          <div class="bg-indigo-50 rounded-lg p-3 text-center">
+            <div id="ta-words" class="text-xl font-bold text-indigo-700">0</div>
+            <div class="text-xs text-indigo-500 mt-0.5">Words</div>
+          </div>
+          <div class="bg-emerald-50 rounded-lg p-3 text-center">
+            <div id="ta-chars" class="text-xl font-bold text-emerald-700">0</div>
+            <div class="text-xs text-emerald-500 mt-0.5">Characters</div>
+          </div>
+          <div class="bg-amber-50 rounded-lg p-3 text-center">
+            <div id="ta-chars-ns" class="text-xl font-bold text-amber-700">0</div>
+            <div class="text-xs text-amber-500 mt-0.5">Chars (no spaces)</div>
+          </div>
+          <div class="bg-rose-50 rounded-lg p-3 text-center">
+            <div id="ta-sentences" class="text-xl font-bold text-rose-700">0</div>
+            <div class="text-xs text-rose-500 mt-0.5">Sentences</div>
+          </div>
+          <div class="bg-cyan-50 rounded-lg p-3 text-center">
+            <div id="ta-paras" class="text-xl font-bold text-cyan-700">0</div>
+            <div class="text-xs text-cyan-500 mt-0.5">Paragraphs</div>
+          </div>
+          <div class="bg-violet-50 rounded-lg p-3 text-center">
+            <div id="ta-lines" class="text-xl font-bold text-violet-700">0</div>
+            <div class="text-xs text-violet-500 mt-0.5">Lines</div>
+          </div>
+        </div>
+
+        <!-- Readability -->
+        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+          <h4 class="text-sm font-semibold text-gray-700 mb-3">Readability</h4>
+          <div class="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <span class="text-gray-500">Flesch Reading Ease</span>
+              <div id="ta-flesch" class="text-lg font-bold text-gray-800">--</div>
+              <div id="ta-flesch-label" class="text-xs text-gray-400"></div>
+            </div>
+            <div>
+              <span class="text-gray-500">Flesch-Kincaid Grade</span>
+              <div id="ta-fk" class="text-lg font-bold text-gray-800">--</div>
+              <div class="text-xs text-gray-400">Grade level</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Additional Stats -->
+        <div class="grid grid-cols-2 gap-3 text-sm">
+          <div class="flex justify-between bg-gray-50 rounded-lg p-3 border border-gray-100">
+            <span class="text-gray-500">Syllables</span>
+            <span id="ta-syllables" class="font-mono font-medium text-gray-700">0</span>
+          </div>
+          <div class="flex justify-between bg-gray-50 rounded-lg p-3 border border-gray-100">
+            <span class="text-gray-500">Avg Word Length</span>
+            <span id="ta-avg-len" class="font-mono font-medium text-gray-700">0</span>
+          </div>
+          <div class="flex justify-between bg-gray-50 rounded-lg p-3 border border-gray-100">
+            <span class="text-gray-500">Longest Word</span>
+            <span id="ta-longest" class="font-mono font-medium text-gray-700 truncate max-w-[120px]">--</span>
+          </div>
+          <div class="flex justify-between bg-gray-50 rounded-lg p-3 border border-gray-100">
+            <span class="text-gray-500">Shortest Word</span>
+            <span id="ta-shortest" class="font-mono font-medium text-gray-700 truncate max-w-[120px]">--</span>
+          </div>
+          <div class="flex justify-between bg-gray-50 rounded-lg p-3 border border-gray-100">
+            <span class="text-gray-500">Reading Time</span>
+            <span id="ta-read-time" class="font-mono font-medium text-gray-700">--</span>
+          </div>
+          <div class="flex justify-between bg-gray-50 rounded-lg p-3 border border-gray-100">
+            <span class="text-gray-500">Speaking Time</span>
+            <span id="ta-speak-time" class="font-mono font-medium text-gray-700">--</span>
+          </div>
+        </div>
+
+        <!-- Keywords -->
+        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+          <h4 class="text-sm font-semibold text-gray-700 mb-3">Top Keywords</h4>
+          <div id="ta-keywords" class="space-y-1.5">
+          </div>
+        </div>
+      </div>
+    </ResultDisplay>
+  </div>
+
+  <div slot="description">
+    <p>
+      This free online text analyzer provides detailed statistics about any text — from word and character counts to advanced readability scores and keyword density analysis. Everything runs locally in your browser; your text is never sent to a server.
+    </p>
+    <p>
+      <strong>Basic Stats:</strong> Get instant counts for words, characters (with and without spaces), sentences, paragraphs, and lines. Perfect for writers checking document length or students meeting assignment requirements.
+    </p>
+    <p>
+      <strong>Readability Scores:</strong> <em>Flesch Reading Ease</em> rates text on a 0–100 scale (higher = easier to read). <em>Flesch-Kincaid Grade Level</em> maps readability to US school grade levels. These scores help you ensure your writing matches your target audience's reading level.
+    </p>
+    <p>
+      <strong>Keyword Density:</strong> See the top 10 most-used words (excluding common stop words). Useful for SEO optimization, content analysis, and identifying overused terms in your writing.
+    </p>
+    <p>
+      <strong>Time Estimates:</strong> Reading time (based on 225 WPM average) and speaking time (130 WPM) help you plan presentations, podcasts, and content length for your audience's attention span.
+    </p>
+  </div>
+</ToolLayout>
+
+<script>
+  import { analyzeText } from '../../lib/text-tools.js';
+
+  function doAnalyze() {
+    const input = document.getElementById('ta-input')?.value || '';
+    if (!input.trim()) {
+      showToast('Please enter some text to analyze.', 'error');
+      return;
+    }
+
+    const stats = analyzeText(input);
+
+    document.getElementById('result-empty').classList.add('hidden');
+    document.getElementById('result-data').classList.remove('hidden');
+
+    document.getElementById('ta-words').textContent = stats.words;
+    document.getElementById('ta-chars').textContent = stats.characters;
+    document.getElementById('ta-chars-ns').textContent = stats.charactersNoSpaces;
+    document.getElementById('ta-sentences').textContent = stats.sentences;
+    document.getElementById('ta-paras').textContent = stats.paragraphs;
+    document.getElementById('ta-lines').textContent = stats.lines;
+    document.getElementById('ta-syllables').textContent = stats.syllables;
+    document.getElementById('ta-avg-len').textContent = stats.avgWordLength;
+    document.getElementById('ta-longest').textContent = stats.longestWord || '--';
+    document.getElementById('ta-shortest').textContent = stats.shortestWord || '--';
+    document.getElementById('ta-read-time').textContent = stats.readingTime;
+    document.getElementById('ta-speak-time').textContent = stats.speakingTime;
+
+    document.getElementById('ta-flesch').textContent = stats.fleschEase;
+    const fe = stats.fleschEase;
+    let fl = '';
+    if (fe >= 90) fl = 'Very Easy';
+    else if (fe >= 80) fl = 'Easy';
+    else if (fe >= 70) fl = 'Fairly Easy';
+    else if (fe >= 60) fl = 'Standard';
+    else if (fe >= 50) fl = 'Fairly Difficult';
+    else if (fe >= 30) fl = 'Difficult';
+    else fl = 'Very Difficult';
+    document.getElementById('ta-flesch-label').textContent = fl;
+
+    document.getElementById('ta-fk').textContent = stats.fleschKincaid;
+
+    const kwDiv = document.getElementById('ta-keywords');
+    if (stats.topKeywords.length === 0) {
+      kwDiv.innerHTML = '<p class="text-xs text-gray-400">No keywords found.</p>';
+    } else {
+      kwDiv.innerHTML = stats.topKeywords.map((kw, i) => `
+        <div class="flex items-center justify-between text-sm">
+          <span class="text-gray-700">${i + 1}. <span class="font-medium">${escapeHtml(kw.word)}</span></span>
+          <span class="text-xs text-gray-400">${kw.count}x (${kw.density}%)</span>
+        </div>
+      `).join('');
+    }
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  document.getElementById('btn-analyze')?.addEventListener('click', doAnalyze);
+</script>

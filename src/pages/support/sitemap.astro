@@ -1,10 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { allTools } from '../../data/tools';
-import Schema from '../../components/Schema.astro';
-const siteUrl = Astro.site.href;
 
-// 收集所有页面 URL（工具页 + 其他重要页面）
 const toolPages = allTools.map(tool => ({ name: tool.title, url: tool.href }));
 const otherPages = [
   { name: 'Home', url: '/' },
@@ -12,47 +9,43 @@ const otherPages = [
   { name: 'Converters', url: '/converters' },
   { name: 'Image Tools', url: '/image-tools' },
   { name: 'Text Tools', url: '/text-tools' },
-  { name: 'Dev Tools', url: '/dev-tools' },
+  { name: 'Developer Tools', url: '/dev-tools' },
   { name: 'Blog', url: '/blog' },
-  { name: 'About Us', url: '/support/about' },
-  { name: 'Privacy Policy', url: '/support/privacy-policy' },
+  { name: 'About', url: '/support/about' },
   { name: 'Contact', url: '/support/contact' },
+  { name: 'FAQ', url: '/support/faq' },
+  { name: 'Privacy Policy', url: '/support/privacy-policy' },
   { name: 'Terms of Service', url: '/support/terms' },
 ];
 
-const allPages = [...otherPages, ...toolPages];
-
-const title = "Sitemap – All MetisTools Pages";
-const description = "Complete sitemap of MetisTools: all converters, calculators, developer tools, image tools, text utilities, and information pages.";
+const title = 'Sitemap – All MetisTools Pages';
+const description = 'Complete sitemap of MetisTools: all converters, calculators, developer tools, image tools, text utilities, and information pages.';
 ---
 
 <BaseLayout title={title} description={description} currentPath="/support/sitemap">
   <div class="max-w-4xl mx-auto px-4 py-12 sm:py-16">
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+    <div class="rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
       <div class="px-6 py-10 sm:p-12">
         <div class="text-center">
-          <div class="text-5xl mb-4">🗺️</div>
-          <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-gray-100">Sitemap</h1>
-          <p class="mt-3 text-gray-500 dark:text-gray-400">All pages and tools on MetisTools</p>
+          <h1 class="text-3xl sm:text-4xl font-bold text-gray-900">Sitemap</h1>
+          <p class="mt-3 text-gray-500">All pages and tools on MetisTools</p>
         </div>
 
         <div class="mt-10 grid grid-cols-1 md:grid-cols-2 gap-8">
-          <!-- 主要页面 -->
           <div>
-            <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">📄 Information Pages</h2>
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Information Pages</h2>
             <ul class="space-y-2">
               {otherPages.map(page => (
-                <li><a href={page.url} class="text-indigo-600 dark:text-indigo-400 hover:underline">{page.name}</a></li>
+                <li><a href={page.url} class="text-indigo-600 hover:underline">{page.name}</a></li>
               ))}
             </ul>
           </div>
 
-          <!-- 工具页面分类（可粗略分组，但这里全部列出） -->
           <div>
-            <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">🛠️ All Tools</h2>
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">All Tools</h2>
             <ul class="space-y-1 columns-2 gap-4">
               {toolPages.map(tool => (
-                <li><a href={tool.url} class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">{tool.name}</a></li>
+                <li><a href={tool.url} class="text-indigo-600 hover:underline text-sm">{tool.name}</a></li>
               ))}
             </ul>
           </div>
@@ -60,9 +53,4 @@ const description = "Complete sitemap of MetisTools: all converters, calculators
       </div>
     </div>
   </div>
-  <Schema
-    toolName="HTML Sitemap"
-    description={description}
-    url={siteUrl + "/support/sitemap"}
-  />
 </BaseLayout>

@@ -1,128 +1,107 @@
 ---
-import Navigation from "../components/Navigation.astro";
-import Footer from "../components/Footer.astro";
-import Breadcrumbs from "../components/Breadcrumbs.astro";
-import { allTools } from "../data/tools";
+// 根布局 —— 所有页面的基础包裹器
+import SeoHead from '../components/seo/SeoHead.astro';
+import Schema from '../components/seo/Schema.astro';
+import Header from '../components/layout/Header.astro';
+import Footer from '../components/layout/Footer.astro';
+import Breadcrumb from '../components/layout/Breadcrumb.astro';
+import CookieConsent from '../components/ui/CookieConsent.astro';
+import Toast from '../components/ui/Toast.astro';
+import SocialShare from '../components/seo/SocialShare.astro';
+import { siteConfig } from '../data/site';
+import '../styles/global.css';
 
-const { title, description, currentPath = "/" } = Astro.props;
-const siteUrl = Astro.site.href;
-
-// 工具分类映射表
-const categoryMap = {
-  calculators: "/calculators",
-  converters: "/converters",
-  dev: "/dev-tools",
-  image: "/image-tools",
-  text: "/text-tools",
-};
-
-// 构建工具 slug -> 分类URL的映射
-const toolCategoryMap = new Map();
-for (const tool of allTools) {
-  const slug = tool.href.replace("/tools/", "");
-  if (slug && categoryMap[tool.category]) {
-    toolCategoryMap.set(slug, categoryMap[tool.category]);
-  }
+export interface Props {
+  title: string;
+  description: string;
+  canonical?: string;
+  ogImage?: string;
+  ogType?: 'website' | 'article';
+  noIndex?: boolean;
+  currentPath?: string;
+  showBreadcrumb?: boolean;
 }
 
-// 生成面包屑项
-function generateBreadcrumbs(path) {
-  const segments = path.split("/").filter(Boolean);
-  const items = [{ name: "Home", url: "/" }];
-  let accumulated = "";
-
-  for (let i = 0; i < segments.length; i++) {
-    const seg = segments[i];
-    accumulated += `/${seg}`;
-    if (seg === "support") continue; // 跳过 support 层级
-
-    let name = seg.charAt(0).toUpperCase() + seg.slice(1).replace(/-/g, " ");
-    let url = accumulated;
-
-    if (seg === "tools") {
-      name = "Tools";
-      const nextSeg = segments[i + 1];
-      url = nextSeg
-        ? toolCategoryMap.get(nextSeg) || "/calculators"
-        : "/calculators";
-    } else if (seg === "blog") {
-      name = "Blog";
-    }
-    items.push({ name, url });
-  }
-  if (items.length > 1) items[items.length - 1].url = null;
-  return items;
-}
-
-const breadcrumbItems = generateBreadcrumbs(currentPath);
+const {
+  title,
+  description,
+  canonical,
+  ogImage,
+  ogType = 'website',
+  noIndex = false,
+  currentPath = '/',
+  showBreadcrumb = true,
+} = Astro.props;
 ---
 
 <!doctype html>
-<html lang="en" class="dark">
+<html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{title}</title>
-    <meta name="description" content={description} />
-    <link rel="canonical" href={new URL(currentPath, siteUrl).href} />
-    <meta name="robots" content="index, follow" />
-
-    <!-- Open Graph / Twitter -->
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content={title} />
-    <meta property="og:description" content={description} />
-    <meta
-      property="og:image"
-      content={new URL("/og-default.jpg", siteUrl).href}
+    <SeoHead
+      title={title}
+      description={description}
+      canonical={canonical}
+      ogImage={ogImage}
+      ogType={ogType}
+      noIndex={noIndex}
     />
-    <meta property="og:url" content={new URL(currentPath, siteUrl).href} />
-    <meta property="og:site_name" content="MetisTools" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content={title} />
-    <meta name="twitter:description" content={description} />
-    <meta
-      name="twitter:image"
-      content={new URL("/og-default.jpg", siteUrl).href}
-    />
-    <meta name="google-adsense-account" content="ca-pub-3912115209665374">
-    <!-- 预连接 Google 服务 -->
-    <link rel="preconnect" href="https://www.googletagmanager.com" />
-    <link rel="preconnect" href="https://www.google-analytics.com" />
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3912115209665374"
-     crossorigin="anonymous"></script>
-    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
   </head>
-  <body
-    class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 font-sans min-h-screen flex flex-col"
-  >
-    <Navigation currentPath={currentPath} />
-    <main class="flex-1 pt-16">
-      <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-        {breadcrumbItems.length > 1 && <Breadcrumbs items={breadcrumbItems} />}
+  <body class="bg-gray-50 text-gray-900 antialiased min-h-screen flex flex-col">
+    <!-- 网站结构化数据 -->
+    <Schema type="WebSite" />
+
+    <!-- 顶部导航 -->
+    <Header currentPath={currentPath} />
+
+    <!-- 主内容 -->
+    <main class="flex-1">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-4">
+        {showBreadcrumb && <Breadcrumb path={currentPath} />}
         <slot />
       </div>
     </main>
-    <Footer />
-    <script defer src="/js/common.js"></script>
 
-    <!-- Google Analytics 延迟加载 -->
-    <script>
+    <!-- 页脚 -->
+    <Footer />
+
+    <!-- 浮动社交分享栏 -->
+    <SocialShare />
+
+    <!-- Cookie 同意弹窗 -->
+    <CookieConsent />
+
+    <!-- Toast 通知容器 -->
+    <Toast />
+
+    <!-- ===== 第三方脚本（受 Cookie 同意控制） ===== -->
+    <script define:vars={{ gaId: siteConfig.googleAnalyticsId }}>
+      // Cookie 同意管理
       (function () {
-        window.addEventListener("load", () => {
-          setTimeout(() => {
-            const script = document.createElement("script");
-            script.src =
-              "https://www.googletagmanager.com/gtag/js?id=G-87VGYW1H47";
-            script.async = true;
-            document.head.appendChild(script);
-            window.dataLayer = window.dataLayer || [];
-            function gtag() {
-              dataLayer.push(arguments);
-            }
-            gtag("js", new Date());
-            gtag("config", "G-87VGYW1H47");
-          }, 3000);
-        });
+        const STORAGE_KEY = 'cookie-preferences';
+        const preferences = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+
+        // 默认：未选择时所有功能关闭
+        const consent = preferences || {
+          necessary: true,   // 必要 Cookie 始终开启
+          analytics: false,
+          advertising: false,
+        };
+
+        // Google Analytics（仅 analytics 同意时加载）
+        if (consent.analytics) {
+          window.addEventListener('load', () => {
+            setTimeout(() => {
+              const script = document.createElement('script');
+              script.src = `https://www.googletagmanager.com/gtag/js?id=${gaId}`;
+              script.async = true;
+              document.head.appendChild(script);
+              window.dataLayer = window.dataLayer || [];
+              function gtag() { dataLayer.push(arguments); }
+              gtag('js', new Date());
+              gtag('config', gaId);
+            }, 3000);
+          });
+        }
       })();
     </script>
   </body>

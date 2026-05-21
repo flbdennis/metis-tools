@@ -1,105 +1,169 @@
 ---
-import Schema from '../../components/Schema.astro';
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getPageSeo } from '../../utils/seo.js';
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import TextareaInput from '../../components/ui/TextareaInput.astro';
+import SelectInput from '../../components/ui/SelectInput.astro';
+import NumberInput from '../../components/ui/NumberInput.astro';
+import ResultDisplay from '../../components/tool/ResultDisplay.astro';
 
-const { title, description } = getPageSeo('tools/code-beautifier'); // 根据页面修改键名
+const pageTitle = 'Code Beautifier – Format HTML, CSS, JS | MetisTools';
+const pageDescription = 'Beautify (pretty print) or minify your HTML, CSS, or JavaScript code. Auto language detection, before/after comparison. Free online code formatter for developers.';
+
+const langOptions = [
+  { value: 'auto', label: 'Auto Detect' },
+  { value: 'html', label: 'HTML' },
+  { value: 'css', label: 'CSS' },
+  { value: 'js', label: 'JavaScript' },
+];
+
+const actionOptions = [
+  { value: 'beautify', label: 'Beautify (Pretty Print)' },
+  { value: 'minify', label: 'Minify (Compact)' },
+];
 ---
 
-<BaseLayout title={title} description={description} currentPath="/tools/code-beautifier">
-  <div class="max-w-4xl mx-auto py-8">
-    <div class="bg-white dark:bg-slate-950 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-slate-800">
-      <h1 class="text-3xl font-bold mb-2">✨ Code Beautifier</h1>
-      <p class="text-gray-600 dark:text-gray-300 mb-6">Beautify or minify HTML, CSS, and JavaScript code. All processing is client-side.</p>
+<ToolLayout title={pageTitle} description={pageDescription} toolHref="/tools/code-beautifier">
+  <div slot="input">
+    <div class="space-y-4">
+      <TextareaInput id="code-input" label="Code Input" placeholder="Paste your HTML, CSS, or JavaScript here..." rows={8} monospace={true} required={true} />
 
-      <div class="flex gap-2 mb-4">
-        <select id="lang" class="px-4 py-2 rounded-full border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950">
-          <option value="html">HTML</option>
-          <option value="css">CSS</option>
-          <option value="js">JavaScript</option>
-        </select>
-        <button id="beautify-btn" class="bg-indigo-600 dark:bg-indigo-500 text-white px-4 py-2 rounded-full text-sm">Beautify</button>
-        <button id="minify-btn" class="bg-gray-200 dark:bg-slate-800 hover:bg-gray-300 dark:hover:bg-slate-700 px-4 py-2 rounded-full text-sm">Minify</button>
+      <div class="grid grid-cols-2 gap-3">
+        <SelectInput id="code-lang" label="Language" options={langOptions} selected="auto" />
+        <SelectInput id="code-action" label="Action" options={actionOptions} selected="beautify" />
       </div>
 
-      <textarea id="input-code" rows="8" class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-slate-700 font-mono text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950" placeholder="Paste your code here..."></textarea>
+      <NumberInput id="code-indent" label="Indent Size" value="2" min={1} max={8} decimalPlaces={0} helperText="Spaces per indent level (beautify only)" />
 
-      <div class="mt-4">
-        <label class="block text-sm font-medium mb-1">Result</label>
-        <textarea id="output-code" rows="8" class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-slate-700 bg-gray-50 dark:bg-slate-950 font-mono text-sm text-gray-900 dark:text-gray-100" readonly placeholder="Result will appear here..."></textarea>
-        <button id="copy-btn" class="mt-2 bg-indigo-600 dark:bg-indigo-500 text-white px-4 py-2 rounded-full text-sm">Copy Result</button>
-      </div>
+      <button type="button" id="btn-process" class="tool-btn-primary w-full">
+        Beautify Code
+      </button>
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/js-beautify@1.15.1/js/lib/beautify.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/js-beautify@1.15.1/js/lib/beautify-css.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/js-beautify@1.15.1/js/lib/beautify-html.min.js"></script>
-  <script>
-    const langSelect = document.getElementById('lang');
-    const inputCode = document.getElementById('input-code');
-    const outputCode = document.getElementById('output-code');
-    const beautifyBtn = document.getElementById('beautify-btn');
-    const minifyBtn = document.getElementById('minify-btn');
-    const copyBtn = document.getElementById('copy-btn');
+  <div slot="result">
+    <ResultDisplay emptyMessage="Paste code and click <strong>Beautify Code</strong> to format or minify." onCopy={true}>
+      <div slot="result-content" class="space-y-4">
+        <div id="code-output" class="bg-gray-50 rounded-lg p-4 border border-gray-200 font-mono text-xs whitespace-pre-wrap break-all text-gray-800 leading-relaxed max-h-[500px] overflow-y-auto">
+        </div>
 
-    function showMsg(msg, type) {
-      if (typeof showMessage === 'function') showMessage(msg, type);
-      else alert(msg);
+        <div id="code-stats" class="flex gap-4 text-xs text-gray-400 pt-3 border-t border-gray-100">
+        </div>
+      </div>
+    </ResultDisplay>
+  </div>
+
+  <div slot="description">
+    <p>
+      Clean, well-formatted code is easier to read, debug, and maintain. This tool beautifies (pretty prints) or minifies HTML, CSS, and JavaScript code using battle-tested formatting libraries. All processing happens directly in your browser.
+    </p>
+    <p>
+      <strong>Auto Detect Language:</strong> Not sure what language your code is? The auto-detect mode analyzes your input and automatically applies the correct formatter. It detects HTML by checking for HTML tags, CSS by checking for common CSS patterns, and defaults to JavaScript otherwise.
+    </p>
+    <p>
+      <strong>Beautify (Pretty Print):</strong> Adds proper indentation, line breaks, and spacing to make code readable. Configure the indent size (2, 4, or 8 spaces). This is ideal for formatting minified third-party code, poorly structured legacy code, or code snippets from the web.
+    </p>
+    <p>
+      <strong>Minify (Compact):</strong> Removes all unnecessary whitespace, comments, and formatting to produce the smallest possible file size. Useful for production deployment where bandwidth matters, or when embedding code inline.
+    </p>
+    <p>
+      <strong>Before/After Stats:</strong> See the character count difference between your original code and the processed output — helpful for understanding the impact of minification on file size.
+    </p>
+  </div>
+</ToolLayout>
+
+<script>
+  let currentOutput = '';
+
+  function detectLanguage(code) {
+    const trimmed = code.trim();
+    if (/^\s*</.test(trimmed) || /<!DOCTYPE/i.test(trimmed) || /<html/i.test(trimmed) || /<div/i.test(trimmed) || /<[a-zA-Z][^>]*>/.test(trimmed)) {
+      return 'html';
     }
-
-    function beautify() {
-      let result = '';
-      const lang = langSelect.value;
-      const code = inputCode.value;
-      try {
-        if (lang === 'html') {
-          result = html_beautify(code, { indent_size: 2 });
-        } else if (lang === 'css') {
-          result = css_beautify(code, { indent_size: 2 });
-        } else if (lang === 'js') {
-          result = js_beautify(code, { indent_size: 2 });
-        }
-        outputCode.value = result;
-        showMsg('Beautified', 'success');
-      } catch (e) {
-        showMsg('Error: ' + e.message, 'error');
-      }
+    if (/[{}]/.test(trimmed) && /:\s*[^;]+;/.test(trimmed)) {
+      const cssRatio = (trimmed.match(/[:;]/g) || []).length;
+      const jsRatio = (trimmed.match(/[{}();]/g) || []).length;
+      if (cssRatio > jsRatio) return 'css';
     }
-
-    function minify() {
-      let result = '';
-      const lang = langSelect.value;
-      const code = inputCode.value;
-      try {
-        if (lang === 'html') {
-          result = html_beautify(code, { indent_size: 0, preserve_newlines: false });
-        } else if (lang === 'css') {
-          result = css_beautify(code, { indent_size: 0, preserve_newlines: false });
-        } else if (lang === 'js') {
-          result = js_beautify(code, { indent_size: 0, preserve_newlines: false });
-        }
-        outputCode.value = result;
-        showMsg('Minified', 'success');
-      } catch (e) {
-        showMsg('Error: ' + e.message, 'error');
-      }
+    if (/function\s*\(/.test(trimmed) || /const\s+\w+\s*=/.test(trimmed) || /let\s+\w+\s*=/.test(trimmed) || /var\s+\w+\s*=/.test(trimmed) || /=>\s*\{/.test(trimmed)) {
+      return 'js';
     }
+    return 'js';
+  }
 
-    beautifyBtn.addEventListener('click', beautify);
-    minifyBtn.addEventListener('click', minify);
-    copyBtn.addEventListener('click', () => {
-      if (outputCode.value) {
-        navigator.clipboard.writeText(outputCode.value).then(() => showMsg('Copied!', 'success')).catch(() => showMsg('Copy failed', 'error'));
+  async function processCode() {
+    const input = document.getElementById('code-input')?.value;
+    if (!input?.trim()) { showToast('Please paste code to format.', 'error'); return; }
+
+    let lang = document.getElementById('code-lang')?.value || 'auto';
+    const action = document.getElementById('code-action')?.value || 'beautify';
+    const rawVal = document.getElementById('code-indent')?.value;
+    let indentSize = Number(rawVal);
+    if (!Number.isFinite(indentSize) || indentSize < 1) indentSize = 2;
+
+    if (lang === 'auto') lang = detectLanguage(input);
+
+    try {
+      const beautify = await import('js-beautify');
+      const html_beautify = beautify.html_beautify || beautify.default?.html_beautify;
+      const css_beautify = beautify.css_beautify || beautify.default?.css_beautify;
+      const js_beautify = beautify.js_beautify || beautify.default?.js_beautify;
+
+      let output;
+      const beautifyOptions = {
+        indent_size: indentSize,
+        indent_char: ' ',
+      };
+
+      if (action === 'beautify') {
+        if (lang === 'html') output = html_beautify(input, beautifyOptions);
+        else if (lang === 'css') output = css_beautify(input, beautifyOptions);
+        else output = js_beautify(input, beautifyOptions);
       } else {
-        showMsg('Nothing to copy', 'error');
+        if (lang === 'html') {
+          output = html_beautify(input, { indent_size: 0, max_preserve_newlines: 0, preserve_newlines: false });
+        } else if (lang === 'css') {
+          output = css_beautify(input, { indent_size: 0 });
+          output = output.replace(/\s+/g, ' ').replace(/\s*([{}:;,])\s*/g, '$1').trim();
+        } else {
+          output = js_beautify(input, { indent_size: 0 });
+          output = output.replace(/^\s+/gm, '').replace(/\n/g, '').replace(/\s+/g, ' ');
+        }
       }
-    });
-  </script>
-  <Schema
-    category="Developer"
-    toolName="Code Beautifier"
-    description={description}
-    url={Astro.url.href}
-  />
-</BaseLayout>
+
+      currentOutput = output;
+
+      document.getElementById('result-empty').classList.add('hidden');
+      document.getElementById('result-data').classList.remove('hidden');
+      document.getElementById('code-output').textContent = output;
+      document.getElementById('code-stats').innerHTML = `
+        <span>Language: <strong>${lang.toUpperCase()}</strong></span>
+        <span>Original: <strong>${input.length}</strong> chars</span>
+        <span>Output: <strong>${output.length}</strong> chars</span>
+        <span>${action === 'beautify' ? '✓ Beautified' : '✓ Minified'}</span>
+      `;
+    } catch (e) {
+      showToast('Error processing code: ' + e.message, 'error');
+    }
+  }
+
+  function updateButtonLabel() {
+    const action = document.getElementById('code-action')?.value || 'beautify';
+    const btn = document.getElementById('btn-process');
+    if (btn) btn.textContent = action === 'minify' ? 'Minify Code' : 'Beautify Code';
+  }
+
+  document.getElementById('code-action')?.addEventListener('change', updateButtonLabel);
+  document.addEventListener('select-change', (e) => {
+    if (e.target?.closest('.custom-select-wrapper')?.dataset?.selectId === 'code-action') {
+      updateButtonLabel();
+    }
+  });
+
+  document.getElementById('btn-process')?.addEventListener('click', processCode);
+
+  document.getElementById('btn-copy-result')?.addEventListener('click', () => {
+    if (!currentOutput) return;
+    navigator.clipboard.writeText(currentOutput).then(() => {
+      showToast('Code copied to clipboard!', 'success');
+    }).catch(() => showToast('Failed to copy.', 'error'));
+  });
+</script>

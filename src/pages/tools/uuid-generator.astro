@@ -1,70 +1,140 @@
 ---
-import Schema from '../../components/Schema.astro';
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getPageSeo } from '../../utils/seo.js';
-const { title, description } = getPageSeo('tools/uuid-generator'); // 根据页面修改键名
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import NumberInput from '../../components/ui/NumberInput.astro';
+import SelectInput from '../../components/ui/SelectInput.astro';
+import ResultDisplay from '../../components/tool/ResultDisplay.astro';
+
+const pageTitle = 'UUID Generator – Create Random UUID v4 | MetisTools';
+const pageDescription = 'Generate random UUID v4 identifiers. Bulk generation, multiple format options, and copy/download support. Free online UUID generator for developers.';
+
+const formatOptions = [
+  { value: 'lowercase', label: 'Lowercase (8-4-4-4-12)' },
+  { value: 'uppercase', label: 'Uppercase (8-4-4-4-12)' },
+  { value: 'no-hyphens', label: 'No Hyphens (32 hex chars)' },
+];
 ---
 
-<BaseLayout title={title} description={description} currentPath="/tools/uuid-generator">
-  <div class="max-w-2xl mx-auto py-8">
-    <div class="bg-white dark:bg-slate-950 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-slate-800">
-      <h1 class="text-3xl font-bold mb-2">🆔 UUID / GUID Generator</h1>
-      <p class="text-gray-600 dark:text-gray-300 mb-6">Generate random UUID v4 (universally unique identifier).</p>
+<ToolLayout title={pageTitle} description={pageDescription} toolHref="/tools/uuid-generator">
+  <div slot="input">
+    <div class="space-y-4">
+      <NumberInput id="uuid-count" label="Number of UUIDs" value="1" min={1} max={100} decimalPlaces={0} required={true} helperText="1 – 100 UUIDs" />
 
-      <div class="flex items-center gap-2 mb-4">
-        <label class="text-sm font-medium">Number of UUIDs:</label>
-        <input type="number" id="count" min="1" max="100" value="1" class="w-20 px-2 py-1 rounded border border-gray-300 dark:border-slate-700 text-center text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950">
-        <button id="generate-btn" class="bg-indigo-600 dark:bg-indigo-500 text-white px-4 py-2 rounded-full text-sm">Generate</button>
-      </div>
+      <SelectInput id="uuid-format" label="Format" options={formatOptions} selected="lowercase" />
 
-      <textarea id="output" rows="6" class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-slate-700 font-mono text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950" readonly placeholder="UUIDs will appear here..."></textarea>
-      <button id="copy-btn" class="mt-2 bg-gray-200 dark:bg-slate-800 hover:bg-gray-300 dark:hover:bg-slate-700 px-4 py-2 rounded-full text-sm">Copy All</button>
+      <button type="button" id="btn-generate" class="tool-btn-primary w-full">
+        Generate UUID
+      </button>
     </div>
   </div>
 
-  <script>
-    const countInput = document.getElementById('count');
-    const generateBtn = document.getElementById('generate-btn');
-    const output = document.getElementById('output');
-    const copyBtn = document.getElementById('copy-btn');
+  <div slot="result">
+    <ResultDisplay emptyMessage="Set your options and click <strong>Generate UUID</strong>." onCopy={true} onDownload={true}>
+      <div slot="result-content" class="space-y-4">
+        <!-- UUID 列表 -->
+        <div id="uuid-list" class="space-y-1.5 max-h-[400px] overflow-y-auto">
+        </div>
 
-    function generateUUID() {
-      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-        const r = (Math.random() * 16) | 0;
-        const v = c === 'x' ? r : (r & 0x3) | 0x8;
-        return v.toString(16);
+        <!-- 统计 -->
+        <div id="uuid-stats" class="flex gap-3 text-xs text-gray-400 pt-3 border-t border-gray-100">
+        </div>
+      </div>
+    </ResultDisplay>
+  </div>
+
+  <div slot="description">
+    <p>
+      A UUID (Universally Unique Identifier) is a 128-bit number used to uniquely identify information in computer systems. This generator creates <strong>UUID Version 4</strong> identifiers, which are randomly generated using cryptographically secure random numbers (<code>crypto.getRandomValues</code>).
+    </p>
+    <p>
+      <strong>UUID v4 Structure:</strong> A standard UUID v4 follows the format <code>xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx</code> — 32 hexadecimal digits with 4 hyphens, totaling 36 characters. The "4" indicates version 4, and "y" (8, 9, A, or B) indicates the variant.
+    </p>
+    <p>
+      <strong>Format Options:</strong> Choose between lowercase (standard), uppercase, or no-hyphens format. The no-hyphens format is useful for systems that don't support hyphens in identifiers, or when you need a compact 32-character hex string.
+    </p>
+    <p>
+      <strong>Bulk Generation:</strong> Need multiple UUIDs? Generate up to 100 at once. Each UUID is independently generated using fresh random values, so there's no predictable pattern between them.
+    </p>
+    <p>
+      <strong>Collision Probability:</strong> With 2^122 possible random UUIDv4 values, the probability of generating a duplicate is astronomically low — you'd need to generate ~2.71 × 10^18 UUIDs to have a 50% chance of a single collision.
+    </p>
+    <p>
+      Common uses for UUIDs include: database primary keys, distributed system identifiers, session tokens, file names, request/transaction IDs, and anywhere you need a globally unique identifier without a central coordination service.
+    </p>
+  </div>
+</ToolLayout>
+
+<script>
+  function generateUUIDv4(format) {
+    const arr = new Uint8Array(16);
+    crypto.getRandomValues(arr);
+    arr[6] = (arr[6] & 0x0f) | 0x40;
+    arr[8] = (arr[8] & 0x3f) | 0x80;
+    const hex = Array.from(arr, b => b.toString(16).padStart(2, '0')).join('');
+    if (format === 'uppercase') return hex.toUpperCase();
+    if (format === 'no-hyphens') return hex.toLowerCase();
+    return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+  }
+
+  let currentUUIDs = [];
+
+  function render() {
+    const count = parseInt(document.getElementById('uuid-count')?.value) || 1;
+    const format = document.getElementById('uuid-format')?.value || 'lowercase';
+
+    currentUUIDs = [];
+    for (let i = 0; i < count; i++) {
+      currentUUIDs.push(generateUUIDv4(format));
+    }
+
+    document.getElementById('result-empty').classList.add('hidden');
+    document.getElementById('result-data').classList.remove('hidden');
+
+    const list = document.getElementById('uuid-list');
+    list.innerHTML = currentUUIDs.map((u, i) =>
+      `<div class="flex items-center gap-2 group py-1">
+        <span class="text-[10px] text-gray-300 w-5 flex-shrink-0 text-right">${i + 1}</span>
+        <span class="font-mono text-sm text-gray-800 flex-1">${u}</span>
+        <button type="button" class="copy-one opacity-0 group-hover:opacity-100 text-[11px] text-primary-600 hover:text-primary-800 flex-shrink-0" data-uuid="${u}">Copy</button>
+      </div>`
+    ).join('');
+
+    // 统计
+    document.getElementById('uuid-stats').innerHTML = `
+      <span>Generated: <strong>${currentUUIDs.length}</strong></span>
+      <span>Format: <strong>${format === 'lowercase' ? 'lowercase 8-4-4-4-12' : format === 'uppercase' ? 'uppercase 8-4-4-4-12' : '32 hex chars'}</strong></span>
+    `;
+
+    // 单个复制按钮
+    list.querySelectorAll('.copy-one').forEach(btn => {
+      btn.addEventListener('click', () => {
+        navigator.clipboard.writeText(btn.dataset.uuid).then(() => {
+          showToast('UUID copied!', 'success');
+        });
       });
-    }
-
-    function showMsg(msg, type) {
-      if (typeof showMessage === 'function') showMessage(msg, type);
-      else alert(msg);
-    }
-
-    generateBtn.addEventListener('click', () => {
-      let count = parseInt(countInput.value);
-      if (isNaN(count) || count < 1) count = 1;
-      if (count > 100) count = 100;
-      const uuids = [];
-      for (let i = 0; i < count; i++) {
-        uuids.push(generateUUID());
-      }
-      output.value = uuids.join('\n');
-      showMsg(`Generated ${uuids.length} UUID(s)`, 'success');
     });
+  }
 
-    copyBtn.addEventListener('click', () => {
-      if (output.value) {
-        navigator.clipboard.writeText(output.value).then(() => showMsg('Copied!', 'success')).catch(() => showMsg('Copy failed', 'error'));
-      } else {
-        showMsg('Nothing to copy', 'error');
-      }
-    });
-  </script>
-  <Schema
-    toolName="UUID Generator"
-    description={description}
-    url={Astro.url.href}
-    category="Developer"
-  />
-</BaseLayout>
+  document.getElementById('btn-generate')?.addEventListener('click', render);
+
+  // 复制全部
+  document.getElementById('btn-copy-result')?.addEventListener('click', () => {
+    if (!currentUUIDs.length) return;
+    const text = currentUUIDs.join('\n');
+    navigator.clipboard.writeText(text).then(() => {
+      showToast(currentUUIDs.length === 1 ? 'UUID copied!' : `${currentUUIDs.length} UUIDs copied!`, 'success');
+    }).catch(() => showToast('Failed to copy.', 'error'));
+  });
+
+  // 下载全部
+  document.getElementById('btn-download-result')?.addEventListener('click', () => {
+    if (!currentUUIDs.length) return;
+    const text = currentUUIDs.join('\n');
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'uuids.txt';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+</script>

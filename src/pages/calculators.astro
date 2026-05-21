@@ -1,10 +1,52 @@
 ---
-import CategoryLayout from '../components/CategoryLayout.astro';
-import { allTools } from '../data/tools';
+// 计算器分类页
+import BaseLayout from '../layouts/BaseLayout.astro';
+import CategoryGrid from '../components/ui/CategoryGrid.astro';
+import AdPlaceholder from '../components/ui/AdPlaceholder.astro';
+import { siteConfig } from '../data/site';
+import { getToolsByCategory } from '../data/tools';
 
-const title = "Online Calculators - Free Math & Health Tools";
-const description = "BMI, Age, Tip, Mortgage, Date difference, and more. All calculators free to use.";
-const calculators = allTools.filter(tool => tool.category === "calculators");
+const tools = getToolsByCategory('calculators');
+const pageTitle = 'Free Online Calculators — BMI, Age, Loan, Tip & More';
+const pageDescription = 'Free online calculators for everyday use: BMI, age, tip, loan, percentage, date difference, and unit converters. No signup required, instant results.';
 ---
 
-<CategoryLayout title={title} description={description} currentPath="/calculators" tools={calculators} />
+<BaseLayout title={pageTitle} description={pageDescription} currentPath="/calculators">
+  <section class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">Calculators</h1>
+    <p class="mt-2 text-gray-500 max-w-2xl">
+      Free online calculators for health, finance, math, and everyday conversions. All tools run in your browser — no data is uploaded.
+    </p>
+  </section>
+
+  <!-- [AdSense 广告位]: 分类页顶部 -->
+  <div class="mb-8">
+    <AdPlaceholder position="hero-banner" />
+  </div>
+
+  <!-- 工具网格 -->
+  <section class="mb-8">
+    <div class="flex items-center justify-between mb-5">
+      <h2 class="text-lg font-semibold text-gray-700">{tools.length} Tools</h2>
+    </div>
+    <CategoryGrid category="calculators" />
+  </section>
+
+  <!-- 分类说明 SEO 文本 -->
+  <section class="max-w-3xl pb-12">
+    <div class="prose prose-gray max-w-none text-sm text-gray-600 leading-relaxed">
+      <h2 class="text-xl font-semibold text-gray-900">Online Calculators for Every Need</h2>
+      <p>
+        Our calculator collection covers health metrics like BMI, financial tools like loan and tip calculators,
+        date and age calculators, unit converters for length and weight, and percentage calculators.
+        Every calculator is free, requires no registration, and processes all data locally in your browser
+        for complete privacy.
+      </p>
+    </div>
+  </section>
+
+  <!-- [AdSense 广告位]: 底部 -->
+  <div class="mb-12">
+    <AdPlaceholder position="footer-banner" />
+  </div>
+</BaseLayout>

@@ -1,10 +1,43 @@
 ---
-import CategoryLayout from '../components/CategoryLayout.astro';
-import { allTools } from '../data/tools';
+// 文本工具分类页
+import BaseLayout from '../layouts/BaseLayout.astro';
+import CategoryGrid from '../components/ui/CategoryGrid.astro';
+import AdPlaceholder from '../components/ui/AdPlaceholder.astro';
+import { getToolsByCategory } from '../data/tools';
 
-const title = "Text Tools - Free Online Text Processing Utilities";
-const description = "Case converter, encoding/decoding, regex tester, duplicate remover, sorting, statistics, and more. All in your browser.";
-const textTools = allTools.filter(tool => tool.category === "text");
+const tools = getToolsByCategory('text');
+const pageTitle = 'Free Text Tools — Case Converter, Regex Tester, Text Analyzer & More';
+const pageDescription = 'Powerful text manipulation tools: case converter, Base64 encoder/decoder, regex tester, duplicate remover, text sorter, and readability analyzer. Free, fast, and private.';
 ---
 
-<CategoryLayout title={title} description={description} currentPath="/text-tools" tools={textTools} />
+<BaseLayout title={pageTitle} description={pageDescription} currentPath="/text-tools">
+  <section class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">Text Tools</h1>
+    <p class="mt-2 text-gray-500 max-w-2xl">
+      Manipulate, analyze, and transform text with ease. Convert text case, encode/decode data, test regex patterns, remove duplicates, sort lines, and analyze readability — all in your browser.
+    </p>
+  </section>
+
+  <div class="mb-8"><AdPlaceholder position="hero-banner" /></div>
+
+  <section class="mb-8">
+    <div class="flex items-center justify-between mb-5">
+      <h2 class="text-lg font-semibold text-gray-700">{tools.length} Tools</h2>
+    </div>
+    <CategoryGrid category="text" />
+  </section>
+
+  <section class="max-w-3xl pb-12">
+    <div class="prose prose-gray max-w-none text-sm text-gray-600 leading-relaxed">
+      <h2 class="text-xl font-semibold text-gray-900">Essential Text Processing Tools</h2>
+      <p>
+        Convert between uppercase, lowercase, title case, camelCase, snake_case, and more. Encode and decode
+        Base64, URL, HTML entities, Hex, and ROT13. Test regular expressions with real-time matching and
+        group extraction. Remove duplicate lines, sort alphabetically, and analyze text with readability
+        scores and keyword density. Every tool processes data locally — no text is ever sent to a server.
+      </p>
+    </div>
+  </section>
+
+  <div class="mb-12"><AdPlaceholder position="footer-banner" /></div>
+</BaseLayout>

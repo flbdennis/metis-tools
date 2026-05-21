@@ -1,67 +1,140 @@
 ---
-import Schema from '../../components/Schema.astro';
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getPageSeo } from '../../utils/seo.js';
-const { title, description } = getPageSeo('tools/tip'); // 根据页面修改键名
+// 小费计算器页面 —— 服务等级预设、税费选项、分账、四舍五入
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import NumberInput from '../../components/ui/NumberInput.astro';
+import SelectInput from '../../components/ui/SelectInput.astro';
+import ResultDisplay from '../../components/tool/ResultDisplay.astro';
+
+const pageTitle = 'Tip Calculator — Calculate Tips & Split Bills Instantly';
+const pageDescription = 'Calculate tip amount, total bill, and per-person share. Includes service quality presets, tax options, bill splitting, and rounding modes.';
+
+const serviceOptions = [
+  { value: '20', label: 'Excellent (20%)' },
+  { value: '18', label: 'Very Good (18%)' },
+  { value: '15', label: 'Good (15%)' },
+  { value: '12', label: 'Fair (12%)' },
+  { value: 'custom', label: 'Custom %' },
+];
+
+const roundOptions = [
+  { value: 'none', label: 'No rounding' },
+  { value: 'up', label: 'Round up' },
+  { value: 'down', label: 'Round down' },
+];
 ---
 
-<BaseLayout title={title} description={description} currentPath="/tools/tip">
-  <div class="max-w-2xl mx-auto py-8">
-    <div class="bg-white dark:bg-slate-950 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-slate-800">
-      <h1 class="text-3xl font-bold mb-2">💵 Tip Calculator</h1>
-      <p class="text-gray-600 dark:text-gray-300 mb-6">Calculate tip and split the bill easily.</p>
-      <div class="space-y-4">
-        <div>
-          <label class="block text-sm font-medium mb-1">Bill Amount ($)</label>
-          <input type="number" id="bill" class="w-full px-4 py-2 rounded-full border border-gray-300 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950" placeholder="0.00" step="any" value="50">
-        </div>
-        <div>
-          <label class="block text-sm font-medium mb-1">Tip Percentage (%)</label>
-          <input type="number" id="tipPercent" class="w-full px-4 py-2 rounded-full border border-gray-300 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950" placeholder="15" step="any" value="15">
-        </div>
-        <div>
-          <label class="block text-sm font-medium mb-1">Number of People</label>
-          <input type="number" id="people" class="w-full px-4 py-2 rounded-full border border-gray-300 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950" placeholder="1" min="1" value="1">
-        </div>
-        <button id="calcBtn" class="w-full bg-indigo-600 dark:bg-indigo-500 hover:bg-indigo-700 dark:hover:bg-indigo-600 text-white font-medium py-2 rounded-full transition-transform transform hover:scale-98">Calculate Tip</button>
-        <div id="result" class="mt-4 p-4 bg-gray-100 dark:bg-slate-900 rounded-xl text-center text-gray-800 dark:text-gray-100 hidden">
-          <p>Tip Amount: $<span id="tipAmount">0.00</span></p>
-          <p>Total Bill: $<span id="totalBill">0.00</span></p>
-          <p>Per Person: $<span id="perPerson">0.00</span></p>
-        </div>
+<ToolLayout title={pageTitle} description={pageDescription} toolHref="/tools/tip">
+  <div slot="input">
+    <div class="space-y-4">
+      <NumberInput id="bill-amount" label="Bill Amount" placeholder="e.g. 85.50" decimalPlaces={2} required={true} helperText="💰" />
+      <SelectInput id="service-quality" label="Service Quality" options={serviceOptions} selected="15" />
+      <div id="custom-tip-row" class="hidden">
+        <NumberInput id="custom-tip-percent" label="Custom Tip %" placeholder="e.g. 22" decimalPlaces={0} max={100} />
       </div>
+      <NumberInput id="tax-amount" label="Tax Amount (optional)" placeholder="e.g. 7.50" decimalPlaces={2} helperText="💰" />
+      <NumberInput id="num-people" label="Number of People" placeholder="e.g. 4" decimalPlaces={0} min={1} value="1" />
+      <SelectInput id="round-mode" label="Round Total" options={roundOptions} selected="none" />
+      <button type="button" id="calc-tip" class="tool-btn-primary w-full">Calculate Tip</button>
     </div>
   </div>
-  <script>
-    const billInput = document.getElementById('bill');
-    const tipPercentInput = document.getElementById('tipPercent');
-    const peopleInput = document.getElementById('people');
-    const calcBtn = document.getElementById('calcBtn');
-    const resultDiv = document.getElementById('result');
-    const tipAmountSpan = document.getElementById('tipAmount');
-    const totalBillSpan = document.getElementById('totalBill');
-    const perPersonSpan = document.getElementById('perPerson');
 
-    calcBtn.addEventListener('click', () => {
-      let bill = parseFloat(billInput.value);
-      let tipPercent = parseFloat(tipPercentInput.value);
-      let people = parseInt(peopleInput.value);
-      if (isNaN(bill) || bill < 0) bill = 0;
-      if (isNaN(tipPercent)) tipPercent = 0;
-      if (isNaN(people) || people < 1) people = 1;
-      const tip = bill * (tipPercent / 100);
-      const total = bill + tip;
-      const perPerson = total / people;
-      tipAmountSpan.textContent = tip.toFixed(2);
-      totalBillSpan.textContent = total.toFixed(2);
-      perPersonSpan.textContent = perPerson.toFixed(2);
-      resultDiv.classList.remove('hidden');
+  <div slot="result">
+    <ResultDisplay emptyMessage="Enter the bill amount and click <strong>Calculate Tip</strong> to see the breakdown.">
+      <div slot="result-content">
+        <div class="text-center mb-5">
+          <div class="text-4xl font-bold text-primary-600" id="total-per-person">--</div>
+          <div class="text-sm text-gray-400 mt-1">per person</div>
+        </div>
+
+        <div class="space-y-2 mb-4">
+          <div class="bg-gray-50 rounded-lg p-3 flex justify-between text-sm">
+            <span class="text-gray-600">Tip Amount</span>
+            <span class="font-semibold text-gray-800" id="tip-amount">--</span>
+          </div>
+          <div class="bg-gray-50 rounded-lg p-3 flex justify-between text-sm">
+            <span class="text-gray-600">Tip %</span>
+            <span class="font-semibold text-gray-800" id="tip-percent-display">--</span>
+          </div>
+          <div class="bg-gray-50 rounded-lg p-3 flex justify-between text-sm">
+            <span class="text-gray-600">Subtotal + Tip</span>
+            <span class="font-semibold text-gray-800" id="subtotal-tip">--</span>
+          </div>
+          <div class="bg-gray-50 rounded-lg p-3 flex justify-between text-sm">
+            <span class="text-gray-600">Tax</span>
+            <span class="font-semibold text-gray-800" id="tax-display">--</span>
+          </div>
+        </div>
+
+        <div class="mt-4 pt-4 border-t-2 border-primary-100">
+          <div class="flex justify-between text-base font-bold">
+            <span class="text-gray-800">Total Bill</span>
+            <span class="text-primary-600" id="total-bill">--</span>
+          </div>
+          <div class="flex justify-between text-sm mt-1" id="per-person-row">
+            <span class="text-gray-500">Each pays (÷ <span id="people-count-display">1</span>)</span>
+            <span class="font-semibold text-gray-800" id="total-per-person-2">--</span>
+          </div>
+        </div>
+      </div>
+    </ResultDisplay>
+  </div>
+
+  <div slot="description">
+    <p>
+      Quickly calculate the right tip for any dining or service situation. Choose from preset service quality levels
+      or enter a custom percentage. Add tax, split among any number of people, and optionally round up or down.
+    </p>
+    <p>All calculations happen instantly in your browser. No data is sent anywhere.</p>
+  </div>
+</ToolLayout>
+
+<script>
+  function initTipForm() {
+    const serviceSelect = document.getElementById('service-quality');
+    const customRow = document.getElementById('custom-tip-row');
+    function checkCustom() {
+      if (serviceSelect?.value === 'custom') customRow?.classList.remove('hidden');
+      else customRow?.classList.add('hidden');
+    }
+    serviceSelect?.addEventListener('change', checkCustom);
+    document.addEventListener('select-change', (e) => {
+      if (e.target?.closest('.custom-select-wrapper')?.dataset?.selectId === 'service-quality') checkCustom();
     });
-  </script>
-    <Schema
-    toolName="Tip Calculator"
-    description={description}
-    url={Astro.url.href}
-    category="Finance"
-  />
-</BaseLayout>
+  }
+
+  function calculateTip() {
+    const bill = parseFloat(document.getElementById('bill-amount')?.value);
+    const numPeople = parseInt(document.getElementById('num-people')?.value) || 1;
+    const tax = parseFloat(document.getElementById('tax-amount')?.value) || 0;
+    if (!bill || bill <= 0) { showToast('Please enter a valid bill amount.', 'error'); return; }
+
+    const serviceSelect = document.getElementById('service-quality');
+    let tipPercent = serviceSelect?.value === 'custom'
+      ? (parseFloat(document.getElementById('custom-tip-percent')?.value) || 0)
+      : (parseFloat(serviceSelect?.value) || 15);
+
+    const tipAmount = bill * (tipPercent / 100);
+    const subtotalPlusTip = bill + tipAmount;
+    let total = subtotalPlusTip + tax;
+    let perPerson = total / numPeople;
+    const roundMode = document.getElementById('round-mode')?.value;
+    if (roundMode === 'up') { total = Math.ceil(total * 100) / 100; perPerson = Math.ceil(perPerson * 100) / 100; }
+    else if (roundMode === 'down') { total = Math.floor(total * 100) / 100; perPerson = Math.floor(perPerson * 100) / 100; }
+
+    document.getElementById('result-empty').classList.add('hidden');
+    document.getElementById('result-data').classList.remove('hidden');
+    document.getElementById('total-per-person').textContent = '💰' + perPerson.toFixed(2);
+    document.getElementById('tip-amount').textContent = '💰' + tipAmount.toFixed(2);
+    document.getElementById('tip-percent-display').textContent = tipPercent + '%';
+    document.getElementById('subtotal-tip').textContent = '💰' + subtotalPlusTip.toFixed(2);
+    document.getElementById('tax-display').textContent = '💰' + tax.toFixed(2);
+    document.getElementById('total-bill').textContent = '💰' + total.toFixed(2);
+    document.getElementById('people-count-display').textContent = numPeople;
+    document.getElementById('total-per-person-2').textContent = '💰' + perPerson.toFixed(2);
+    document.getElementById('per-person-row').classList.toggle('hidden', numPeople === 1);
+  }
+
+  initTipForm();
+  document.addEventListener('astro:page-load', initTipForm);
+  document.getElementById('calc-tip')?.addEventListener('click', calculateTip);
+</script>

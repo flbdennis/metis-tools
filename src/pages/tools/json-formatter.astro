@@ -1,79 +1,146 @@
 ---
-import Schema from '../../components/Schema.astro';
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getPageSeo } from '../../utils/seo.js';
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import TextareaInput from '../../components/ui/TextareaInput.astro';
+import SelectInput from '../../components/ui/SelectInput.astro';
+import ResultDisplay from '../../components/tool/ResultDisplay.astro';
 
-const { title, description } = getPageSeo('tools/json-formatter'); // 根据页面修改键名
+const pageTitle = 'JSON Formatter & Minifier – Pretty Print JSON | MetisTools';
+const pageDescription = 'Format (beautify) or minify your JSON data. Validate JSON syntax with syntax error highlighting and line numbers. Free online JSON formatter for developers.';
+
+const indentOptions = [
+  { value: '2', label: '2 Spaces' },
+  { value: '4', label: '4 Spaces' },
+  { value: 'tab', label: 'Tab' },
+];
+
+const actionOptions = [
+  { value: 'format', label: 'Format (Beautify)' },
+  { value: 'minify', label: 'Minify (Compact)' },
+];
 ---
 
-<BaseLayout title={title} description={description} currentPath="/tools/json-formatter">
-  <div class="max-w-4xl mx-auto py-8">
-    <div class="bg-white dark:bg-slate-950 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-slate-800">
-      <h1 class="text-3xl font-bold mb-2">🔧 JSON Formatter & Minifier</h1>
-      <p class="text-gray-600 dark:text-gray-300 mb-6">Format (pretty‑print) or minify your JSON data. All processing is done in your browser.</p>
+<ToolLayout title={pageTitle} description={pageDescription} toolHref="/tools/json-formatter">
+  <div slot="input">
+    <div class="space-y-4">
+      <TextareaInput id="json-input" label="JSON Input" placeholder='Paste your JSON here...&#10;{"name":"John","age":30}' rows={8} monospace={true} required={true} />
 
-      <textarea id="input-json" rows="10" class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-slate-700 font-mono text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950" placeholder='{"name":"John","age":30,"city":"New York"}'></textarea>
-
-      <div class="mt-4 flex flex-wrap gap-2">
-        <button id="format-btn" class="bg-indigo-600 dark:bg-indigo-500 text-white px-4 py-2 rounded-full text-sm">Format (Pretty)</button>
-        <button id="minify-btn" class="bg-gray-200 dark:bg-slate-800 hover:bg-gray-300 dark:hover:bg-slate-700 px-4 py-2 rounded-full text-sm">Minify</button>
-        <button id="validate-btn" class="bg-gray-200 dark:bg-slate-800 hover:bg-gray-300 dark:hover:bg-slate-700 px-4 py-2 rounded-full text-sm">Validate</button>
+      <div class="grid grid-cols-2 gap-3">
+        <SelectInput id="json-action" label="Action" options={actionOptions} selected="format" />
+        <SelectInput id="json-indent" label="Indent" options={indentOptions} selected="2" />
       </div>
 
-      <div class="mt-4">
-        <label class="block text-sm font-medium mb-1">Result</label>
-        <textarea id="output-json" rows="10" class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-slate-700 bg-gray-50 dark:bg-slate-950 font-mono text-sm text-gray-900 dark:text-gray-100" readonly placeholder="Result will appear here..."></textarea>
-        <button id="copy-btn" class="mt-2 bg-indigo-600 dark:bg-indigo-500 text-white px-4 py-2 rounded-full text-sm">Copy Result</button>
-      </div>
+      <button type="button" id="btn-process" class="tool-btn-primary w-full">
+        Format JSON
+      </button>
     </div>
   </div>
 
-  <script>
-    const input = document.getElementById('input-json');
-    const output = document.getElementById('output-json');
-    const formatBtn = document.getElementById('format-btn');
-    const minifyBtn = document.getElementById('minify-btn');
-    const validateBtn = document.getElementById('validate-btn');
-    const copyBtn = document.getElementById('copy-btn');
+  <div slot="result">
+    <ResultDisplay emptyMessage="Paste JSON and click <strong>Format JSON</strong> to prettify or minify." onCopy={true}>
+      <div slot="result-content" class="space-y-4">
+        <div id="json-output" class="bg-gray-50 rounded-lg p-4 border border-gray-200 font-mono text-xs whitespace-pre-wrap break-all text-gray-800 leading-relaxed max-h-[500px] overflow-y-auto">
+        </div>
 
-    function showMsg(msg, type) {
-      if (typeof showMessage === 'function') showMessage(msg, type);
-      else alert(msg);
-    }
+        <div id="json-stats" class="flex gap-4 text-xs text-gray-400 pt-3 border-t border-gray-100">
+        </div>
+      </div>
+    </ResultDisplay>
+  </div>
 
-    function formatJSON(space = 2) {
-      try {
-        const obj = JSON.parse(input.value);
-        output.value = JSON.stringify(obj, null, space);
-        showMsg('Formatted successfully', 'success');
-      } catch (e) {
-        output.value = '';
-        showMsg(`Invalid JSON: ${e.message}`, 'error');
-      }
-    }
+  <div slot="description">
+    <p>
+      JSON (JavaScript Object Notation) is the universal data format for web APIs, configuration files, and data exchange. This tool helps you format, validate, and minify JSON data instantly, all within your browser — no data is ever sent to a server.
+    </p>
+    <p>
+      <strong>Format (Beautify):</strong> Takes compact or messy JSON and formats it with proper indentation and line breaks, making it easy to read and debug. Choose 2-space, 4-space, or tab indentation. Perfect for inspecting API responses or config files.
+    </p>
+    <p>
+      <strong>Minify (Compact):</strong> Removes all unnecessary whitespace to create the smallest possible JSON string. Useful for reducing payload size in API requests or when you need to embed JSON in a URL or HTML attribute.
+    </p>
+    <p>
+      <strong>Validation with Error Location:</strong> If your JSON has syntax errors, the tool shows the exact error message along with the line number where the problem was detected. Common errors include missing commas, trailing commas, unquoted keys, and mismatched brackets.
+    </p>
+    <p>
+      <strong>Stats:</strong> After processing, see the original and formatted character counts to understand the size difference between formats.
+    </p>
+  </div>
+</ToolLayout>
 
-    formatBtn.addEventListener('click', () => formatJSON(2));
-    minifyBtn.addEventListener('click', () => formatJSON(0));
-    validateBtn.addEventListener('click', () => {
-      try {
-        JSON.parse(input.value);
-        showMsg('Valid JSON', 'success');
-      } catch (e) {
-        showMsg(`Invalid JSON: ${e.message}`, 'error');
-      }
-    });
-    copyBtn.addEventListener('click', () => {
-      if (output.value) {
-        navigator.clipboard.writeText(output.value).then(() => showMsg('Copied!', 'success')).catch(() => showMsg('Copy failed', 'error'));
+<script>
+  let currentOutput = '';
+
+  function processJSON() {
+    const input = document.getElementById('json-input')?.value?.trim();
+    if (!input) { showToast('Please paste JSON data.', 'error'); return; }
+
+    const action = document.getElementById('json-action')?.value || 'format';
+    const indentVal = document.getElementById('json-indent')?.value || '2';
+
+    let indent;
+    if (indentVal === 'tab') indent = '\t';
+    else indent = parseInt(indentVal);
+
+    try {
+      const parsed = JSON.parse(input);
+
+      if (action === 'minify') {
+        currentOutput = JSON.stringify(parsed);
       } else {
-        showMsg('Nothing to copy', 'error');
+        currentOutput = JSON.stringify(parsed, null, indent);
       }
-    });
-  </script>
-  <Schema
-    toolName="JSON Formatter"
-    description={description}
-    url={Astro.url.href}
-    category="Developer"
-  />
-</BaseLayout>
+
+      document.getElementById('result-empty').classList.add('hidden');
+      document.getElementById('result-data').classList.remove('hidden');
+      document.getElementById('json-output').textContent = currentOutput;
+      document.getElementById('json-output').style.color = '#1f2937';
+
+      document.getElementById('json-stats').innerHTML = `
+        <span>Original: <strong>${input.length}</strong> chars</span>
+        <span>Output: <strong>${currentOutput.length}</strong> chars</span>
+        <span class="text-green-600 font-medium">✓ Valid JSON</span>
+      `;
+    } catch (e) {
+      const match = e.message.match(/position\s+(\d+)/);
+      const pos = match ? parseInt(match[1]) : null;
+      let line = null;
+      if (pos !== null) {
+        line = input.substring(0, pos).split('\n').length;
+      }
+
+      document.getElementById('result-empty').classList.add('hidden');
+      document.getElementById('result-data').classList.remove('hidden');
+      document.getElementById('json-output').innerHTML = `<span class="text-red-600">Syntax Error: ${escapeHtml(e.message)}</span>${line ? `<span class="block mt-1 text-red-500">Line: ${line}</span>` : ''}`;
+      document.getElementById('json-stats').innerHTML = '';
+    }
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // 根据 action 更新按钮文案
+  function updateButtonLabel() {
+    const action = document.getElementById('json-action')?.value || 'format';
+    const btn = document.getElementById('btn-process');
+    if (btn) btn.textContent = action === 'minify' ? 'Minify JSON' : 'Format JSON';
+    // 如果是 minify 则隐藏 indent
+    const indentWrapper = document.getElementById('json-indent')?.closest('.custom-select-wrapper');
+    if (indentWrapper) indentWrapper.style.display = action === 'minify' ? 'none' : '';
+  }
+
+  document.getElementById('json-action')?.addEventListener('change', updateButtonLabel);
+  document.addEventListener('select-change', (e) => {
+    if (e.target?.closest('.custom-select-wrapper')?.dataset?.selectId === 'json-action') {
+      updateButtonLabel();
+    }
+  });
+
+  document.getElementById('btn-process')?.addEventListener('click', processJSON);
+
+  document.getElementById('btn-copy-result')?.addEventListener('click', () => {
+    if (!currentOutput) return;
+    navigator.clipboard.writeText(currentOutput).then(() => {
+      showToast('JSON copied to clipboard!', 'success');
+    }).catch(() => showToast('Failed to copy.', 'error'));
+  });
+</script>

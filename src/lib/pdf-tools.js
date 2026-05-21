@@ -1,21 +1,19 @@
 // src/lib/pdf-tools.js
 import * as pdfjsLib from 'pdfjs-dist';
 import { PDFDocument } from 'pdf-lib';
+import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
-// 设置 worker (使用 CDN 或本地)
-// 注意：需要确保 pdfjs-dist 版本匹配
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl;
 
-/**
- * 将 PDF 转换为图片数组
- * @param {File} pdfFile - PDF 文件
- * @param {string} imageType - 'image/png' 或 'image/jpeg'
- * @param {number} scale - 缩放比例，默认 1.5
- * @returns {Promise<Blob[]>}
- */
+const CMAP_URL = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@5.7.284/cmaps/';
+
 export async function pdfToImages(pdfFile, imageType = 'image/png', scale = 1.5) {
   const arrayBuffer = await pdfFile.arrayBuffer();
-  const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+  const loadingTask = pdfjsLib.getDocument({
+    data: arrayBuffer,
+    cMapUrl: CMAP_URL,
+    cMapPacked: true,
+  });
   const pdf = await loadingTask.promise;
   const numPages = pdf.numPages;
   const blobs = [];
@@ -34,38 +32,96 @@ export async function pdfToImages(pdfFile, imageType = 'image/png', scale = 1.5)
   return blobs;
 }
 
-/**
- * 提取 PDF 文本
- * @param {File} pdfFile
- * @returns {Promise<string>}
- */
+function groupTextItemsByLine(items) {
+  if (!items.length) return [];
+  const tolerance = 2;
+  const lines = [];
+  let currentLine = [items[0]];
+  let currentY = items[0].transform[5];
+  for (let i = 1; i < items.length; i++) {
+    const y = items[i].transform[5];
+    if (Math.abs(y - currentY) < tolerance) {
+      currentLine.push(items[i]);
+    } else {
+      lines.push(currentLine.sort((a, b) => a.transform[4] - b.transform[4]));
+      currentLine = [items[i]];
+      currentY = y;
+    }
+  }
+  lines.push(currentLine.sort((a, b) => a.transform[4] - b.transform[4]));
+  return lines;
+}
+
 export async function pdfToText(pdfFile) {
   const arrayBuffer = await pdfFile.arrayBuffer();
-  const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+  const loadingTask = pdfjsLib.getDocument({
+    data: arrayBuffer,
+    cMapUrl: CMAP_URL,
+    cMapPacked: true,
+  });
   const pdf = await loadingTask.promise;
-  let fullText = '';
+  const pageTexts = [];
   for (let i = 1; i <= pdf.numPages; i++) {
     const page = await pdf.getPage(i);
     const textContent = await page.getTextContent();
-    const pageText = textContent.items.map(item => item.str).join(' ');
-    fullText += pageText + '\n';
+    const lines = groupTextItemsByLine(textContent.items);
+    pageTexts.push(lines.map(line => line.map(item => item.str).join('')).join('\n'));
   }
-  return fullText;
+  return pageTexts.join('\n\n');
 }
 
 /**
- * 将 PDF 转换为 HTML（简单封装文本，不保留复杂样式）
- * @param {File} pdfFile
+ * 纯图片版 PDF 转 HTML（每页转为图片嵌入）
+ * @param {File} pdfFile - PDF 文件
+ * @param {number} scale - 图片缩放比例，默认 2
  * @returns {Promise<string>}
  */
-export async function pdfToHtml(pdfFile) {
-  const text = await pdfToText(pdfFile);
-  const escapedText = escapeHtml(text);
+export async function pdfToHtml(pdfFile, scale = 2) {
+  const imageBlobs = await pdfToImages(pdfFile, 'image/png', scale);
+  const imagesBase64 = await Promise.all(imageBlobs.map(blobToBase64));
+  const pagesHtml = imagesBase64.map((src, idx) => `
+    <div class="pdf-page">
+      <img src="${src}" alt="Page ${idx+1}" style="max-width:100%; height:auto; display:block;" />
+      <p style="margin:8px 0 0; font-size:12px; color:#666;">Page ${idx+1} of ${imagesBase64.length}</p>
+    </div>
+  `).join('');
+
   return `<!DOCTYPE html>
 <html>
-<head><meta charset="UTF-8"><title>Converted PDF</title></head>
-<body><pre>${escapedText}</pre></body>
+<head><meta charset="UTF-8"><title>Converted PDF: ${escapeHtml(pdfFile.name)}</title>
+<style>
+  body { background: #f3f4f6; margin:0; padding:20px; font-family: system-ui; }
+  .container { max-width: 1000px; margin:0 auto; }
+  .pdf-page { background: white; margin-bottom: 24px; text-align: center; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+  .pdf-page img { width: 100%; height: auto; }
+  .info-note {
+    margin-top: 20px;
+    padding: 12px;
+    background: #e0f2fe;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 14px;
+    color: #0369a1;
+  }
+</style>
+</head>
+<body><div class="container">
+  ${pagesHtml}
+  <div class="info-note">
+    ⚡ This HTML file contains embedded images of your PDF pages.  
+    It works in any browser, even when opened locally (file://).
+  </div>
+</div></body>
 </html>`;
+}
+
+function blobToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
 }
 
 function escapeHtml(str) {

@@ -1,10 +1,42 @@
 ---
-import CategoryLayout from '../components/CategoryLayout.astro';
-import { allTools } from '../data/tools';
+// 图像工具分类页
+import BaseLayout from '../layouts/BaseLayout.astro';
+import CategoryGrid from '../components/ui/CategoryGrid.astro';
+import AdPlaceholder from '../components/ui/AdPlaceholder.astro';
+import { getToolsByCategory } from '../data/tools';
 
-const title = "Image Tools - Free Online Image Processing";
-const description = "Compress, convert, crop, resize images online. All processing done locally in your browser.";
-const imageTools = allTools.filter(tool => tool.category === "image");
+const tools = getToolsByCategory('image');
+const pageTitle = 'Free Image Tools — Compress, Convert, Crop & Resize Online';
+const pageDescription = 'Edit images directly in your browser: compress JPEG/PNG/WebP, convert formats, crop and resize. Free online image tools with no upload required — all processing is local and private.';
 ---
 
-<CategoryLayout title={title} description={description} currentPath="/image-tools" tools={imageTools} />
+<BaseLayout title={pageTitle} description={pageDescription} currentPath="/image-tools">
+  <section class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">Image Tools</h1>
+    <p class="mt-2 text-gray-500 max-w-2xl">
+      Edit, optimize, and convert images directly in your browser. No file uploads to any server — everything is processed locally for complete privacy and maximum speed.
+    </p>
+  </section>
+
+  <div class="mb-8"><AdPlaceholder position="hero-banner" /></div>
+
+  <section class="mb-8">
+    <div class="flex items-center justify-between mb-5">
+      <h2 class="text-lg font-semibold text-gray-700">{tools.length} Tools</h2>
+    </div>
+    <CategoryGrid category="image" />
+  </section>
+
+  <section class="max-w-3xl pb-12">
+    <div class="prose prose-gray max-w-none text-sm text-gray-600 leading-relaxed">
+      <h2 class="text-xl font-semibold text-gray-900">Browser-Based Image Editing</h2>
+      <p>
+        Compress images to reduce file size while preserving quality, convert between PNG, JPEG, and WebP formats
+        with adjustable settings, crop and resize images with preset aspect ratios for social media. All image
+        processing happens entirely in your browser using Canvas API — your files never leave your device.
+      </p>
+    </div>
+  </section>
+
+  <div class="mb-12"><AdPlaceholder position="footer-banner" /></div>
+</BaseLayout>

@@ -1,0 +1,219 @@
+---
+// 自定义数字输入框 —— type="text"，完全自定义样式
+// decimalPlaces: 0 = 整数模式，>0 = 小数模式并限制小数位数
+export interface Props {
+  id: string;
+  label?: string;
+  placeholder?: string;
+  value?: string;
+  min?: number;
+  max?: number;
+  step?: number;
+  decimalPlaces?: number;
+  allowNegative?: boolean;
+  required?: boolean;
+  disabled?: boolean;
+  class?: string;
+  helperText?: string;
+}
+
+const {
+  id,
+  label = '',
+  placeholder = '',
+  value = '',
+  min,
+  max,
+  step,
+  decimalPlaces = 0,
+  allowNegative = false,
+  required = false,
+  disabled = false,
+  class: extraClass = '',
+  helperText = '',
+} = Astro.props;
+---
+
+<div class={`${extraClass}`}>
+  {label && (
+    <label for={id} class="tool-label">
+      {label}
+      {required && <span class="text-red-500 ml-0.5">*</span>}
+    </label>
+  )}
+  <div class="relative">
+    <input
+      type="text"
+      inputmode={decimalPlaces > 0 ? 'decimal' : 'numeric'}
+      id={id}
+      name={id}
+      value={value}
+      placeholder={placeholder}
+      data-min={min != null ? String(min) : ''}
+      data-max={max != null ? String(max) : ''}
+      data-decimals={String(decimalPlaces)}
+      data-allow-negative={allowNegative ? 'true' : 'false'}
+      required={required}
+      disabled={disabled}
+      class="tool-input number-input peer"
+      autocomplete="off"
+    />
+    <!-- 数字控件按钮组（替代原生 spinner） -->
+    <div class="number-controls">
+      <button type="button" class="number-btn number-btn-up" tabindex="-1" aria-label="Increase">
+        <svg class="h-2.5 w-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"/></svg>
+      </button>
+      <button type="button" class="number-btn number-btn-down" tabindex="-1" aria-label="Decrease">
+        <svg class="h-2.5 w-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+      </button>
+    </div>
+  </div>
+  <!-- 错误/提示信息 -->
+  <p class="field-error hidden text-xs text-red-500 mt-1"></p>
+  {helperText && <p class="text-xs text-gray-400 mt-1">{helperText}</p>}
+</div>
+
+<style>
+  .number-input {
+    -moz-appearance: textfield;
+  }
+  .number-input::-webkit-inner-spin-button,
+  .number-input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  .number-controls {
+    position: absolute;
+    right: 2px;
+    top: 2px;
+    bottom: 2px;
+    display: flex;
+    flex-direction: column;
+    width: 24px;
+    border-left: 1px solid #e5e7eb;
+  }
+  .number-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #9ca3af;
+    transition: color 0.15s, background 0.15s;
+    padding: 0;
+  }
+  .number-btn:hover {
+    color: #4f46e5;
+    background: #eef2ff;
+  }
+  .number-btn:active {
+    color: #4338ca;
+  }
+  .number-btn-up {
+    border-top-right-radius: 6px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  .number-btn-down {
+    border-bottom-right-radius: 6px;
+  }
+  .number-input:disabled + .number-controls {
+    display: none;
+  }
+</style>
+
+<script>
+  function initNumberInputs() {
+    document.querySelectorAll('.number-input').forEach(input => {
+      if (input.dataset._init) return;
+      input.dataset._init = '1';
+
+      const min = input.dataset.min ? parseFloat(input.dataset.min) : null;
+      const max = input.dataset.max ? parseFloat(input.dataset.max) : null;
+      const decimals = parseInt(input.dataset.decimals) || 0;
+      const allowNeg = input.dataset.allowNegative === 'true';
+      const step = decimals > 0 ? Math.pow(10, -decimals) : 1;
+
+      // 输入时过滤非法字符
+      input.addEventListener('input', () => {
+        let val = input.value;
+
+        // 移除非法字符：只保留数字、小数点、负号
+        if (allowNeg) {
+          val = val.replace(/[^0-9.\-]/g, '');
+          // 负号只能在开头
+          const firstMinus = val.indexOf('-');
+          if (firstMinus > 0) {
+            val = '-' + val.replace(/-/g, '');
+          } else if (firstMinus === 0) {
+            val = '-' + val.slice(1).replace(/-/g, '');
+          }
+        } else {
+          val = val.replace(/[^0-9.]/g, '');
+        }
+
+        // 处理小数点：只保留第一个，限制小数位数
+        const dotIndex = val.indexOf('.');
+        if (dotIndex !== -1) {
+          if (decimals === 0) {
+            // 整数模式：移除小数点及之后的内容
+            val = val.substring(0, dotIndex);
+          } else {
+            // 小数模式：保留第一个小数点，限制小数位数
+            const beforeDot = val.substring(0, dotIndex);
+            const afterDot = val.substring(dotIndex + 1).replace(/\./g, '');
+            val = beforeDot + '.' + afterDot.substring(0, decimals);
+          }
+        }
+
+        input.value = val;
+      });
+
+      // 失焦时校验范围
+      input.addEventListener('blur', () => {
+        const val = parseFloat(input.value);
+        if (!isNaN(val)) {
+          if (min !== null && val < min) {
+            input.value = decimals > 0 ? min.toFixed(decimals) : String(min);
+          }
+          if (max !== null && val > max) {
+            input.value = decimals > 0 ? max.toFixed(decimals) : String(max);
+          }
+        }
+        // 清理尾部小数点（如 "123."）
+        if (input.value.endsWith('.')) {
+          input.value = input.value.slice(0, -1);
+        }
+      });
+
+      // 步进按钮
+      const container = input.parentElement;
+      if (container) {
+        const upBtn = container.querySelector('.number-btn-up');
+        const downBtn = container.querySelector('.number-btn-down');
+
+        upBtn?.addEventListener('click', (e) => {
+          e.preventDefault();
+          let val = parseFloat(input.value) || 0;
+          const newVal = Math.min(val + step, max ?? Infinity);
+          input.value = decimals > 0 ? newVal.toFixed(decimals) : String(newVal);
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+          input.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+
+        downBtn?.addEventListener('click', (e) => {
+          e.preventDefault();
+          let val = parseFloat(input.value) || 0;
+          const newVal = Math.max(val - step, min ?? -Infinity);
+          input.value = decimals > 0 ? newVal.toFixed(decimals) : String(newVal);
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+          input.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+      }
+    });
+  }
+
+  initNumberInputs();
+  document.addEventListener('astro:page-load', initNumberInputs);
+</script>

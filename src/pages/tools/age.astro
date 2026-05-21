@@ -1,75 +1,144 @@
 ---
-import Schema from '../../components/Schema.astro';
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getPageSeo } from '../../utils/seo.js';
+// 年龄计算器页面 —— 精确年龄、下次生日倒计时、星座、出生星期、趣味统计
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import DateInput from '../../components/ui/DateInput.astro';
+import ResultDisplay from '../../components/tool/ResultDisplay.astro';
 
-const { title, description } = getPageSeo('tools/age'); // 根据页面修改键名
+const pageTitle = 'Age Calculator — Calculate Your Exact Age Instantly';
+const pageDescription = 'Calculate your exact age in years, months, and days. Includes countdown to your next birthday, zodiac sign, day of the week you were born, and fun life statistics.';
 ---
 
-<BaseLayout title={title} description={description} currentPath="/tools/age">
-  <div class="max-w-2xl mx-auto py-8">
-    <div class="bg-white dark:bg-slate-950 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-slate-800">
-      <h1 class="text-3xl font-bold mb-2">🎂 Age Calculator</h1>
-      <p class="text-gray-600 dark:text-gray-300 mb-6">Enter your date of birth to calculate your exact age.</p>
-      <div class="space-y-4">
-        <div>
-          <label class="block text-sm font-medium mb-1">Date of Birth</label>
-          <input type="date" id="dob" class="w-full px-4 py-2 rounded-full border border-gray-300 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950" value="2000-01-01">
-        </div>
-        <button id="calcBtn" class="w-full bg-indigo-600 dark:bg-indigo-500 hover:bg-indigo-700 dark:hover:bg-indigo-600 text-white font-medium py-2 rounded-full transition-transform transform hover:scale-98">Calculate Age</button>
-        <div id="result" class="mt-4 p-4 bg-gray-100 dark:bg-slate-900 rounded-xl text-center text-gray-800 dark:text-gray-100 hidden">
-          <p><strong>Your exact age:</strong> <span id="ageYears">--</span> years, <span id="ageMonths">--</span> months, <span id="ageDays">--</span> days</p>
-          <p>Total days lived: <span id="totalDays">--</span></p>
-        </div>
-      </div>
+<ToolLayout title={pageTitle} description={pageDescription} toolHref="/tools/age">
+  <div slot="input">
+    <div class="space-y-4">
+      <DateInput id="birthdate" label="Date of Birth" required={true} />
+      <DateInput id="calc-date" label="Calculate Age At" helperText="Leave empty to use today's date" />
+
+      <button type="button" id="calc-age" class="tool-btn-primary w-full">
+        Calculate Age
+      </button>
     </div>
   </div>
-  <script>
-    const dobInput = document.getElementById('dob');
-    const calcBtn = document.getElementById('calcBtn');
-    const resultDiv = document.getElementById('result');
-    const ageYears = document.getElementById('ageYears');
-    const ageMonths = document.getElementById('ageMonths');
-    const ageDays = document.getElementById('ageDays');
-    const totalDaysSpan = document.getElementById('totalDays');
 
-    calcBtn.addEventListener('click', () => {
-      const dobValue = dobInput.value;
-      if (!dobValue) {
-        showMessage('Please select your date of birth.', 'error');
-        return;
-      }
-      const birthDate = new Date(dobValue);
-      const today = new Date();
-      if (birthDate > today) {
-        showMessage('Birth date cannot be in the future.', 'error');
-        return;
-      }
-      let years = today.getFullYear() - birthDate.getFullYear();
-      let months = today.getMonth() - birthDate.getMonth();
-      let days = today.getDate() - birthDate.getDate();
-      if (days < 0) {
-        months--;
-        const lastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
-        days += lastMonth.getDate();
-      }
-      if (months < 0) {
-        years--;
-        months += 12;
-      }
-      const timeDiff = today - birthDate;
-      const totalDays = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-      ageYears.textContent = years;
-      ageMonths.textContent = months;
-      ageDays.textContent = days;
-      totalDaysSpan.textContent = totalDays;
-      resultDiv.classList.remove('hidden');
-    });
-  </script>
-    <Schema
-    category="Utility"
-    toolName="Age Calculator"
-    description={description}
-    url={Astro.url.href}
-  />
-</BaseLayout>
+  <div slot="result">
+    <ResultDisplay emptyMessage="Select your date of birth, then click <strong>Calculate Age</strong> to see your exact age.">
+      <div slot="result-content">
+        <div class="text-center mb-5">
+          <div class="text-5xl font-bold text-primary-600" id="age-years">--</div>
+          <div class="text-sm text-gray-500 mt-1">years old</div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2 mb-5">
+          <div class="bg-primary-50 rounded-lg p-3 text-center border border-primary-100">
+            <div class="text-lg font-bold text-primary-700" id="age-months">--</div>
+            <div class="text-[10px] text-primary-500">months</div>
+          </div>
+          <div class="bg-primary-50 rounded-lg p-3 text-center border border-primary-100">
+            <div class="text-lg font-bold text-primary-700" id="age-weeks">--</div>
+            <div class="text-[10px] text-primary-500">weeks</div>
+          </div>
+          <div class="bg-primary-50 rounded-lg p-3 text-center border border-primary-100">
+            <div class="text-lg font-bold text-primary-700" id="age-days">--</div>
+            <div class="text-[10px] text-primary-500">days</div>
+          </div>
+        </div>
+
+        <div class="bg-gray-50 rounded-lg p-3 mb-4">
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-gray-600">Exact age</span>
+            <span class="font-semibold text-gray-800" id="exact-age-text">--</span>
+          </div>
+        </div>
+
+        <div class="bg-amber-50 rounded-lg p-3 mb-4 border border-amber-200">
+          <div class="text-xs text-amber-600 font-medium mb-1">Next Birthday</div>
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-gray-700" id="next-bday-date">--</span>
+            <span class="text-sm font-bold text-amber-600" id="next-bday-countdown">--</span>
+          </div>
+        </div>
+
+        <div class="space-y-2 text-sm mt-auto">
+          <div class="flex justify-between"><span class="text-gray-500">Zodiac Sign</span><span class="font-medium text-gray-800" id="zodiac-sign">--</span></div>
+          <div class="flex justify-between"><span class="text-gray-500">Born On</span><span class="font-medium text-gray-800" id="born-day">--</span></div>
+          <div class="flex justify-between"><span class="text-gray-500">Total Hours Lived</span><span class="font-medium text-gray-800" id="total-hours">--</span></div>
+          <div class="flex justify-between"><span class="text-gray-500">Total Minutes Lived</span><span class="font-medium text-gray-800" id="total-minutes">--</span></div>
+        </div>
+      </div>
+    </ResultDisplay>
+  </div>
+
+  <div slot="description">
+    <p>
+      This age calculator computes your exact chronological age — down to the day — between any two dates.
+      It also shows the countdown to your next birthday, your zodiac sign, the day of the week you were born,
+      and fun statistics like total hours and minutes you've been alive.
+    </p>
+    <p>All calculations are performed locally in your browser — no data is sent anywhere.</p>
+  </div>
+</ToolLayout>
+
+<script>
+  function getZodiacSign(month, day) {
+    const signs = [
+      { name: 'Capricorn', end: [1, 19] }, { name: 'Aquarius', end: [2, 18] },
+      { name: 'Pisces', end: [3, 20] }, { name: 'Aries', end: [4, 19] },
+      { name: 'Taurus', end: [5, 20] }, { name: 'Gemini', end: [6, 20] },
+      { name: 'Cancer', end: [7, 22] }, { name: 'Leo', end: [8, 22] },
+      { name: 'Virgo', end: [9, 22] }, { name: 'Libra', end: [10, 22] },
+      { name: 'Scorpio', end: [11, 21] }, { name: 'Sagittarius', end: [12, 21] },
+      { name: 'Capricorn', end: [12, 31] },
+    ];
+    for (const sign of signs) {
+      if (month < sign.end[0] || (month === sign.end[0] && day <= sign.end[1])) return sign.name;
+    }
+    return 'Capricorn';
+  }
+
+  const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+  function calculateAge() {
+    const birthInput = document.getElementById('birthdate');
+    const calcInput = document.getElementById('calc-date');
+    if (!birthInput?.value) { showToast('Please select your date of birth.', 'error'); return; }
+
+    const birthDate = new Date(birthInput.value + 'T00:00:00');
+    const today = calcInput?.value ? new Date(calcInput.value + 'T00:00:00') : new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (birthDate > today) { showToast('Date of birth cannot be in the future.', 'error'); return; }
+
+    let years = today.getFullYear() - birthDate.getFullYear();
+    let months = today.getMonth() - birthDate.getMonth();
+    let days = today.getDate() - birthDate.getDate();
+
+    if (days < 0) { months--; days += new Date(today.getFullYear(), today.getMonth(), 0).getDate(); }
+    if (months < 0) { years--; months += 12; }
+
+    const diffMs = today - birthDate;
+    const totalDays = Math.floor(diffMs / 86400000);
+    const totalWeeks = Math.floor(totalDays / 7);
+    const totalMonthsApprox = years * 12 + months;
+
+    let nextBday = new Date(today.getFullYear(), birthDate.getMonth(), birthDate.getDate());
+    if (nextBday <= today) nextBday.setFullYear(nextBday.getFullYear() + 1);
+    const daysToBday = Math.ceil((nextBday - today) / 86400000);
+    const nextBdayAge = nextBday.getFullYear() - birthDate.getFullYear();
+
+    document.getElementById('result-empty').classList.add('hidden');
+    document.getElementById('result-data').classList.remove('hidden');
+    document.getElementById('age-years').textContent = years;
+    document.getElementById('age-months').textContent = totalMonthsApprox.toLocaleString();
+    document.getElementById('age-weeks').textContent = totalWeeks.toLocaleString();
+    document.getElementById('age-days').textContent = totalDays.toLocaleString();
+    document.getElementById('exact-age-text').textContent = `${years} years, ${months} months, ${days} days`;
+    document.getElementById('next-bday-date').textContent = nextBday.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+    document.getElementById('next-bday-countdown').textContent = `${daysToBday} day${daysToBday !== 1 ? 's' : ''} (turning ${nextBdayAge})`;
+    document.getElementById('zodiac-sign').textContent = getZodiacSign(birthDate.getMonth() + 1, birthDate.getDate());
+    document.getElementById('born-day').textContent = dayNames[birthDate.getDay()];
+    document.getElementById('total-hours').textContent = (totalDays * 24).toLocaleString();
+    document.getElementById('total-minutes').textContent = (totalDays * 1440).toLocaleString();
+  }
+
+  document.getElementById('calc-age')?.addEventListener('click', calculateAge);
+</script>

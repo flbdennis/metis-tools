@@ -1,10 +1,42 @@
 ---
-import CategoryLayout from '../components/CategoryLayout.astro';
-import { allTools } from '../data/tools';
+// 转换器分类页
+import BaseLayout from '../layouts/BaseLayout.astro';
+import CategoryGrid from '../components/ui/CategoryGrid.astro';
+import AdPlaceholder from '../components/ui/AdPlaceholder.astro';
+import { getToolsByCategory } from '../data/tools';
 
-const title = "File Converters - Free Online Conversion Tools";
-const description = "Convert PDF, images, videos, audio files online. Free, fast, and secure.";
-const converters = allTools.filter(tool => tool.category === "converters");
+const tools = getToolsByCategory('converters');
+const pageTitle = 'Free Online Converters — PDF, Currency & File Conversion Tools';
+const pageDescription = 'Convert PDF files, currencies with real-time exchange rates, and more. Free online converters with no signup required. Fast, secure, and private.';
 ---
 
-<CategoryLayout title={title} description={description} currentPath="/converters" tools={converters} />
+<BaseLayout title={pageTitle} description={pageDescription} currentPath="/converters">
+  <section class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">Converters</h1>
+    <p class="mt-2 text-gray-500 max-w-2xl">
+      Powerful file and data conversion tools. Convert PDFs to images or text, check real-time currency exchange rates, and more — all processed locally or via secure APIs.
+    </p>
+  </section>
+
+  <div class="mb-8"><AdPlaceholder position="hero-banner" /></div>
+
+  <section class="mb-8">
+    <div class="flex items-center justify-between mb-5">
+      <h2 class="text-lg font-semibold text-gray-700">{tools.length} Tools</h2>
+    </div>
+    <CategoryGrid category="converters" />
+  </section>
+
+  <section class="max-w-3xl pb-12">
+    <div class="prose prose-gray max-w-none text-sm text-gray-600 leading-relaxed">
+      <h2 class="text-xl font-semibold text-gray-900">File & Data Conversion Made Easy</h2>
+      <p>
+        Convert PDF documents to images, extract text and HTML, merge and compress PDFs. Get real-time
+        currency exchange rates for over 170 currencies. All conversion tools are designed to be fast,
+        reliable, and respect your privacy.
+      </p>
+    </div>
+  </section>
+
+  <div class="mb-12"><AdPlaceholder position="footer-banner" /></div>
+</BaseLayout>

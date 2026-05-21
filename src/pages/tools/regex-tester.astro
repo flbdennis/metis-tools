@@ -1,110 +1,276 @@
 ---
-import Schema from '../../components/Schema.astro';
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getPageSeo } from '../../utils/seo.js';
-const { title, description } = getPageSeo('tools/regex-tester'); // 根据页面修改键名
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import TextareaInput from '../../components/ui/TextareaInput.astro';
+import CheckboxInput from '../../components/ui/CheckboxInput.astro';
+import ResultDisplay from '../../components/tool/ResultDisplay.astro';
+
+const pageTitle = 'Regex Tester – Test Regular Expressions Online | MetisTools';
+const pageDescription = 'Test regular expressions with real-time matching, match highlighting, group extraction, and replace mode. Includes common regex pattern reference.';
+
+const commonPatterns = [
+  { label: 'Email', pattern: '^[\\w.-]+@[\\w.-]+\\.\\w{2,}$' },
+  { label: 'URL', pattern: 'https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)' },
+  { label: 'IP Address (IPv4)', pattern: '\\b(?:[0-9]{1,3}\\.){3}[0-9]{1,3}\\b' },
+  { label: 'Phone (US)', pattern: '\\(?\\d{3}\\)?[-.\\s]?\\d{3}[-.]?\\d{4}' },
+  { label: 'Date (YYYY-MM-DD)', pattern: '\\d{4}-\\d{2}-\\d{2}' },
+  { label: 'Hex Color', pattern: '#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})\\b' },
+  { label: 'Username (3-16 chars)', pattern: '^[a-zA-Z0-9_]{3,16}$' },
+  { label: 'Digits Only', pattern: '^\\d+$' },
+  { label: 'Alphanumeric', pattern: '^[a-zA-Z0-9]+$' },
+  { label: 'HTML Tag', pattern: '<(\\/?)(\\w+)[^>]*>' },
+];
+
+const flagOptions = [
+  { value: 'g', label: 'Global (g)' },
+  { value: 'i', label: 'Case Insensitive (i)' },
+  { value: 'm', label: 'Multiline (m)' },
+  { value: 's', label: 'Dot All (s)' },
+  { value: 'u', label: 'Unicode (u)' },
+];
 ---
 
-<BaseLayout title={title} description={description} currentPath="/tools/regex-tester">
-  <div class="max-w-4xl mx-auto py-8">
-    <div class="bg-white dark:bg-slate-950 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-slate-800">
-      <h1 class="text-3xl font-bold mb-2">🎯 Regex Tester</h1>
-      <p class="text-gray-600 dark:text-gray-300 mb-6">Write a regular expression and test it against your text. Matches are highlighted in real‑time.</p>
+<ToolLayout title={pageTitle} description={pageDescription} toolHref="/tools/regex-tester">
+  <div slot="input">
+    <div class="space-y-4">
+      <TextareaInput id="re-pattern" label="Regular Expression" placeholder="e.g., \\b\\w+@\\w+\\.\\w+\\b" rows={2} monospace={true} required={true} />
 
-      <div class="space-y-4">
-        <div>
-          <label class="block text-sm font-medium mb-1">Regular Expression</label>
-          <input type="text" id="regex-input" class="w-full px-4 py-2 rounded-full border border-gray-300 dark:border-slate-700 font-mono text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950" placeholder="e.g., \b\w{4}\b">
+      <details class="group">
+        <summary class="text-xs text-gray-400 cursor-pointer hover:text-gray-500 select-none">Common Patterns (click to use)</summary>
+        <div class="mt-2 flex flex-wrap gap-1.5">
+          {commonPatterns.map(p => (
+            <button type="button" class="pattern-chip text-xs bg-gray-100 hover:bg-indigo-100 text-gray-600 hover:text-indigo-700 rounded-full px-2.5 py-1 transition-colors" data-pattern={p.pattern}>
+              {p.label}
+            </button>
+          ))}
         </div>
-        <div class="flex items-center gap-4">
-          <label class="inline-flex items-center"><input type="checkbox" id="flag-g" value="g" class="mr-1 text-gray-900 dark:text-gray-100"> g (global)</label>
-          <label class="inline-flex items-center"><input type="checkbox" id="flag-i" value="i" class="mr-1 text-gray-900 dark:text-gray-100"> i (case‑insensitive)</label>
-          <label class="inline-flex items-center"><input type="checkbox" id="flag-m" value="m" class="mr-1 text-gray-900 dark:text-gray-100"> m (multiline)</label>
-        </div>
-        <div>
-          <label class="block text-sm font-medium mb-1">Test String</label>
-          <textarea id="test-string" rows="8" class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-slate-700 font-mono text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950" placeholder="Enter test text..."></textarea>
+      </details>
+
+      <div class="space-y-2">
+        <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Flags</p>
+        <div class="flex flex-wrap gap-x-4 gap-y-1">
+          {flagOptions.map(f => (
+            <CheckboxInput id={`re-flag-${f.value}`} label={f.label} checked={f.value === 'g'} class="text-xs" />
+          ))}
         </div>
       </div>
 
-      <div id="result-area" class="mt-6 p-4 bg-gray-50 dark:bg-slate-950 rounded-xl hidden">
-        <p id="match-count" class="text-sm font-medium"></p>
-        <div id="highlighted-output" class="mt-2 p-3 bg-white dark:bg-slate-950 border rounded font-mono text-sm overflow-auto max-h-60"></div>
+      <TextareaInput id="re-text" label="Test String" placeholder="Enter text to test against your regex..." rows={6} monospace={true} required={true} />
+
+      <div id="re-replace-section" class="hidden space-y-1">
+        <label for="re-replace" class="block text-sm font-medium text-gray-700 mb-1">Replace With</label>
+        <input type="text" id="re-replace" class="tool-input" placeholder="$1, etc." />
+      </div>
+
+      <div class="flex gap-2">
+        <button type="button" id="btn-test" class="tool-btn-primary flex-1">
+          Test Regex
+        </button>
+        <button type="button" id="btn-replace-toggle" class="tool-btn-secondary text-xs">
+          Replace
+        </button>
       </div>
     </div>
   </div>
 
-  <script>
-    import { testRegex } from '../../lib/text-tools';
+  <div slot="result">
+    <ResultDisplay emptyMessage="Enter a regex pattern and test string, then click <strong>Test Regex</strong> to see matches." onCopy={false} onDownload={false}>
+      <div slot="result-content" class="space-y-4">
+        <!-- Error -->
+        <div id="re-error" class="hidden bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700"></div>
 
-    const regexInput = document.getElementById('regex-input');
-    const flagG = document.getElementById('flag-g');
-    const flagI = document.getElementById('flag-i');
-    const flagM = document.getElementById('flag-m');
-    const testString = document.getElementById('test-string');
-    const resultArea = document.getElementById('result-area');
-    const matchCountSpan = document.getElementById('match-count');
-    const highlightedOutput = document.getElementById('highlighted-output');
+        <!-- Summary -->
+        <div class="flex gap-4 text-sm">
+          <div class="bg-indigo-50 rounded-lg px-4 py-2 text-center flex-1">
+            <div id="re-count" class="text-xl font-bold text-indigo-700">0</div>
+            <div class="text-xs text-indigo-500">Matches</div>
+          </div>
+          <div class="bg-emerald-50 rounded-lg px-4 py-2 text-center flex-1">
+            <div id="re-groups" class="text-xl font-bold text-emerald-700">0</div>
+            <div class="text-xs text-emerald-500">Groups</div>
+          </div>
+        </div>
 
-    function updateHighlight() {
-      const pattern = regexInput.value;
-      if (!pattern) {
-        resultArea.classList.add('hidden');
-        return;
-      }
-      let flags = '';
-      if (flagG.checked) flags += 'g';
-      if (flagI.checked) flags += 'i';
-      if (flagM.checked) flags += 'm';
-      const testStr = testString.value;
-      if (!testStr) {
-        resultArea.classList.add('hidden');
-        return;
-      }
+        <!-- Highlighted Text -->
+        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+          <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Highlighted Matches</h4>
+          <div id="re-highlight" class="text-sm font-mono whitespace-pre-wrap break-all leading-relaxed max-h-[250px] overflow-y-auto"></div>
+        </div>
 
-      const result = testRegex(pattern, flags, testStr);
-      if (!result.isValid) {
-        resultArea.classList.remove('hidden');
-        matchCountSpan.textContent = `Invalid regex: ${result.error}`;
-        highlightedOutput.innerHTML = '';
-        return;
-      }
+        <!-- Match Details -->
+        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+          <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Match Details</h4>
+          <div id="re-matches" class="space-y-2 text-sm max-h-[250px] overflow-y-auto"></div>
+        </div>
 
-      const matches = result.matches;
+        <!-- Replace Result -->
+        <div id="re-replace-result" class="hidden bg-gray-50 rounded-lg p-4 border border-gray-200">
+          <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Replace Result</h4>
+          <div id="re-replace-output" class="text-sm font-mono whitespace-pre-wrap break-all leading-relaxed"></div>
+        </div>
+      </div>
+    </ResultDisplay>
+  </div>
+
+  <div slot="description">
+    <p>
+      Test regular expressions (regex) against any text with real-time feedback. This free online regex tester highlights all matches, shows captured groups, and supports a replace mode — all running locally in your browser. Perfect for developers debugging patterns or learning regex syntax.
+    </p>
+    <p>
+      <strong>Flags:</strong> <em>Global (g)</em> finds all matches instead of just the first. <em>Case Insensitive (i)</em> ignores letter case. <em>Multiline (m)</em> makes ^ and $ match line boundaries. <em>Dot All (s)</em> makes . match newlines. <em>Unicode (u)</em> enables full Unicode matching for emoji and international characters.
+    </p>
+    <p>
+      <strong>Match Highlighting:</strong> All matches are visually highlighted in your test string with color-coded backgrounds, making it easy to see exactly what was captured. Each match includes its index position and captured group values.
+    </p>
+    <p>
+      <strong>Replace Mode:</strong> Toggle the Replace button to enter a substitution pattern (e.g., $1, $&amp;) and see the result of running a regex replace operation. Useful for data transformation, formatting, and text cleanup tasks.
+    </p>
+    <p>
+      <strong>Common Patterns Library:</strong> Click any chip from the pattern library to instantly load common regex patterns for emails, URLs, IP addresses, phone numbers, dates, hex colors, and more. Great starting points for building your own patterns.
+    </p>
+  </div>
+</ToolLayout>
+
+<script>
+  import { testRegex } from '../../lib/text-tools.js';
+
+  let lastResult = null;
+  let isReplaceMode = false;
+
+  function doTest() {
+    const patternEl = document.getElementById('re-pattern');
+    const pattern = patternEl?.value || '';
+    const text = document.getElementById('re-text')?.value || '';
+    if (!pattern.trim()) { showToast('Please enter a regex pattern.', 'error'); return; }
+
+    // Collect flags
+    let flags = '';
+    ['g','i','m','s','u'].forEach(f => {
+      const cb = document.getElementById(`re-flag-${f}`);
+      if (cb?.checked) flags += f;
+    });
+
+    const result = testRegex(pattern, flags, text);
+
+    document.getElementById('result-empty').classList.add('hidden');
+    document.getElementById('result-data').classList.remove('hidden');
+
+    const errEl = document.getElementById('re-error');
+    if (!result.isValid) {
+      errEl.textContent = `Regex Error: ${result.error}`;
+      errEl.classList.remove('hidden');
+      document.getElementById('re-count').textContent = '--';
+      document.getElementById('re-groups').textContent = '--';
+      document.getElementById('re-highlight').innerHTML = '';
+      document.getElementById('re-matches').innerHTML = '';
+      return;
+    }
+    errEl.classList.add('hidden');
+
+    lastResult = result;
+    const matches = result.matches;
+    document.getElementById('re-count').textContent = result.count;
+
+    // Count groups
+    let totalGroups = 0;
+    matches.forEach(m => totalGroups += (m.groups || []).length);
+    document.getElementById('re-groups').textContent = totalGroups;
+
+    // Highlight matches
+    const highlightDiv = document.getElementById('re-highlight');
+    if (matches.length === 0) {
+      highlightDiv.innerHTML = '<span class="text-gray-400">No matches found.</span>';
+    } else {
+      const colors = ['#fef3c7','#dbeafe','#dcfce7','#fce7f3','#e0e7ff','#fef2f2','#f0fdf4','#fdf2f8','#fff7ed','#f5f3ff'];
       let html = '';
-      let lastIndex = 0;
-      for (const m of matches) {
-        const matchText = m.match;
-        const idx = m.index;
-        html += escapeHtml(testStr.substring(lastIndex, idx));
-        html += `<mark class="bg-yellow-200 rounded px-0.5">${escapeHtml(matchText)}</mark>`;
-        lastIndex = idx + matchText.length;
-      }
-      html += escapeHtml(testStr.substring(lastIndex));
-      highlightedOutput.innerHTML = html;
-      matchCountSpan.textContent = `${matches.length} match(es) found.`;
-      resultArea.classList.remove('hidden');
-    }
-
-    function escapeHtml(str) {
-      return str.replace(/[&<>]/g, function(m) {
-        if (m === '&') return '&amp;';
-        if (m === '<') return '&lt;';
-        if (m === '>') return '&gt;';
-        return m;
+      let lastEnd = 0;
+      matches.forEach((m, i) => {
+        html += escapeHtml(text.slice(lastEnd, m.index));
+        html += `<mark class="match-highlight" style="background:${colors[i % colors.length]};padding:1px 2px;border-radius:2px;" data-match-idx="${i}">${escapeHtml(m.match)}</mark>`;
+        lastEnd = m.index + m.match.length;
       });
+      html += escapeHtml(text.slice(lastEnd));
+      highlightDiv.innerHTML = html;
     }
 
-    regexInput.addEventListener('input', updateHighlight);
-    flagG.addEventListener('change', updateHighlight);
-    flagI.addEventListener('change', updateHighlight);
-    flagM.addEventListener('change', updateHighlight);
-    testString.addEventListener('input', updateHighlight);
-  </script>
-  <Schema
-    toolName="Regex Tester"
-    description={description}
-    url={Astro.url.href}
-    category="Developer"
-  />
-</BaseLayout>
+    // Match details
+    const detailsDiv = document.getElementById('re-matches');
+    if (matches.length === 0) {
+      detailsDiv.innerHTML = '<p class="text-xs text-gray-400">No matches to display.</p>';
+    } else {
+      detailsDiv.innerHTML = matches.slice(0, 50).map((m, i) => `
+        <div class="bg-white rounded border border-gray-100 p-2">
+          <div class="text-xs text-gray-400">Match ${i + 1} <span class="text-gray-300">at index ${m.index}</span></div>
+          <code class="text-[13px] text-gray-800">${escapeHtml(m.match)}</code>
+          ${m.groups.length > 0 ? `<div class="flex flex-wrap gap-1 mt-1">${m.groups.map((g, j) => `<span class="text-xs bg-gray-100 rounded px-1.5 py-0.5 text-gray-600">Group ${j + 1}: ${escapeHtml(g || '(empty)')}</span>`).join('')}</div>` : ''}
+        </div>
+      `).join('');
+      if (matches.length > 50) {
+        detailsDiv.innerHTML += `<p class="text-xs text-gray-400 mt-1">... and ${matches.length - 50} more matches</p>`;
+      }
+    }
+
+    // Replace mode
+    if (isReplaceMode) {
+      doReplace(pattern, flags, text);
+    }
+  }
+
+  function doReplace(pattern, flags, text) {
+    const replaceWith = document.getElementById('re-replace')?.value || '';
+    try {
+      const regex = new RegExp(pattern, flags);
+      const replaced = text.replace(regex, replaceWith);
+      document.getElementById('re-replace-result').classList.remove('hidden');
+      document.getElementById('re-replace-output').textContent = replaced;
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function toggleReplace() {
+    isReplaceMode = !isReplaceMode;
+    const section = document.getElementById('re-replace-section');
+    const btn = document.getElementById('btn-replace-toggle');
+    section.classList.toggle('hidden', !isReplaceMode);
+    btn.classList.toggle('tool-btn-secondary', !isReplaceMode);
+    btn.classList.toggle('bg-indigo-100', isReplaceMode);
+    btn.classList.toggle('text-indigo-700', isReplaceMode);
+    btn.textContent = isReplaceMode ? 'Replace Mode ✓' : 'Replace';
+    if (!isReplaceMode) {
+      document.getElementById('re-replace-result').classList.add('hidden');
+    } else if (lastResult && lastResult.isValid) {
+      const pattern = document.getElementById('re-pattern')?.value || '';
+      const text = document.getElementById('re-text')?.value || '';
+      let flags = '';
+      ['g','i','m','s','u'].forEach(f => {
+        if (document.getElementById(`re-flag-${f}`)?.checked) flags += f;
+      });
+      doReplace(pattern, flags, text);
+    }
+  }
+
+  // Common pattern chips
+  document.querySelectorAll('.pattern-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const pattern = chip.dataset.pattern;
+      const input = document.getElementById('re-pattern');
+      if (input) {
+        input.value = pattern;
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+    });
+  });
+
+  document.getElementById('btn-test')?.addEventListener('click', doTest);
+  document.getElementById('btn-replace-toggle')?.addEventListener('click', toggleReplace);
+</script>
+
+<style>
+  .match-highlight {
+    display: inline;
+  }
+</style>

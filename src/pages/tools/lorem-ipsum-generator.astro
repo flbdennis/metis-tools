@@ -1,104 +1,171 @@
 ---
-import Schema from '../../components/Schema.astro';
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getPageSeo } from '../../utils/seo.js';
-const { title, description } = getPageSeo('tools/lorem-ipsum-generator'); // 根据页面修改键名
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import NumberInput from '../../components/ui/NumberInput.astro';
+import SelectInput from '../../components/ui/SelectInput.astro';
+import CheckboxInput from '../../components/ui/CheckboxInput.astro';
+import ResultDisplay from '../../components/tool/ResultDisplay.astro';
+
+const pageTitle = 'Lorem Ipsum Generator – Dummy Text Generator | MetisTools';
+const pageDescription = 'Generate random Lorem Ipsum placeholder text for designs, mockups, or content. Free online dummy text generator with paragraph, sentence, word, and character options.';
+
+const modeOptions = [
+  { value: 'paragraphs', label: 'Paragraphs' },
+  { value: 'sentences', label: 'Sentences' },
+  { value: 'words', label: 'Words' },
+  { value: 'characters', label: 'Characters' },
+];
 ---
 
-<BaseLayout title={title} description={description} currentPath="/tools/lorem-ipsum-generator">
-  <div class="max-w-2xl mx-auto py-8">
-    <div class="bg-white dark:bg-slate-950 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-slate-800">
-      <h1 class="text-3xl font-bold mb-2">📝 Lorem Ipsum Generator</h1>
-      <p class="text-gray-600 dark:text-gray-300 mb-6">Generate realistic dummy text for your projects.</p>
+<ToolLayout title={pageTitle} description={pageDescription} toolHref="/tools/lorem-ipsum-generator">
+  <div slot="input">
+    <div class="space-y-4">
+      <SelectInput id="lorem-mode" label="Generate By" options={modeOptions} selected="paragraphs" />
 
-      <div class="flex gap-4 mb-4">
-        <div class="flex-1">
-          <label class="block text-sm font-medium mb-1">Unit</label>
-          <select id="unit" class="w-full px-4 py-2 rounded-full border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950">
-            <option value="paragraphs">Paragraphs</option>
-            <option value="words">Words</option>
-          </select>
-        </div>
-        <div class="flex-1">
-          <label class="block text-sm font-medium mb-1">Count</label>
-          <input type="number" id="count" min="1" max="50" value="3" class="w-full px-4 py-2 rounded-full border border-gray-300 dark:border-slate-700 text-center text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950">
-        </div>
-      </div>
-      <button id="generate-btn" class="w-full bg-indigo-600 dark:bg-indigo-500 text-white py-2 rounded-full mb-4">Generate</button>
-      <textarea id="output" rows="8" class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-slate-700 font-sans text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950" readonly placeholder="Generated text will appear here..."></textarea>
-      <button id="copy-btn" class="mt-2 bg-gray-200 dark:bg-slate-800 hover:bg-gray-300 dark:hover:bg-slate-700 px-4 py-2 rounded-full text-sm">Copy Text</button>
+      <NumberInput id="lorem-count" label="Count" value="3" min={1} max={100} decimalPlaces={0} required={true} helperText="Paragraphs, sentences, words, or characters" />
+
+      <CheckboxInput id="start-lorem" label='Start with "Lorem ipsum dolor sit amet..."' checked={true} class="block" />
+      <CheckboxInput id="as-html" label="Output as HTML (wrapped in <p> tags)" checked={false} class="block" />
+
+      <button type="button" id="btn-generate" class="tool-btn-primary w-full">
+        Generate Text
+      </button>
     </div>
   </div>
 
-  <script>
-    const unitSelect = document.getElementById('unit');
-    const countInput = document.getElementById('count');
-    const generateBtn = document.getElementById('generate-btn');
-    const output = document.getElementById('output');
-    const copyBtn = document.getElementById('copy-btn');
+  <div slot="result">
+    <ResultDisplay emptyMessage="Choose your options and click <strong>Generate Text</strong>." onCopy={true}>
+      <div slot="result-content" class="space-y-4">
+        <div id="lorem-output" class="bg-gray-50 rounded-lg p-4 border border-gray-200 text-sm text-gray-800 leading-relaxed max-h-[500px] overflow-y-auto">
+        </div>
 
-    const words = [
-      "lorem", "ipsum", "dolor", "sit", "amet", "consectetur", "adipiscing", "elit", "sed", "do",
-      "eiusmod", "tempor", "incididunt", "ut", "labore", "et", "dolore", "magna", "aliqua", "ut",
-      "enim", "ad", "minim", "veniam", "quis", "nostrud", "exercitation", "ullamco", "laboris", "nisi",
-      "ut", "aliquip", "ex", "ea", "commodo", "consequat", "duis", "aute", "irure", "dolor", "in",
-      "reprehenderit", "in", "voluptate", "velit", "esse", "cillum", "dolore", "eu", "fugiat", "nulla",
-      "pariatur", "excepteur", "sint", "occaecat", "cupidatat", "non", "proident", "sunt", "in", "culpa",
-      "qui", "officia", "deserunt", "mollit", "anim", "id", "est", "laborum"
-    ];
+        <div id="lorem-stats" class="flex gap-4 text-xs text-gray-400 pt-3 border-t border-gray-100">
+        </div>
+      </div>
+    </ResultDisplay>
+  </div>
 
-    function getRandomWord() {
-      return words[Math.floor(Math.random() * words.length)];
-    }
+  <div slot="description">
+    <p>
+      Lorem Ipsum is the industry standard placeholder text used by designers, developers, and typesetters since the 1500s. This generator creates random, readable-like dummy text that helps you focus on layout and design without the distraction of meaningful content.
+    </p>
+    <p>
+      <strong>Generation Modes:</strong> Generate text by paragraphs (standard), sentences (for short placeholder lines), words (for UI labels), or characters (for precise length limits like meta descriptions or SMS).
+    </p>
+    <p>
+      <strong>HTML Output:</strong> Enable HTML mode to wrap each paragraph in <code>&lt;p&gt;</code> tags, ready to paste directly into your HTML templates or content management system.
+    </p>
+    <p>
+      <strong>"Lorem Ipsum" Start:</strong> When enabled, the text begins with the traditional "Lorem ipsum dolor sit amet" opening. Disable it to get fully randomized pseudo-Latin text.
+    </p>
+    <p>
+      <strong>Why Use Lorem Ipsum?</strong> Real content can distract reviewers from the design itself. Placeholder text lets you evaluate fonts, spacing, colors, and layout decisions objectively. It's widely used in web design, print layout, app prototyping, and content management system demos.
+    </p>
+  </div>
+</ToolLayout>
 
-    function generateParagraph(wordCount = 80) {
-      const pWords = [];
-      for (let i = 0; i < wordCount; i++) {
-        pWords.push(getRandomWord());
-      }
-      let sentence = pWords.join(' ');
-      sentence = sentence.charAt(0).toUpperCase() + sentence.slice(1);
-      if (!sentence.endsWith('.')) sentence += '.';
-      return sentence;
-    }
+<script>
+  const WORDS = [
+    'lorem','ipsum','dolor','sit','amet','consectetur','adipiscing','elit',
+    'sed','do','eiusmod','tempor','incididunt','ut','labore','et','dolore',
+    'magna','aliqua','enim','ad','minim','veniam','quis','nostrud',
+    'exercitation','ullamco','laboris','nisi','ut','aliquip','ex','ea',
+    'commodo','consequat','duis','aute','irure','dolor','in','reprehenderit',
+    'voluptate','velit','esse','cillum','dolore','eu','fugiat','nulla',
+    'pariatur','excepteur','sint','occaecat','cupidatat','non','proident',
+    'sunt','culpa','qui','officia','deserunt','mollit','anim','id','est',
+    'laborum','perspiciatis','unde','omnis','iste','natus','error','sit',
+    'voluptatem','accusantium','doloremque','laudantium','totam','rem',
+    'aperiam','eaque','ipsa','quae','ab','illo','inventore','veritatis',
+    'quasi','architecto','beatae','vitae','dicta','sunt','explicabo',
+    'nemo','enim','ipsam','quia','voluptas','aspernatur','aut','odit',
+    'fugit','consequuntur','magni','dolores','eos','ratione','sequi',
+    'nesciunt','neque','porro','quisquam','dolorem','adipisci','numquam',
+    'modi','tempora','incidunt','magnam','quaerat','voluptatem',
+  ];
 
-    function generateText() {
-      const unit = unitSelect.value;
-      let count = parseInt(countInput.value);
-      if (isNaN(count) || count < 1) count = 1;
-      if (count > 50) count = 50;
-      let result = '';
-      if (unit === 'paragraphs') {
-        const paras = [];
-        for (let i = 0; i < count; i++) {
-          paras.push(generateParagraph(60 + Math.floor(Math.random() * 40)));
+  function randomWords(count) {
+    const arr = new Uint32Array(count);
+    crypto.getRandomValues(arr);
+    return Array.from(arr, (v) => WORDS[v % WORDS.length]);
+  }
+
+  function toSentence(words) {
+    let s = words.join(' ');
+    s = s.charAt(0).toUpperCase() + s.slice(1);
+    if (!/[.!?]$/.test(s)) s += '.';
+    return s;
+  }
+
+  let currentText = '';
+
+  function generate() {
+    const mode = document.getElementById('lorem-mode')?.value || 'paragraphs';
+    const count = parseInt(document.getElementById('lorem-count')?.value) || 3;
+    const startLorem = document.getElementById('start-lorem')?.checked ?? true;
+    const asHtml = document.getElementById('as-html')?.checked ?? false;
+
+    let paragraphs = [];
+    const paragraphCount = mode === 'paragraphs' ? count : (mode === 'sentences' ? 1 : 1);
+
+    for (let p = 0; p < paragraphCount; p++) {
+      const sCount = mode === 'sentences' ? count : (Math.floor(Math.random() * 4) + 3);
+      const sentences = [];
+
+      for (let s = 0; s < sCount; s++) {
+        let wCount;
+        if (mode === 'words') wCount = count;
+        else if (mode === 'characters') wCount = Math.ceil(count / 5);
+        else wCount = Math.floor(Math.random() * 12) + 5;
+
+        let words = randomWords(wCount);
+        if (startLorem && p === 0 && s === 0) {
+          words = ['lorem','ipsum','dolor','sit','amet', ...words.slice(5)];
         }
-        result = paras.join('\n\n');
-      } else {
-        const wordList = [];
-        for (let i = 0; i < count; i++) {
-          wordList.push(getRandomWord());
-        }
-        result = wordList.join(' ');
-        result = result.charAt(0).toUpperCase() + result.slice(1);
+        sentences.push(toSentence(words));
+        if (mode === 'words' || mode === 'characters') break;
       }
-      output.value = result;
+      paragraphs.push(sentences.join(' '));
     }
 
-    generateBtn.addEventListener('click', generateText);
-    copyBtn.addEventListener('click', () => {
-      if (output.value) {
-        navigator.clipboard.writeText(output.value).then(() => showMessage('Copied!', 'success')).catch(() => showMessage('Copy failed', 'error'));
-      } else {
-        showMessage('Nothing to copy', 'error');
-      }
-    });
-    generateText(); // 初始生成
-  </script>
-  <Schema
-    toolName="Lorem Ipsum Generator"
-    description={description}
-    url={Astro.url.href}
-    category="Design"
-  />
-</BaseLayout>
+    let text = paragraphs.join('\n\n');
+
+    if (mode === 'characters') {
+      text = text.substring(0, count);
+      const lastSpace = text.lastIndexOf(' ');
+      if (lastSpace > 0) text = text.substring(0, lastSpace) + '.';
+    }
+
+    currentText = asHtml ? paragraphs.map(p => `<p>${p}</p>`).join('\n') : text;
+
+    // Render
+    document.getElementById('result-empty').classList.add('hidden');
+    document.getElementById('result-data').classList.remove('hidden');
+
+    const output = document.getElementById('lorem-output');
+    if (asHtml) {
+      output.innerHTML = `<pre class="font-mono text-xs whitespace-pre-wrap">${escapeHtml(currentText)}</pre>`;
+    } else {
+      output.innerHTML = currentText.split('\n\n').map(p => `<p class="mb-2 last:mb-0">${p}</p>`).join('');
+    }
+
+    const wordCount = text.split(/\s+/).filter(w => w.length > 0).length;
+    document.getElementById('lorem-stats').innerHTML = `
+      <span>Words: <strong>${wordCount}</strong></span>
+      <span>Characters: <strong>${text.length}</strong></span>
+      <span>Paragraphs: <strong>${paragraphs.length}</strong></span>
+    `;
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  document.getElementById('btn-generate')?.addEventListener('click', generate);
+
+  document.getElementById('btn-copy-result')?.addEventListener('click', () => {
+    if (!currentText) return;
+    navigator.clipboard.writeText(currentText).then(() => {
+      showToast('Text copied to clipboard!', 'success');
+    }).catch(() => showToast('Failed to copy.', 'error'));
+  });
+</script>

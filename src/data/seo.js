@@ -121,12 +121,44 @@ export const seoData = {
     title: 'Sort & Shuffle Lines – Alphabetical, Random Order | MetisTools',
     description: 'Sort lines alphabetically (A-Z or Z-A) or randomly shuffle line order. Free online text sorter for lists, to-do items, and data preparation.',
   },
-  'tools/text-statistics': {
-    title: 'Text Statistics – Word, Character, Line Counter | MetisTools',
-    description: 'Count words, characters (with/without spaces), lines, and paragraphs. Free online text statistics tool for writers, students, and SEO specialists.',
+  'tools/text-analyzer': {
+    title: 'Text Analyzer – Word, Character, Readability Counter | MetisTools',
+    description: 'Count words, characters, sentences, and paragraphs. Includes readability scores, keyword density, and reading time estimation. Free online text analyzer.',
   },
-  'tools/text-stats': {
-    title: 'Text Stats – Word, Character, Line Counter | MetisTools',
-    description: 'Count words, characters, lines, and paragraphs. Free online text stats tool for writers, editors, and students.',
+  'tools/pdf-converter': {
+    title: 'PDF Converter – Convert PDF to Image, Text, HTML | MetisTools',
+    description: 'Convert PDF files to images (PNG/JPEG), extract text, or convert to HTML. Free online PDF converter with no file size limits. No signup required.',
+  },
+
+  // Blog
+  blog: {
+    index: {
+      title: 'Blog – Tips, Guides & Updates | MetisTools',
+      description: 'Read our latest articles about online tools, development, design, and productivity. Tips, guides, and product updates from the MetisTools team.',
+    },
+  },
+
+  // Support pages
+  support: {
+    about: {
+      title: 'About MetisTools – Free Online Toolbox',
+      description: 'Learn about MetisTools — a free, privacy-first online toolkit. Every tool runs locally in your browser with no data uploaded to any server.',
+    },
+    contact: {
+      title: 'Contact MetisTools – Get in Touch',
+      description: 'Have suggestions, bug reports, or business inquiries? Contact the MetisTools team. We respond within 2-3 business days.',
+    },
+    faq: {
+      title: 'FAQ – Frequently Asked Questions | MetisTools',
+      description: 'Find answers to common questions about MetisTools. Learn about our free tools, privacy, file handling, and more.',
+    },
+    privacy: {
+      title: 'Privacy Policy – MetisTools',
+      description: 'Read the MetisTools privacy policy. We take your privacy seriously — no data collection, no server uploads, complete transparency.',
+    },
+    terms: {
+      title: 'Terms of Service & Disclaimer | MetisTools',
+      description: 'Read the MetisTools terms of service. Understand the conditions for using our free online tools and services.',
+    },
   },
 };

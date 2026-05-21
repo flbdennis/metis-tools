@@ -1,0 +1,89 @@
+---
+// 面包屑导航组件 —— 含 JSON-LD 结构化数据
+import Schema from '../seo/Schema.astro';
+import { navigationConfig } from '../../data/navigation';
+import { allTools } from '../../data/tools';
+
+export interface Props {
+  path: string;
+}
+
+const { path } = Astro.props;
+
+// 解析路径为面包屑项
+function buildBreadcrumbs(pathname) {
+  const segments = pathname.split('/').filter(Boolean);
+  const items = [{ name: 'Home', url: '/' }];
+
+  let accumulated = '';
+  for (let i = 0; i < segments.length; i++) {
+    const seg = segments[i];
+    accumulated += `/${seg}`;
+
+    if (seg === 'support' || seg === 'tools') continue;
+
+    let name = seg.charAt(0).toUpperCase() + seg.slice(1).replace(/-/g, ' ');
+    let url = accumulated;
+
+    // "support" 子页面：不显示 "support" 层级
+    if (segments[i - 1] === 'support') {
+      url = accumulated;
+    }
+
+    // "tools" 子页面：查工具名 + 分类链接
+    if (segments[i - 1] === 'tools') {
+      const tool = allTools.find(t => t.href === `/${segments.slice(i - 1, i + 1).join('/')}`) || allTools.find(t => t.href === accumulated);
+      if (tool) {
+        name = tool.title;
+        const cat = navigationConfig.categoryMap[tool.category];
+        if (cat) {
+          // 在工具名之前插入分类
+          if (items[items.length - 1]?.name !== cat.name) {
+            items.push({ name: cat.name, url: cat.href });
+          }
+        }
+      }
+    }
+
+    // "blog" 子页面
+    if (seg === 'blog') {
+      name = 'Blog';
+    }
+
+    items.push({ name, url });
+  }
+
+  // 最后一项不可点击
+  if (items.length > 1) {
+    items[items.length - 1].url = null;
+  }
+
+  return items;
+}
+
+const breadcrumbs = buildBreadcrumbs(path);
+---
+
+{/* 面包屑数量 ≤ 1 时不渲染（只有 Home） */}
+{breadcrumbs.length > 1 && (
+  <nav class="flex py-3" aria-label="Breadcrumb">
+    <ol class="flex flex-wrap items-center gap-1.5 text-sm text-gray-500">
+      {breadcrumbs.map((item, i) => (
+        <li class="flex items-center gap-1.5">
+          {i > 0 && (
+            <svg class="h-4 w-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          )}
+          {item.url ? (
+            <a href={item.url} class="hover:text-gray-700 transition-colors">{item.name}</a>
+          ) : (
+            <span class="text-gray-900 font-medium">{item.name}</span>
+          )}
+        </li>
+      ))}
+    </ol>
+  </nav>
+)}
+
+<Schema type="BreadcrumbList" breadcrumbs={breadcrumbs} />

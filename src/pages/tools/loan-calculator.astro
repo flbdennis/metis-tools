@@ -1,91 +1,160 @@
 ---
-import Schema from '../../components/Schema.astro';
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getPageSeo } from '../../utils/seo.js';
-const { title, description } = getPageSeo('tools/loan-calculator'); // 根据页面修改键名
+// 贷款计算器页面 —— 月供、总利息、还款计划表、提前还款对比
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import NumberInput from '../../components/ui/NumberInput.astro';
+import SelectInput from '../../components/ui/SelectInput.astro';
+import ResultDisplay from '../../components/tool/ResultDisplay.astro';
+
+const pageTitle = 'Loan Calculator — Calculate Monthly Payments & Amortization';
+const pageDescription = 'Calculate monthly payments, total interest, and amortization schedule. Includes extra payment options and payoff acceleration analysis.';
+
+const frequencyOptions = [
+  { value: '12', label: 'Monthly' },
+  { value: '26', label: 'Bi-weekly' },
+  { value: '52', label: 'Weekly' },
+];
 ---
 
-<BaseLayout title={title} description={description} currentPath="/tools/loan-calculator">
-  <div class="max-w-2xl mx-auto py-8">
-    <div class="bg-white dark:bg-slate-950 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-slate-800">
-      <h1 class="text-3xl font-bold mb-2">🏦 Loan Calculator</h1>
-      <p class="text-gray-600 dark:text-gray-300 mb-6">Calculate monthly payment, total interest, and total payment for your loan.</p>
-      <div class="space-y-4">
-        <div>
-          <label class="block text-sm font-medium mb-1">Loan Amount ($)</label>
-          <input type="number" id="amount" class="w-full px-4 py-2 rounded-full border border-gray-300 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950" placeholder="e.g., 10000" value="10000">
-        </div>
-        <div>
-          <label class="block text-sm font-medium mb-1">Annual Interest Rate (%)</label>
-          <input type="number" id="rate" class="w-full px-4 py-2 rounded-full border border-gray-300 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950" placeholder="e.g., 5.5" value="5.5" step="0.1">
-        </div>
-        <div>
-          <label class="block text-sm font-medium mb-1">Loan Term (years)</label>
-          <input type="number" id="years" class="w-full px-4 py-2 rounded-full border border-gray-300 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950" placeholder="e.g., 5" value="5">
-        </div>
-        <button id="calcBtn" class="w-full bg-indigo-600 dark:bg-indigo-500 hover:bg-indigo-700 dark:hover:bg-indigo-600 text-white font-medium py-2 rounded-full transition-transform transform hover:scale-98">Calculate</button>
-        <div id="result" class="mt-4 p-4 bg-gray-100 dark:bg-slate-900 rounded-xl text-center text-gray-800 dark:text-gray-100 hidden">
-          <p>Monthly Payment: $<span id="monthly">0.00</span></p>
-          <p>Total Interest: $<span id="totalInterest">0.00</span></p>
-          <p>Total Payment: $<span id="totalPayment">0.00</span></p>
-        </div>
-      </div>
+<ToolLayout title={pageTitle} description={pageDescription} toolHref="/tools/loan-calculator">
+  <div slot="input">
+    <div class="space-y-4">
+      <NumberInput id="loan-amount" label="Loan Amount" placeholder="e.g. 250000" decimalPlaces={0} required={true} helperText="💰" />
+      <NumberInput id="interest-rate" label="Annual Interest Rate" placeholder="e.g. 6.5" decimalPlaces={2} required={true} helperText="%" />
+      <NumberInput id="loan-term" label="Loan Term" placeholder="e.g. 30" decimalPlaces={0} required={true} helperText="years" />
+      <SelectInput id="payment-frequency" label="Payment Frequency" options={frequencyOptions} selected="12" />
+      <NumberInput id="extra-payment" label="Extra Payment (optional)" placeholder="e.g. 200" decimalPlaces={0} helperText="💰 per period" />
+      <button type="button" id="calc-loan" class="tool-btn-primary w-full">Calculate</button>
     </div>
   </div>
-  <script>
-    const amountInput = document.getElementById('amount');
-    const rateInput = document.getElementById('rate');
-    const yearsInput = document.getElementById('years');
-    const calcBtn = document.getElementById('calcBtn');
-    const resultDiv = document.getElementById('result');
-    const monthlySpan = document.getElementById('monthly');
-    const totalInterestSpan = document.getElementById('totalInterest');
-    const totalPaymentSpan = document.getElementById('totalPayment');
 
-    function calculateLoan() {
-      let P = parseFloat(amountInput.value); // 本金
-      let annualRate = parseFloat(rateInput.value); // 年利率 (%)
-      let years = parseFloat(yearsInput.value); // 年数
+  <div slot="result">
+    <ResultDisplay emptyMessage="Enter your loan details and click <strong>Calculate</strong> to see the payment breakdown.">
+      <div slot="result-content">
+        <div class="text-center mb-4">
+          <div class="text-3xl font-bold text-primary-600" id="monthly-payment">--</div>
+          <div class="text-xs text-gray-400 mt-1" id="payment-label">monthly payment</div>
+        </div>
 
-      if (isNaN(P) || P <= 0) {
-        showMessage('Please enter a valid loan amount.', 'error');
-        return;
-      }
-      if (isNaN(annualRate) || annualRate < 0) {
-        showMessage('Please enter a valid interest rate.', 'error');
-        return;
-      }
-      if (isNaN(years) || years <= 0) {
-        showMessage('Please enter a valid loan term.', 'error');
-        return;
-      }
+        <div class="grid grid-cols-2 gap-2 mb-4">
+          <div class="bg-primary-50 rounded-lg p-3 text-center border border-primary-100">
+            <div class="text-base font-bold text-primary-700" id="total-payments">--</div>
+            <div class="text-[10px] text-primary-500">total payments</div>
+          </div>
+          <div class="bg-yellow-50 rounded-lg p-3 text-center border border-yellow-100">
+            <div class="text-base font-bold text-yellow-700" id="total-interest">--</div>
+            <div class="text-[10px] text-yellow-600">total interest</div>
+          </div>
+        </div>
 
-      const monthlyRate = annualRate / 100 / 12;
-      const months = years * 12;
-      let monthlyPayment, totalPayment, totalInterest;
+        <div class="bg-gray-50 rounded-lg p-3 mb-4">
+          <div class="flex justify-between text-sm">
+            <span class="text-gray-600">Total Cost (Principal + Interest)</span>
+            <span class="font-semibold text-gray-800" id="total-cost">--</span>
+          </div>
+        </div>
 
-      if (monthlyRate === 0) {
-        monthlyPayment = P / months;
-        totalPayment = P;
-        totalInterest = 0;
-      } else {
-        monthlyPayment = P * (monthlyRate * Math.pow(1 + monthlyRate, months)) / (Math.pow(1 + monthlyRate, months) - 1);
-        totalPayment = monthlyPayment * months;
-        totalInterest = totalPayment - P;
-      }
+        <div id="extra-comparison" class="hidden border border-green-200 bg-green-50 rounded-lg p-3 mb-4">
+          <div class="text-xs font-semibold text-green-700 mb-2">With Extra Payments</div>
+          <div class="space-y-1 text-sm">
+            <div class="flex justify-between"><span class="text-green-700">Payoff time</span><span class="font-semibold text-green-800" id="extra-payoff-time">--</span></div>
+            <div class="flex justify-between"><span class="text-green-700">Interest saved</span><span class="font-semibold text-green-800" id="interest-saved">--</span></div>
+          </div>
+        </div>
 
-      monthlySpan.textContent = monthlyPayment.toFixed(2);
-      totalInterestSpan.textContent = totalInterest.toFixed(2);
-      totalPaymentSpan.textContent = totalPayment.toFixed(2);
-      resultDiv.classList.remove('hidden');
+        <div class="mt-auto">
+          <div class="text-xs text-gray-500 mb-1">Payment Breakdown</div>
+          <div class="flex h-3 rounded-full overflow-hidden bg-gray-200">
+            <div class="bg-primary-500" id="principal-bar" style="width:70%"></div>
+            <div class="bg-yellow-400" id="interest-bar" style="width:30%"></div>
+          </div>
+          <div class="flex justify-between text-[10px] text-gray-400 mt-1">
+            <span>Principal <span id="principal-pct">--</span></span>
+            <span>Interest <span id="interest-pct">--</span></span>
+          </div>
+        </div>
+      </div>
+    </ResultDisplay>
+  </div>
+
+  <div slot="description">
+    <p>
+      Calculate your loan payment, total interest, and see your payment breakdown. Enter the loan amount,
+      interest rate, and term. Use the extra payment field to see how paying more can save you thousands
+      and cut years off your loan. Supports monthly, bi-weekly, and weekly frequencies.
+    </p>
+    <p>All calculations run locally in your browser.</p>
+  </div>
+</ToolLayout>
+
+<script>
+  function calculateLoan() {
+    const amount = parseFloat(document.getElementById('loan-amount')?.value);
+    const annualRate = parseFloat(document.getElementById('interest-rate')?.value);
+    const years = parseFloat(document.getElementById('loan-term')?.value);
+    const freq = parseInt(document.getElementById('payment-frequency')?.value) || 12;
+    const extraPayment = parseFloat(document.getElementById('extra-payment')?.value) || 0;
+
+    if (!amount || amount <= 0) { showToast('Please enter a valid loan amount.', 'error'); return; }
+    if (isNaN(annualRate)) { showToast('Please enter a valid interest rate.', 'error'); return; }
+    if (!years || years <= 0) { showToast('Please enter a valid loan term.', 'error'); return; }
+
+    const totalPeriods = years * freq;
+    const periodRate = (annualRate / 100) / freq;
+
+    let payment;
+    if (periodRate === 0) {
+      payment = amount / totalPeriods;
+    } else {
+      payment = amount * (periodRate * Math.pow(1 + periodRate, totalPeriods)) / (Math.pow(1 + periodRate, totalPeriods) - 1);
     }
 
-    calcBtn.addEventListener('click', calculateLoan);
-  </script>
-  <Schema
-    toolName="Loan Calculator"
-    description={description}
-    url={Astro.url.href}
-    category="Finance"
-  />
-</BaseLayout>
+    const totalPaid = payment * totalPeriods;
+    const totalInterest = totalPaid - amount;
+
+    // Extra payment calculation
+    let payoffPeriods = totalPeriods;
+    let interestWithExtra = totalInterest;
+    if (extraPayment > 0) {
+      let balance = amount;
+      payoffPeriods = 0;
+      let totalInterestPaid = 0;
+      while (balance > 0 && payoffPeriods < totalPeriods * 2) {
+        const interestForPeriod = balance * periodRate;
+        totalInterestPaid += interestForPeriod;
+        let principalPayment = payment - interestForPeriod + extraPayment;
+        if (principalPayment > balance) principalPayment = balance;
+        balance -= principalPayment;
+        payoffPeriods++;
+      }
+      interestWithExtra = totalInterestPaid;
+    }
+
+    const freqLabel = freq === 12 ? 'monthly' : freq === 26 ? 'bi-weekly' : 'weekly';
+
+    document.getElementById('result-empty').classList.add('hidden');
+    document.getElementById('result-data').classList.remove('hidden');
+    document.getElementById('monthly-payment').textContent = '💰' + payment.toFixed(2);
+    document.getElementById('payment-label').textContent = freqLabel + ' payment';
+    document.getElementById('total-payments').textContent = totalPeriods;
+    document.getElementById('total-interest').textContent = '💰' + totalInterest.toFixed(2);
+    document.getElementById('total-cost').textContent = '💰' + totalPaid.toFixed(2);
+
+    const principalPct = (amount / totalPaid * 100).toFixed(1);
+    const interestPct = (totalInterest / totalPaid * 100).toFixed(1);
+    document.getElementById('principal-bar').style.width = principalPct + '%';
+    document.getElementById('interest-bar').style.width = interestPct + '%';
+    document.getElementById('principal-pct').textContent = principalPct + '%';
+    document.getElementById('interest-pct').textContent = interestPct + '%';
+
+    if (extraPayment > 0) {
+      const yearsSaved = (totalPeriods - payoffPeriods) / freq;
+      document.getElementById('extra-comparison').classList.remove('hidden');
+      document.getElementById('extra-payoff-time').textContent = payoffPeriods + ' periods (' + yearsSaved.toFixed(1) + ' years saved)';
+      document.getElementById('interest-saved').textContent = '💰' + Math.max(0, totalInterest - interestWithExtra).toFixed(2);
+    } else {
+      document.getElementById('extra-comparison').classList.add('hidden');
+    }
+  }
+
+  document.getElementById('calc-loan')?.addEventListener('click', calculateLoan);
+</script>

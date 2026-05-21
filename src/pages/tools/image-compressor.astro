@@ -1,168 +1,214 @@
 ---
-import Schema from '../../components/Schema.astro';
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getPageSeo } from '../../utils/seo.js';
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import FileUpload from '../../components/ui/FileUpload.astro';
+import NumberInput from '../../components/ui/NumberInput.astro';
+import SelectInput from '../../components/ui/SelectInput.astro';
+import ProgressBar from '../../components/ui/ProgressBar.astro';
+import ResultDisplay from '../../components/tool/ResultDisplay.astro';
 
-const { title, description } = getPageSeo('tools/image-compressor'); // 根据页面修改键名
+const pageTitle = 'Image Compressor – Reduce JPG, PNG, WebP Size | MetisTools';
+const pageDescription = 'Compress JPEG, PNG, WebP images online without losing quality. Free image compressor for web optimization, email attachments, and storage.';
+
+const qualityOptions = [
+  { value: '0.9', label: 'High (90%) — Best Quality' },
+  { value: '0.7', label: 'Medium (70%) — Balanced' },
+  { value: '0.5', label: 'Low (50%) — Maximum Compression' },
+  { value: 'custom', label: 'Custom' },
+];
 ---
 
-<BaseLayout title={title} description={description} currentPath="/tools/image-compressor">
-  <div class="max-w-2xl mx-auto py-8">
-    <div class="bg-white dark:bg-slate-950 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-slate-800">
-      <h1 class="text-3xl font-bold mb-2">🖼️ Image Compressor</h1>
-      <p class="text-gray-600 dark:text-gray-300 mb-6">Reduce image file size while maintaining quality. Your images never leave your device.</p>
+<ToolLayout title={pageTitle} description={pageDescription} toolHref="/tools/image-compressor">
+  <div slot="input">
+    <div class="space-y-4">
+      <FileUpload id="ic-file" label="Upload Image" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" maxSize={100 * 1024 * 1024} required={true} helperText="JPEG, PNG, or WebP — up to 100MB" />
 
-      <div id="upload-zone" class="border-2 border-dashed border-gray-300 dark:border-slate-700 rounded-xl p-6 text-center cursor-pointer hover:border-indigo-500 transition">
-        <svg class="mx-auto h-10 w-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-        </svg>
-        <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">Drag & drop an image here, or <span class="text-indigo-600 dark:text-indigo-400 font-medium">browse</span></p>
-        <p class="text-xs text-gray-400 mt-1">Supports JPG, PNG, WebP. Max 20MB.</p>
-        <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp" class="hidden text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950">
+      <SelectInput id="ic-quality-preset" label="Quality Preset" options={qualityOptions} selected="0.7" />
+
+      <div id="ic-custom-quality" class="hidden">
+        <NumberInput id="ic-quality" label="Custom Quality" value="80" min={1} max={100} decimalPlaces={0} allowNegative={false} required={false} helperText="1 – 100 (higher = better quality, larger file)" />
       </div>
 
-      <div class="mt-4">
-        <label class="block text-sm font-medium mb-1">Quality: <span id="quality-value">80</span>%</label>
-        <input type="range" id="quality" min="10" max="100" value="80" class="w-full text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950">
-      </div>
-
-      <div id="preview-area" class="mt-6 hidden">
-        <div class="flex flex-col md:flex-row gap-4">
-          <div class="flex-1">
-            <p class="text-sm font-medium">Original</p>
-            <img id="original-preview" class="mt-2 max-h-48 rounded border" />
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1" id="original-size"></p>
-          </div>
-          <div class="flex-1">
-            <p class="text-sm font-medium">Compressed</p>
-            <img id="compressed-preview" class="mt-2 max-h-48 rounded border" />
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1" id="compressed-size"></p>
-          </div>
-        </div>
-        <button id="download-btn" class="mt-4 bg-indigo-600 dark:bg-indigo-500 text-white px-4 py-2 rounded-full text-sm disabled:opacity-50" disabled>Download Compressed Image</button>
-      </div>
+      <button type="button" id="btn-compress" class="tool-btn-primary w-full" disabled>
+        Compress Image
+      </button>
     </div>
   </div>
 
-  <script>
-    const uploadZone = document.getElementById('upload-zone');
-    const fileInput = document.getElementById('file-input');
-    const qualitySlider = document.getElementById('quality');
-    const qualityValue = document.getElementById('quality-value');
-    const previewArea = document.getElementById('preview-area');
-    const originalImg = document.getElementById('original-preview');
-    const compressedImg = document.getElementById('compressed-preview');
-    const originalSizeSpan = document.getElementById('original-size');
-    const compressedSizeSpan = document.getElementById('compressed-size');
-    const downloadBtn = document.getElementById('download-btn');
+  <div slot="result">
+    <ResultDisplay emptyMessage="Upload an image and click <strong>Compress Image</strong> to see results." onDownload={true}>
+      <div slot="result-content" class="space-y-4">
+        <ProgressBar visible={false} />
 
-    let currentFile = null;
-    let currentCompressedBlob = null;
-    let currentOriginalUrl = null;   // 保存原始图片的 blob URL
-    let currentCompressedUrl = null; // 保存压缩后图片的 blob URL
+        <!-- Before / After preview -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Original</h4>
+            <div class="bg-gray-100 rounded-lg border border-gray-200 aspect-square flex items-center justify-center overflow-hidden">
+              <img id="ic-original-img" src="" alt="Original" class="max-w-full max-h-full object-contain hidden" />
+              <span id="ic-original-placeholder" class="text-xs text-gray-400">--</span>
+            </div>
+            <div id="ic-original-info" class="mt-1 text-xs text-gray-500"></div>
+          </div>
+          <div>
+            <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Compressed</h4>
+            <div class="bg-gray-100 rounded-lg border border-gray-200 aspect-square flex items-center justify-center overflow-hidden">
+              <img id="ic-compressed-img" src="" alt="Compressed" class="max-w-full max-h-full object-contain hidden" />
+              <span id="ic-compressed-placeholder" class="text-xs text-gray-400">--</span>
+            </div>
+            <div id="ic-compressed-info" class="mt-1 text-xs text-gray-500"></div>
+          </div>
+        </div>
 
-    function showMsg(msg, type = 'info') {
-      if (typeof showMessage === 'function') showMessage(msg, type);
-      else alert(msg);
+        <!-- Stats -->
+        <div class="grid grid-cols-3 gap-3 text-center">
+          <div class="bg-gray-50 rounded-lg p-3 border border-gray-100">
+            <div id="ic-saved" class="text-lg font-bold text-emerald-600">--</div>
+            <div class="text-xs text-gray-500">Saved</div>
+          </div>
+          <div class="bg-gray-50 rounded-lg p-3 border border-gray-100">
+            <div id="ic-orig-size" class="text-lg font-bold text-gray-700">--</div>
+            <div class="text-xs text-gray-500">Original Size</div>
+          </div>
+          <div class="bg-gray-50 rounded-lg p-3 border border-gray-100">
+            <div id="ic-new-size" class="text-lg font-bold text-gray-700">--</div>
+            <div class="text-xs text-gray-500">New Size</div>
+          </div>
+        </div>
+      </div>
+    </ResultDisplay>
+  </div>
+
+  <div slot="description">
+    <p>
+      This free online image compressor reduces the file size of JPEG, PNG, and WebP images directly in your browser. Your images are never uploaded to any server — all compression happens locally using the Canvas API, keeping your data private and secure.
+    </p>
+    <p>
+      <strong>Quality Control:</strong> Choose from High (90%), Medium (70%), or Low (50%) quality presets, or set a custom quality level from 1 to 100. Higher quality means larger files; lower quality means more compression and smaller files.
+    </p>
+    <p>
+      <strong>Before/After Preview:</strong> Compare the original and compressed images side by side to visually verify that quality is preserved. Check the exact file size difference and the percentage saved.
+    </p>
+    <p>
+      <strong>Supports Multiple Formats:</strong> Works with JPEG (.jpg), PNG (.png), and WebP (.webp) images up to 100MB. The output format matches the input format by default, so your compressed image stays compatible with your workflow.
+    </p>
+    <p>
+      <strong>Use Cases:</strong> Optimize website images for faster page loads and better SEO. Reduce email attachment sizes to stay under limits. Free up storage space on your device by compressing photos. Prepare images for social media where file size limits apply.
+    </p>
+  </div>
+</ToolLayout>
+
+<script>
+  import { compressImage, formatFileSize } from '../../lib/image-tools.js';
+
+  const showToast = window.showToast || (() => {});
+  const updateProgress = window.updateProgress || (() => {});
+  const hideProgress = window.hideProgress || (() => {});
+
+  let currentFile = null;
+  let currentResult = null;
+
+  function clearResults() {
+    currentResult = null;
+    document.getElementById('result-data').classList.add('hidden');
+    document.getElementById('result-empty').classList.remove('hidden');
+    document.getElementById('ic-compressed-img').classList.add('hidden');
+    document.getElementById('ic-compressed-placeholder').classList.remove('hidden');
+    document.getElementById('ic-compressed-info').textContent = '';
+    document.getElementById('ic-saved').textContent = '--';
+    document.getElementById('ic-orig-size').textContent = '--';
+    document.getElementById('ic-new-size').textContent = '--';
+    hideProgress();
+  }
+
+  function toggleCustomQuality() {
+    const preset = document.getElementById('ic-quality-preset')?.value;
+    const customDiv = document.getElementById('ic-custom-quality');
+    if (preset === 'custom') {
+      customDiv.classList.remove('hidden');
+    } else {
+      customDiv.classList.add('hidden');
     }
+  }
 
-    qualitySlider.addEventListener('input', () => {
-      qualityValue.textContent = qualitySlider.value;
-      if (currentFile) compressImage(currentFile);
-    });
-
-    async function compressImage(file) {
-      if (!file) return;
-      try {
-        const quality = qualitySlider.value / 100;
-
-        // 1. 清理旧的 blob URL，避免内存泄漏
-        if (currentOriginalUrl) URL.revokeObjectURL(currentOriginalUrl);
-        if (currentCompressedUrl) URL.revokeObjectURL(currentCompressedUrl);
-
-        // 2. 创建原始图片的 blob URL 并立即显示
-        currentOriginalUrl = URL.createObjectURL(file);
-        originalImg.src = currentOriginalUrl;
-        originalSizeSpan.textContent = `Size: ${(file.size / 1024).toFixed(2)} KB`;
-
-        // 3. 等待图片加载完成后再进行压缩
-        const img = new Image();
-        img.src = currentOriginalUrl;
-        await new Promise((resolve, reject) => {
-          img.onload = resolve;
-          img.onerror = reject;
-        });
-
-        // 4. Canvas 压缩
-        const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0);
-        const mimeType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
-        const compressedBlob = await new Promise(resolve => canvas.toBlob(resolve, mimeType, quality));
-        currentCompressedBlob = compressedBlob;
-
-        // 5. 创建压缩后图片的 blob URL 并显示
-        currentCompressedUrl = URL.createObjectURL(compressedBlob);
-        compressedImg.src = currentCompressedUrl;
-        compressedSizeSpan.textContent = `Size: ${(compressedBlob.size / 1024).toFixed(2)} KB (${Math.round((1 - compressedBlob.size / file.size) * 100)}% reduction)`;
-        downloadBtn.disabled = false;
-      } catch (err) {
-        console.error(err);
-        showMsg('Compression failed: ' + err.message, 'error');
-      }
+  document.getElementById('ic-quality-preset')?.addEventListener('change', toggleCustomQuality);
+  document.addEventListener('select-change', (e) => {
+    if (e.target?.closest('.custom-select-wrapper')?.dataset?.selectId === 'ic-quality-preset') {
+      toggleCustomQuality();
     }
+  });
 
-    function processFile(file) {
-      if (!file || !file.type.startsWith('image/')) {
-        showMsg('Please upload an image file (JPG, PNG, WebP).', 'error');
-        return;
-      }
-      if (file.size > 20 * 1024 * 1024) {
-        showMsg('File too large. Max 20MB.', 'error');
-        return;
-      }
-      currentFile = file;
-      compressImage(file);
-      previewArea.classList.remove('hidden');
+  // File selection handler
+  document.getElementById('ic-file')?.addEventListener('file-selected', (e) => {
+    currentFile = e.detail.file;
+    clearResults();
+    document.getElementById('btn-compress').disabled = false;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      document.getElementById('ic-original-img').src = ev.target.result;
+      document.getElementById('ic-original-img').classList.remove('hidden');
+      document.getElementById('ic-original-placeholder').classList.add('hidden');
+      document.getElementById('ic-original-info').textContent = `${currentFile.name} — ${formatFileSize(currentFile.size)}`;
+    };
+    reader.readAsDataURL(currentFile);
+  });
+
+  document.getElementById('ic-file')?.addEventListener('file-cleared', () => {
+    currentFile = null;
+    document.getElementById('btn-compress').disabled = true;
+    document.getElementById('ic-original-img').classList.add('hidden');
+    document.getElementById('ic-original-placeholder').classList.remove('hidden');
+    document.getElementById('ic-original-info').textContent = '';
+    clearResults();
+  });
+
+  async function doCompress() {
+    if (!currentFile) { showToast('Please select an image.', 'error'); return; }
+
+    const btn = document.getElementById('btn-compress');
+    btn.disabled = true;
+    btn.textContent = 'Compressing...';
+
+    clearResults();
+    document.getElementById('result-empty').classList.add('hidden');
+    document.getElementById('result-data').classList.remove('hidden');
+    updateProgress(50, 'Compressing image...');
+
+    try {
+      const preset = document.getElementById('ic-quality-preset')?.value;
+      let quality = preset === 'custom'
+        ? (parseInt(document.getElementById('ic-quality')?.value) || 80) / 100
+        : parseFloat(preset || '0.7');
+
+      currentResult = await compressImage(currentFile, quality);
+
+      updateProgress(100, 'Done!');
+
+      document.getElementById('ic-compressed-img').src = currentResult.url;
+      document.getElementById('ic-compressed-img').classList.remove('hidden');
+      document.getElementById('ic-compressed-placeholder').classList.add('hidden');
+      document.getElementById('ic-compressed-info').textContent = `${formatFileSize(currentResult.compressedSize)} — ${currentResult.width}x${currentResult.height}`;
+
+      document.getElementById('ic-saved').textContent = currentResult.savedPercent + '%';
+      document.getElementById('ic-orig-size').textContent = formatFileSize(currentResult.originalSize);
+      document.getElementById('ic-new-size').textContent = formatFileSize(currentResult.compressedSize);
+
+      setTimeout(() => hideProgress(), 1500);
+    } catch (e) {
+      hideProgress();
+      showToast('Compression failed: ' + (e.message || 'Unknown error'), 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Compress Image';
     }
+  }
 
-    uploadZone.addEventListener('click', () => fileInput.click());
-    fileInput.addEventListener('change', (e) => {
-      if (e.target.files.length) processFile(e.target.files[0]);
-    });
-    uploadZone.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      uploadZone.classList.add('border-indigo-500', 'bg-indigo-50');
-    });
-    uploadZone.addEventListener('dragleave', () => {
-      uploadZone.classList.remove('border-indigo-500', 'bg-indigo-50');
-    });
-    uploadZone.addEventListener('drop', (e) => {
-      e.preventDefault();
-      uploadZone.classList.remove('border-indigo-500', 'bg-indigo-50');
-      const file = e.dataTransfer.files[0];
-      if (file && file.type.startsWith('image/')) processFile(file);
-      else showMsg('Please drop an image file.', 'error');
-    });
+  document.getElementById('btn-compress')?.addEventListener('click', doCompress);
 
-    downloadBtn.addEventListener('click', () => {
-      if (currentCompressedBlob) {
-        const url = URL.createObjectURL(currentCompressedBlob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `compressed.${currentCompressedBlob.type.split('/')[1] || 'jpg'}`;
-        a.click();
-        // 延迟释放，确保下载请求已经发出
-        setTimeout(() => URL.revokeObjectURL(url), 100);
-      }
-    });
-  </script>
-  <Schema
-    toolName="Image Compressor"
-    description={description}
-    url={Astro.url.href}
-    category="ImageEditing"
-  />
-</BaseLayout> 
+  document.getElementById('btn-download-result')?.addEventListener('click', () => {
+    if (!currentResult) return;
+    const a = document.createElement('a');
+    a.href = currentResult.url;
+    a.download = 'compressed-' + (currentFile?.name || 'image');
+    a.click();
+  });
+</script>

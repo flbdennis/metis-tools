@@ -3,11 +3,39 @@ import { defineConfig } from 'astro/config';
 import tailwind from '@astrojs/tailwind';
 
 export default defineConfig({
-  // 网站 URL，部署时改为最终域名
-  site: 'https://metistools.com', // 末尾无斜杠
-  // 输出静态 HTML
+  // 网站 URL
+  site: 'https://metistools.com',
+  // 静态输出
   output: 'static',
-  // URL 末尾不添加斜杠
+  // URL 末尾不加斜杠
   trailingSlash: 'never',
+  // 集成
   integrations: [tailwind()],
+  // 构建优化
+  build: {
+    // CSS 内联
+    inlineStylesheets: 'auto',
+  },
+  // Vite 配置
+  vite: {
+    build: {
+      // 使用 esbuild 压缩（Vite 内置）
+      minify: 'esbuild',
+      // 代码分割
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            'flowbite': ['flowbite'],
+            'pdf': ['pdf-lib', 'pdfjs-dist'],
+          },
+        },
+      },
+    },
+    esbuild: {
+      // 去除 console 和 debugger
+      drop: ['console', 'debugger'],
+      // 去除所有注释
+      legalComments: 'none',
+    },
+  },
 });

@@ -1,0 +1,90 @@
+---
+// JSON-LD 结构化数据组件 —— 提升 SEO
+import { siteConfig } from '../../data/site';
+
+export interface Props {
+  type: 'WebSite' | 'BreadcrumbList' | 'HowTo' | 'Article' | 'FAQPage';
+  data?: Record<string, any>;
+  breadcrumbs?: { name: string; url: string }[];
+  toolName?: string;
+}
+
+const { type, data, breadcrumbs = [], toolName } = Astro.props;
+
+let jsonLd = '';
+
+if (type === 'WebSite') {
+  jsonLd = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: siteConfig.name,
+    url: siteConfig.url,
+    description: siteConfig.description,
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: `${siteConfig.url}/?q={search_term_string}`,
+      'query-input': 'required name=search_term_string',
+    },
+  });
+}
+
+if (type === 'BreadcrumbList' && breadcrumbs.length > 0) {
+  jsonLd = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: breadcrumbs.map((item, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: item.name,
+      item: item.url ? new URL(item.url, siteConfig.url).href : undefined,
+    })),
+  });
+}
+
+if (type === 'HowTo' && toolName && data?.steps) {
+  jsonLd = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'HowTo',
+    name: toolName,
+    description: data.description || '',
+    step: data.steps.map((step: string, i: number) => ({
+      '@type': 'HowToStep',
+      position: i + 1,
+      text: step,
+    })),
+  });
+}
+
+if (type === 'Article' && data) {
+  jsonLd = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: data.title,
+    description: data.description,
+    author: { '@type': 'Organization', name: siteConfig.orgName },
+    datePublished: data.pubDate,
+    dateModified: data.modDate || data.pubDate,
+    publisher: {
+      '@type': 'Organization',
+      name: siteConfig.orgName,
+    },
+  });
+}
+
+if (type === 'FAQPage' && data?.questions) {
+  jsonLd = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: data.questions.map((q: { question: string; answer: string }) => ({
+      '@type': 'Question',
+      name: q.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: q.answer,
+      },
+    })),
+  });
+}
+---
+
+{jsonLd && <script type="application/ld+json" set:html={jsonLd} />}

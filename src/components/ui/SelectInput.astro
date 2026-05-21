@@ -1,0 +1,349 @@
+---
+// 自定义下拉选择器 —— 完全替换原生 <select>
+export interface Props {
+  id: string;
+  label?: string;
+  options: { value: string; label: string; disabled?: boolean }[];
+  selected?: string;
+  placeholder?: string;
+  required?: boolean;
+  disabled?: boolean;
+  class?: string;
+  helperText?: string;
+}
+
+const {
+  id,
+  label = '',
+  options = [],
+  selected = '',
+  placeholder = 'Select an option',
+  required = false,
+  disabled = false,
+  class: extraClass = '',
+  helperText = '',
+} = Astro.props;
+
+const selectedOption = options.find(o => o.value === selected);
+const displayText = selectedOption ? selectedOption.label : placeholder;
+---
+
+<div class={`custom-select-wrapper ${extraClass}`} data-select-id={id}>
+  {label && (
+    <label for={`${id}-trigger`} class="tool-label">
+      {label}
+      {required && <span class="text-red-500 ml-0.5">*</span>}
+    </label>
+  )}
+
+  <select
+    id={id}
+    name={id}
+    class="sr-only"
+    required={required}
+    disabled={disabled}
+    data-native-select
+  >
+    <option value="" disabled={required}>{placeholder}</option>
+    {options.map(opt => (
+      <option value={opt.value} selected={opt.value === selected} disabled={opt.disabled}>
+        {opt.label}
+      </option>
+    ))}
+  </select>
+
+  <button
+    type="button"
+    id={`${id}-trigger`}
+    class="custom-select-trigger"
+    disabled={disabled}
+    aria-haspopup="listbox"
+    aria-expanded="false"
+    role="combobox"
+  >
+    <span class={`custom-select-text ${!selectedOption ? 'text-gray-400' : ''}`}>
+      {displayText}
+    </span>
+    <svg class="custom-select-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+    </svg>
+  </button>
+
+  <div class="custom-select-dropdown hidden" role="listbox" aria-labelledby={`${id}-trigger`}>
+    <div class="custom-select-options">
+      {options.map(opt => (
+        <button
+          type="button"
+          class={`custom-select-option ${opt.value === selected ? 'selected' : ''} ${opt.disabled ? 'disabled' : ''}`}
+          data-value={opt.value}
+          disabled={opt.disabled}
+          role="option"
+          aria-selected={opt.value === selected ? 'true' : 'false'}
+        >
+          {opt.label}
+        </button>
+      ))}
+    </div>
+  </div>
+
+  <p class="field-error hidden text-xs text-red-500 mt-1"></p>
+  {helperText && <p class="text-xs text-gray-400 mt-1">{helperText}</p>}
+</div>
+
+<style>
+  .custom-select-wrapper {
+    position: relative;
+  }
+  .custom-select-trigger {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.625rem 1rem;
+    background: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    color: #111827;
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    text-align: left;
+    line-height: 1.5;
+    outline: none;
+  }
+  .custom-select-trigger:hover:not(:disabled) {
+    border-color: #9ca3af;
+  }
+  .custom-select-trigger:focus {
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+  }
+  .custom-select-trigger:disabled {
+    background: #f3f4f6;
+    color: #9ca3af;
+    cursor: not-allowed;
+  }
+  .custom-select-arrow {
+    width: 1rem;
+    height: 1rem;
+    color: #9ca3af;
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+  }
+  .custom-select-wrapper.open .custom-select-arrow {
+    transform: rotate(180deg);
+    color: #4f46e5;
+  }
+  .custom-select-wrapper.open .custom-select-trigger {
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+  }
+  .custom-select-dropdown {
+    position: absolute;
+    left: 0;
+    min-width: 100%;
+    z-index: 50;
+    top: 100%;
+    margin-top: 0.25rem;
+    background: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+    max-height: 15rem;
+    overflow-y: auto;
+    animation: selectDropdownIn 0.15s ease-out;
+  }
+  @keyframes selectDropdownIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .custom-select-options {
+    padding: 0.25rem;
+  }
+  .custom-select-option {
+    white-space: nowrap;
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    color: #374151;
+    border: none;
+    background: transparent;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    transition: background 0.1s;
+    outline: none;
+    line-height: 1.4;
+  }
+  .custom-select-option:hover:not(:disabled) {
+    background: #f3f4f6;
+  }
+  .custom-select-option:focus {
+    background: #eef2ff;
+    color: #4338ca;
+  }
+  .custom-select-option.selected {
+    background: #eef2ff;
+    color: #4f46e5;
+    font-weight: 600;
+  }
+  .custom-select-option.disabled {
+    color: #d1d5db;
+    cursor: not-allowed;
+  }
+</style>
+
+<script>
+  function initSelectInputs() {
+    document.querySelectorAll('.custom-select-wrapper').forEach(wrapper => {
+      if (wrapper.dataset._init) return;
+      wrapper.dataset._init = '1';
+
+      const trigger = wrapper.querySelector('.custom-select-trigger');
+      const dropdown = wrapper.querySelector('.custom-select-dropdown');
+      const nativeSelect = wrapper.querySelector('[data-native-select]');
+      const textSpan = wrapper.querySelector('.custom-select-text');
+      const options = wrapper.querySelectorAll('.custom-select-option');
+
+      if (!trigger || !dropdown) return;
+
+      let openedByKeyboard = false;
+
+      function openDropdown(fromKeyboard = false) {
+        // 关闭其他所有打开的 select
+        document.querySelectorAll('.custom-select-wrapper.open').forEach(w => {
+          if (w !== wrapper) {
+            w.querySelector('.custom-select-dropdown')?.classList.add('hidden');
+            w.classList.remove('open');
+            w.querySelector('.custom-select-trigger')?.setAttribute('aria-expanded', 'false');
+          }
+        });
+
+        dropdown.classList.remove('hidden');
+        wrapper.classList.add('open');
+        trigger.setAttribute('aria-expanded', 'true');
+        openedByKeyboard = fromKeyboard;
+        // 仅键盘操作时自动聚焦选项，点击时不抢焦点
+        if (fromKeyboard) {
+          const selected = dropdown.querySelector('.custom-select-option.selected');
+          (selected || options[0])?.focus();
+        }
+      }
+
+      function closeDropdown() {
+        dropdown.classList.add('hidden');
+        wrapper.classList.remove('open');
+        trigger.setAttribute('aria-expanded', 'false');
+        openedByKeyboard = false;
+      }
+
+      trigger.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (dropdown.classList.contains('hidden')) {
+          openDropdown(false);
+        } else {
+          closeDropdown();
+        }
+      });
+
+      // 阻止 dropdown 内的点击冒泡到 wrapper
+      dropdown.addEventListener('click', (e) => {
+        e.stopPropagation();
+      });
+
+      // 选项点击
+      options.forEach(opt => {
+        opt.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const value = opt.dataset.value;
+          const label = opt.textContent.trim();
+
+          textSpan.textContent = label;
+          textSpan.classList.toggle('text-gray-400', !value);
+
+          if (nativeSelect) {
+            nativeSelect.value = value;
+            nativeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+
+          options.forEach(o => {
+            o.classList.remove('selected');
+            o.setAttribute('aria-selected', 'false');
+          });
+          opt.classList.add('selected');
+          opt.setAttribute('aria-selected', 'true');
+
+          wrapper.dispatchEvent(new CustomEvent('select-change', {
+            detail: { value, label },
+            bubbles: true,
+          }));
+
+          closeDropdown();
+        });
+      });
+
+      // 键盘导航
+      wrapper.addEventListener('keydown', (e) => {
+        const isOpen = !dropdown.classList.contains('hidden');
+        if (!isOpen) {
+          if (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            openDropdown(true);
+          }
+          return;
+        }
+
+        const current = dropdown.querySelector('.custom-select-option:focus');
+        const items = Array.from(dropdown.querySelectorAll('.custom-select-option:not(.disabled)'));
+
+        switch (e.key) {
+          case 'ArrowDown': {
+            e.preventDefault();
+            const idx = current ? items.indexOf(current) : -1;
+            const next = items[Math.min(idx + 1, items.length - 1)];
+            next?.focus();
+            break;
+          }
+          case 'ArrowUp': {
+            e.preventDefault();
+            const idx = current ? items.indexOf(current) : -1;
+            const prev = items[Math.max(idx - 1, 0)];
+            prev?.focus();
+            break;
+          }
+          case 'Enter':
+          case ' ': {
+            e.preventDefault();
+            if (current) current.click();
+            break;
+          }
+          case 'Escape':
+            e.preventDefault();
+            closeDropdown();
+            trigger.focus();
+            break;
+          case 'Tab':
+            closeDropdown();
+            break;
+        }
+      });
+
+      // 点击外部关闭 —— 使用 mousedown 避免与其他组件交互时的焦点转移问题
+      document.addEventListener('mousedown', (e) => {
+        if (!wrapper.contains(e.target)) {
+          if (!dropdown.classList.contains('hidden')) {
+            closeDropdown();
+          }
+        }
+      });
+    });
+  }
+
+  initSelectInputs();
+  document.addEventListener('astro:page-load', initSelectInputs);
+</script>

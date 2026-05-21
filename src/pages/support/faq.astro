@@ -1,61 +1,65 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import Schema from '../../components/Schema.astro';
-const siteUrl = Astro.site.href;
-const title = "Frequently Asked Questions | MetisTools";
-const description = "Answers to common questions about MetisTools – free online tools, privacy, file handling, and more.";
+import Schema from '../../components/seo/Schema.astro';
+import { seoData } from '../../data/seo';
+
+const { title, description } = seoData.support.faq;
+
+const faqItems = [
+  {
+    question: 'Is MetisTools really free?',
+    answer: 'Yes, all tools are 100% free. There are no hidden fees, no premium tiers, and no signup required.',
+  },
+  {
+    question: 'Do I need to create an account?',
+    answer: 'No registration or login is required. You can use every tool instantly without providing any personal information.',
+  },
+  {
+    question: 'Where are my files stored? Are they safe?',
+    answer: 'All file processing (PDF conversion, image editing, etc.) happens locally in your browser. Your files are never uploaded to our servers. Once you close the page, the data is gone.',
+  },
+  {
+    question: 'What is the maximum file size for conversion?',
+    answer: 'For most tools, there is no enforced limit besides your browser\'s capability. Large files may slow down processing time. We recommend keeping files under 50MB for optimal performance.',
+  },
+  {
+    question: 'Why should I use MetisTools over other tool sites?',
+    answer: 'MetisTools is private (files stay on your device), fast (modern static architecture), and supports a wide range of tools including PDF, image, text, developer utilities, and calculators — all in one place.',
+  },
+  {
+    question: 'How do I report a bug or suggest a new tool?',
+    answer: 'Please visit our <a href="/support/contact" class="text-indigo-600 hover:underline">Contact page</a> and send us a message. We appreciate your feedback!',
+  },
+  {
+    question: 'Does MetisTools use cookies?',
+    answer: 'We only use essential cookies for functionality and anonymous analytics (Google Analytics). No personal data is sold or shared. You can manage cookie preferences through your browser settings.',
+  },
+  {
+    question: 'Can I use your tools offline?',
+    answer: 'Some tools (like calculators) may work offline after the page is loaded, but most rely on browser APIs that require an internet connection. We are exploring offline capabilities for future updates.',
+  },
+];
 ---
 
 <BaseLayout title={title} description={description} currentPath="/support/faq">
   <div class="max-w-3xl mx-auto px-4 py-12 sm:py-16">
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+    <div class="rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
       <div class="px-6 py-10 sm:p-12">
         <div class="text-center">
-          <div class="text-5xl mb-4">❓</div>
-          <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-gray-100">Frequently Asked Questions</h1>
-          <p class="mt-3 text-gray-500 dark:text-gray-400">Everything you need to know about MetisTools</p>
+          <h1 class="text-3xl sm:text-4xl font-bold text-gray-900">Frequently Asked Questions</h1>
+          <p class="mt-3 text-gray-500">Everything you need to know about MetisTools</p>
         </div>
 
         <div class="mt-10 space-y-8">
-          <div>
-            <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200">1. Is MetisTools really free?</h2>
-            <p class="mt-2 text-gray-600 dark:text-gray-300 leading-relaxed">Yes, all tools are 100% free. There are no hidden fees, no premium tiers, and no signup required.</p>
-          </div>
-          <div>
-            <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200">2. Do I need to create an account?</h2>
-            <p class="mt-2 text-gray-600 dark:text-gray-300 leading-relaxed">No registration or login is required. You can use every tool instantly without providing any personal information.</p>
-          </div>
-          <div>
-            <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200">3. Where are my files stored? Are they safe?</h2>
-            <p class="mt-2 text-gray-600 dark:text-gray-300 leading-relaxed">All file processing (PDF conversion, image editing, etc.) happens locally in your browser. Your files are never uploaded to our servers. Once you close the page, the data is gone.</p>
-          </div>
-          <div>
-            <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200">4. What is the maximum file size for conversion?</h2>
-            <p class="mt-2 text-gray-600 dark:text-gray-300 leading-relaxed">For most tools, there is no enforced limit besides your browser's capability. Large files may slow down processing time. We recommend keeping files under 50MB for optimal performance.</p>
-          </div>
-          <div>
-            <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200">5. Why should I use MetisTools over other tool sites?</h2>
-            <p class="mt-2 text-gray-600 dark:text-gray-300 leading-relaxed">MetisTools is private (files stay on your device), fast (modern static architecture), and supports a wide range of tools including PDF, image, text, developer utilities, and calculators – all in one place with dark mode support.</p>
-          </div>
-          <div>
-            <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200">6. How do I report a bug or suggest a new tool?</h2>
-            <p class="mt-2 text-gray-600 dark:text-gray-300 leading-relaxed">Please visit our <a href="/support/contact" class="text-indigo-600 hover:underline">Contact page</a> and send us an email. We appreciate your feedback!</p>
-          </div>
-          <div>
-            <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200">7. Does MetisTools use cookies?</h2>
-            <p class="mt-2 text-gray-600 dark:text-gray-300 leading-relaxed">We only use essential cookies for functionality and anonymous analytics (Google Analytics). No personal data is sold or shared. You can disable cookies in your browser settings.</p>
-          </div>
-          <div>
-            <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200">8. Can I use your tools offline?</h2>
-            <p class="mt-2 text-gray-600 dark:text-gray-300 leading-relaxed">Some tools (like calculators) may work offline after the page is loaded, but most rely on browser APIs that require an internet connection. We are exploring offline capabilities for future updates.</p>
-          </div>
+          {faqItems.map((item, i) => (
+            <div>
+              <h2 class="text-lg font-semibold text-gray-800">{i + 1}. {item.question}</h2>
+              <p class="mt-2 text-gray-600 leading-relaxed" set:html={item.answer} />
+            </div>
+          ))}
         </div>
       </div>
     </div>
   </div>
-  <Schema
-    toolName="FAQ Page"
-    description={description}
-    url={siteUrl + "/support/faq"}
-  />
+  <Schema type="FAQPage" data={{ questions: faqItems }} />
 </BaseLayout>

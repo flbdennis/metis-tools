@@ -1,0 +1,46 @@
+---
+// 进度条组件 —— 显示处理进度和状态文字
+export interface Props {
+  percent?: number;
+  status?: string;
+  visible?: boolean;
+}
+
+const {
+  percent = 0,
+  status = 'Processing...',
+  visible = false,
+} = Astro.props;
+---
+
+<div id="progress-container" class="space-y-2" class:list={[{ hidden: !visible }]}>
+  <div class="h-2 rounded-full bg-gray-200 overflow-hidden">
+    <div
+      id="progress-fill"
+      class="h-full rounded-full bg-indigo-500 transition-all duration-500 ease-out"
+      style={`width: ${Math.max(0, Math.min(100, percent))}%`}
+    ></div>
+  </div>
+  <p id="progress-status" class="text-xs text-center text-gray-500">{status}</p>
+</div>
+
+<script>
+  // 运行时更新接口
+  function updateProgress(percent, status) {
+    const container = document.getElementById('progress-container');
+    const fill = document.getElementById('progress-fill');
+    const statusEl = document.getElementById('progress-status');
+    if (container) container.classList.remove('hidden');
+    if (fill) fill.style.width = Math.max(0, Math.min(100, percent)) + '%';
+    if (statusEl) statusEl.textContent = status || 'Processing...';
+  }
+
+  function hideProgress() {
+    const container = document.getElementById('progress-container');
+    if (container) container.classList.add('hidden');
+  }
+
+  // 暴露到全局
+  window.updateProgress = updateProgress;
+  window.hideProgress = hideProgress;
+</script>

@@ -1,0 +1,271 @@
+---
+// 文件上传组件 —— 拖拽或点击选择文件
+export interface Props {
+  id: string;
+  label?: string;
+  accept?: string;
+  maxSize?: number;
+  required?: boolean;
+  class?: string;
+  helperText?: string;
+}
+
+const {
+  id,
+  label = '',
+  accept = '.pdf,application/pdf',
+  maxSize = 50 * 1024 * 1024,
+  required = false,
+  class: extraClass = '',
+  helperText = '',
+} = Astro.props;
+---
+
+<div class={`file-upload-wrapper ${extraClass}`} data-file-upload id={`${id}-wrapper`}>
+  {label && (
+    <label for={id} class="tool-label">
+      {label}
+      {required && <span class="text-red-500 ml-0.5">*</span>}
+    </label>
+  )}
+
+  <div class="file-upload-dropzone" id={`${id}-dropzone`}>
+    <svg class="file-upload-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+    </svg>
+    <p class="file-upload-text">
+      <span class="font-medium text-primary-600">Click to upload</span>
+      <span class="text-gray-500"> or drag and drop</span>
+    </p>
+    <p class="file-upload-hint" id={`${id}-hint`}>{helperText || 'PDF files only'}</p>
+    <input
+      type="file"
+      id={id}
+      name={id}
+      accept={accept}
+      required={required}
+      class="file-upload-input"
+      data-file-input
+    />
+  </div>
+
+  <div class="file-upload-info hidden" id={`${id}-info`}>
+    <div class="flex items-center gap-3">
+      <svg class="h-8 w-8 text-primary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+      <div class="min-w-0 flex-1">
+        <p class="text-sm font-medium text-gray-900 truncate" id={`${id}-filename`}></p>
+        <p class="text-xs text-gray-500" id={`${id}-filesize`}></p>
+      </div>
+      <button type="button" class="file-upload-remove" id={`${id}-remove`} aria-label="Remove file">
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <p class="field-error hidden text-xs text-red-500 mt-1" id={`${id}-error`}></p>
+</div>
+
+<style>
+  /* 样式保持不变 */
+  .file-upload-dropzone {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1.5rem;
+    border: 2px dashed #d1d5db;
+    border-radius: 0.75rem;
+    background: #fafafa;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    min-height: 140px;
+  }
+  .file-upload-dropzone:hover {
+    border-color: #4f46e5;
+    background: #eef2ff;
+  }
+  .file-upload-dropzone.drag-over {
+    border-color: #4f46e5;
+    background: #eef2ff;
+    border-style: solid;
+  }
+  .file-upload-dropzone.has-file {
+    display: none;
+  }
+  .file-upload-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    color: #9ca3af;
+    margin-bottom: 0.75rem;
+    transition: color 0.2s;
+  }
+  .file-upload-dropzone:hover .file-upload-icon {
+    color: #4f46e5;
+  }
+  .file-upload-text {
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+  }
+  .file-upload-hint {
+    font-size: 0.75rem;
+    color: #9ca3af;
+  }
+  .file-upload-input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+  }
+  .file-upload-info {
+    padding: 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.75rem;
+    background: #fff;
+  }
+  .file-upload-remove {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 9999px;
+    border: none;
+    background: #f3f4f6;
+    color: #6b7280;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    flex-shrink: 0;
+  }
+  .file-upload-remove:hover {
+    background: #fee2e2;
+    color: #ef4444;
+  }
+</style>
+
+<script>
+  function formatFileSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / 1048576).toFixed(1) + ' MB';
+  }
+
+  function initFileUploads() {
+    document.querySelectorAll('[data-file-upload]').forEach(wrapper => {
+      if (wrapper.dataset._init) return;
+      wrapper.dataset._init = '1';
+
+      const dropzone = wrapper.querySelector('.file-upload-dropzone');
+      const input = wrapper.querySelector('[data-file-input]');
+      const info = wrapper.querySelector('.file-upload-info');
+      const filename = wrapper.querySelector('[id$="-filename"]');
+      const filesize = wrapper.querySelector('[id$="-filesize"]');
+      const removeBtn = wrapper.querySelector('[id$="-remove"]');
+      const errorEl = wrapper.querySelector('.field-error');
+      const maxSize = parseInt(wrapper.dataset.maxSize || '52428800');
+
+      if (!input || !dropzone) return;
+
+      function showFile(file) {
+        dropzone.classList.add('has-file');
+        info.classList.remove('hidden');
+        filename.textContent = file.name;
+        filesize.textContent = formatFileSize(file.size);
+        if (errorEl) {
+          errorEl.classList.add('hidden');
+          errorEl.textContent = '';
+        }
+      }
+
+      function clearFile() {
+        input.value = '';
+        dropzone.classList.remove('has-file');
+        info.classList.add('hidden');
+        if (errorEl) {
+          errorEl.classList.add('hidden');
+          errorEl.textContent = '';
+        }
+      }
+
+      function validateFile(file) {
+        if (!file) return true;
+        const accept = input.getAttribute('accept') || '';
+        const types = accept.split(',').map(s => s.trim());
+        const isValidType = types.some(t => {
+          if (t.startsWith('.')) return file.name.toLowerCase().endsWith(t);
+          return file.type === t;
+        });
+        if (!isValidType) {
+          if (errorEl) {
+            errorEl.textContent = 'Invalid file type.';
+            errorEl.classList.remove('hidden');
+          }
+          return false;
+        }
+        if (file.size > maxSize) {
+          if (errorEl) {
+            const maxMB = (maxSize / 1048576).toFixed(0);
+            errorEl.textContent = `File is too large. Maximum size is ${maxMB}MB.`;
+            errorEl.classList.remove('hidden');
+          }
+          return false;
+        }
+        return true;
+      }
+
+      input.addEventListener('change', () => {
+        const file = input.files?.[0];
+        if (file && validateFile(file)) {
+          showFile(file);
+          // 派发自定义事件，确保冒泡
+          const event = new CustomEvent('file-selected', { detail: { file }, bubbles: true, composed: true });
+          input.dispatchEvent(event);
+          wrapper.dispatchEvent(event); // 同时从 wrapper 派发
+        } else if (!file) {
+          clearFile();
+        }
+      });
+
+      dropzone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropzone.classList.add('drag-over');
+      });
+
+      dropzone.addEventListener('dragleave', () => {
+        dropzone.classList.remove('drag-over');
+      });
+
+      dropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('drag-over');
+        const file = e.dataTransfer?.files?.[0];
+        if (file && validateFile(file)) {
+          const dt = new DataTransfer();
+          dt.items.add(file);
+          input.files = dt.files;
+          showFile(file);
+          const event = new CustomEvent('file-selected', { detail: { file }, bubbles: true, composed: true });
+          input.dispatchEvent(event);
+          wrapper.dispatchEvent(event);
+        }
+      });
+
+      removeBtn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        clearFile();
+        const event = new CustomEvent('file-cleared', { bubbles: true, composed: true });
+        input.dispatchEvent(event);
+        wrapper.dispatchEvent(event);
+      });
+    });
+  }
+
+  initFileUploads();
+  document.addEventListener('astro:page-load', initFileUploads);
+</script>

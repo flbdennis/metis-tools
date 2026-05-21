@@ -1,86 +1,114 @@
 ---
-import Schema from '../../components/Schema.astro';
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getPageSeo } from '../../utils/seo.js';
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import TextareaInput from '../../components/ui/TextareaInput.astro';
+import SelectInput from '../../components/ui/SelectInput.astro';
+import ResultDisplay from '../../components/tool/ResultDisplay.astro';
 
-const { title, description } = getPageSeo('tools/case-converter'); // 根据页面修改键名
+const pageTitle = 'Case Converter – Convert Text to Uppercase, Lowercase, etc. | MetisTools';
+const pageDescription = 'Convert text to uppercase, lowercase, sentence case, title case, camelCase, PascalCase, snake_case, and kebab-case. Free online case converter.';
+
+const caseOptions = [
+  { value: 'uppercase', label: 'UPPERCASE' },
+  { value: 'lowercase', label: 'lowercase' },
+  { value: 'sentencecase', label: 'Sentence case' },
+  { value: 'titlecase', label: 'Title Case' },
+  { value: 'camelcase', label: 'camelCase' },
+  { value: 'pascalcase', label: 'PascalCase' },
+  { value: 'snakecase', label: 'snake_case' },
+  { value: 'kebabcase', label: 'kebab-case' },
+];
 ---
 
-<BaseLayout title={title} description={description} currentPath="/tools/case-converter">
-  <div class="max-w-4xl mx-auto py-8">
-    <div class="bg-white dark:bg-slate-950 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-slate-800">
-      <h1 class="text-3xl font-bold mb-2">🔠 Case & Naming Converter</h1>
-      <p class="text-gray-600 dark:text-gray-300 mb-6">Enter text below, click any button to convert. Your text never leaves your browser.</p>
+<ToolLayout title={pageTitle} description={pageDescription} toolHref="/tools/case-converter">
+  <div slot="input">
+    <div class="space-y-4">
+      <TextareaInput id="cc-input" label="Enter Text" placeholder="Type or paste your text here..." rows={6} required={true} />
 
-      <textarea id="input-text" rows="6" class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950" placeholder="Type or paste your text here..."></textarea>
+      <SelectInput id="cc-type" label="Convert To" options={caseOptions} selected="lowercase" />
 
-      <div class="mt-4 flex flex-wrap gap-2">
-        <button data-convert="uppercase" class="bg-gray-200 dark:bg-slate-800 hover:bg-gray-300 dark:hover:bg-slate-700 px-4 py-2 rounded-full text-sm font-medium">UPPERCASE</button>
-        <button data-convert="lowercase" class="bg-gray-200 dark:bg-slate-800 hover:bg-gray-300 dark:hover:bg-slate-700 px-4 py-2 rounded-full text-sm font-medium">lowercase</button>
-        <button data-convert="sentencecase" class="bg-gray-200 dark:bg-slate-800 hover:bg-gray-300 dark:hover:bg-slate-700 px-4 py-2 rounded-full text-sm font-medium">Sentence case</button>
-        <button data-convert="titlecase" class="bg-gray-200 dark:bg-slate-800 hover:bg-gray-300 dark:hover:bg-slate-700 px-4 py-2 rounded-full text-sm font-medium">Title Case</button>
-        <button data-convert="camelcase" class="bg-gray-200 dark:bg-slate-800 hover:bg-gray-300 dark:hover:bg-slate-700 px-4 py-2 rounded-full text-sm font-medium">camelCase</button>
-        <button data-convert="pascalcase" class="bg-gray-200 dark:bg-slate-800 hover:bg-gray-300 dark:hover:bg-slate-700 px-4 py-2 rounded-full text-sm font-medium">PascalCase</button>
-        <button data-convert="snakecase" class="bg-gray-200 dark:bg-slate-800 hover:bg-gray-300 dark:hover:bg-slate-700 px-4 py-2 rounded-full text-sm font-medium">snake_case</button>
-        <button data-convert="kebabcase" class="bg-gray-200 dark:bg-slate-800 hover:bg-gray-300 dark:hover:bg-slate-700 px-4 py-2 rounded-full text-sm font-medium">kebab-case</button>
-      </div>
-
-      <div class="mt-4">
-        <label class="block text-sm font-medium mb-1">Result</label>
-        <textarea id="output-text" rows="6" class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-slate-700 bg-gray-50 dark:bg-slate-950 font-mono text-gray-900 dark:text-gray-100" readonly placeholder="Converted text will appear here..."></textarea>
-        <button id="copy-btn" class="mt-2 bg-indigo-600 dark:bg-indigo-500 text-white px-4 py-2 rounded-full text-sm">Copy Result</button>
-      </div>
+      <button type="button" id="btn-convert" class="tool-btn-primary w-full">
+        Convert Case
+      </button>
     </div>
   </div>
 
-  <script>
-    import { caseConverters, namingConverters } from '../../lib/text-tools';
+  <div slot="result">
+    <ResultDisplay emptyMessage="Enter text, choose a case style, and click <strong>Convert Case</strong>." onCopy={true} onDownload={true}>
+      <div slot="result-content" class="space-y-4">
+        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+          <div id="cc-output" class="text-sm font-mono text-gray-800 whitespace-pre-wrap break-all leading-relaxed max-h-[400px] overflow-y-auto"></div>
+        </div>
 
-    const inputEl = document.getElementById('input-text');
-    const outputEl = document.getElementById('output-text');
-    const copyBtn = document.getElementById('copy-btn');
+        <div class="flex gap-4 text-xs text-gray-400 pt-3 border-t border-gray-100">
+          <span>Original: <strong id="cc-orig-len">0</strong> chars</span>
+          <span>Result: <strong id="cc-result-len">0</strong> chars</span>
+        </div>
+      </div>
+    </ResultDisplay>
+  </div>
 
-    function convert(converterName) {
-      const text = inputEl.value;
-      if (!text.trim()) {
-        outputEl.value = '';
-        return;
-      }
-      let result = '';
-      if (caseConverters[converterName]) {
-        result = caseConverters[converterName](text);
-      } else if (namingConverters[converterName]) {
-        result = namingConverters[converterName](text);
-      } else {
-        result = text;
-      }
-      outputEl.value = result;
+  <div slot="description">
+    <p>
+      This free online case converter instantly transforms text between common letter cases and naming styles. Whether you're a developer standardizing variable names or a writer adjusting formatting, all conversions happen right in your browser — no data is ever sent to a server.
+    </p>
+    <p>
+      <strong>Letter Cases:</strong> <em>UPPERCASE</em> makes every letter capital. <em>lowercase</em> makes every letter small. <em>Sentence case</em> capitalizes the first letter of each sentence. <em>Title Case</em> capitalizes the first letter of every word.
+    </p>
+    <p>
+      <strong>Naming Styles (for developers):</strong> <em>camelCase</em> is the standard for JavaScript and Java variable names. <em>PascalCase</em> is used for C# and TypeScript class names. <em>snake_case</em> is common in Python and Ruby. <em>kebab-case</em> is used in CSS class names and URLs.
+    </p>
+    <p>
+      Each conversion handles whitespace normalization and special characters appropriately, giving you clean, predictable output every time. The character count comparison helps you see how the conversion affects text length.
+    </p>
+  </div>
+</ToolLayout>
+
+<script>
+  import { caseConverters, namingConverters } from '../../lib/text-tools.js';
+
+  const allConverters = { ...caseConverters, ...namingConverters };
+  let currentResult = '';
+
+  function doConvert() {
+    const input = document.getElementById('cc-input')?.value || '';
+    if (!input.trim()) {
+      showToast('Please enter some text.', 'error');
+      return;
     }
 
-    const buttons = document.querySelectorAll('[data-convert]');
-    buttons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const converterName = btn.getAttribute('data-convert');
-        convert(converterName);
-      });
-    });
+    const type = document.getElementById('cc-type')?.value || 'lowercase';
+    const fn = allConverters[type];
+    if (!fn) {
+      showToast('Unknown case type.', 'error');
+      return;
+    }
 
-    copyBtn.addEventListener('click', () => {
-      if (outputEl.value) {
-        navigator.clipboard.writeText(outputEl.value).then(() => {
-          showMessage('Copied to clipboard!', 'success');
-        }).catch(() => {
-          showMessage('Failed to copy.', 'error');
-        });
-      } else {
-        showMessage('Nothing to copy.', 'error');
-      }
-    });
-  </script>
-  <Schema
-    category="TextUtility"
-    toolName="Case Converter"
-    description={description}
-    url={Astro.url.href}
-  />
-</BaseLayout>
+    currentResult = fn(input);
+
+    document.getElementById('result-empty').classList.add('hidden');
+    document.getElementById('result-data').classList.remove('hidden');
+    document.getElementById('cc-output').textContent = currentResult;
+    document.getElementById('cc-orig-len').textContent = input.length;
+    document.getElementById('cc-result-len').textContent = currentResult.length;
+  }
+
+  document.getElementById('btn-convert')?.addEventListener('click', doConvert);
+
+  document.getElementById('btn-copy-result')?.addEventListener('click', () => {
+    if (!currentResult) return;
+    navigator.clipboard.writeText(currentResult).then(() => {
+      showToast('Copied to clipboard!', 'success');
+    }).catch(() => showToast('Failed to copy.', 'error'));
+  });
+
+  document.getElementById('btn-download-result')?.addEventListener('click', () => {
+    if (!currentResult) return;
+    const blob = new Blob([currentResult], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'converted-text.txt';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+</script>

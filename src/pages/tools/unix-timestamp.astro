@@ -1,103 +1,169 @@
 ---
-import Schema from '../../components/Schema.astro';
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getPageSeo } from '../../utils/seo.js';
-const { title, description } = getPageSeo('tools/unix-timestamp'); // 根据页面修改键名
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import NumberInput from '../../components/ui/NumberInput.astro';
+import DateInput from '../../components/ui/DateInput.astro';
+import TextareaInput from '../../components/ui/TextareaInput.astro';
+import ResultDisplay from '../../components/tool/ResultDisplay.astro';
+
+const pageTitle = 'Unix Timestamp Converter – Epoch Time Converter | MetisTools';
+const pageDescription = 'Convert Unix timestamps to human-readable dates and vice versa. Live current timestamp with real-time updates. Free online epoch time converter for developers.';
 ---
 
-<BaseLayout title={title} description={description} currentPath="/tools/unix-timestamp">
-  <div class="max-w-2xl mx-auto py-8">
-    <div class="bg-white dark:bg-slate-950 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-slate-800">
-      <h1 class="text-3xl font-bold mb-2">⏱️ Unix Timestamp Converter</h1>
-      <p class="text-gray-600 dark:text-gray-300 mb-6">Convert between Unix timestamps (seconds since 1970-01-01) and human-readable dates.</p>
+<ToolLayout title={pageTitle} description={pageDescription} toolHref="/tools/unix-timestamp">
+  <div slot="input">
+    <div class="space-y-4">
+      <!-- 当前时间戳 -->
+      <div class="bg-gray-50 rounded-lg p-4 border border-gray-200 text-center">
+        <div class="text-xs text-gray-400 uppercase tracking-wider mb-1">Current Unix Timestamp</div>
+        <div id="current-timestamp" class="text-2xl font-mono font-bold text-primary-600">--</div>
+        <div id="current-utc" class="text-xs text-gray-400 mt-1">--</div>
+      </div>
 
-      <div class="space-y-6">
-        <div>
-          <label class="block text-sm font-medium mb-1">Unix Timestamp (seconds)</label>
-          <div class="flex gap-2">
-            <input type="number" id="timestamp" class="flex-1 px-4 py-2 rounded-full border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950" placeholder="e.g., 1700000000" step="1">
-            <button id="now-btn" class="bg-gray-200 dark:bg-slate-800 px-4 py-2 rounded-full text-sm">Now</button>
-          </div>
-          <button id="ts-to-date" class="mt-2 bg-indigo-600 dark:bg-indigo-500 text-white px-4 py-2 rounded-full text-sm">Convert to Date →</button>
-        </div>
+      <!-- Timestamp → Date -->
+      <div class="border-t border-gray-100 pt-4">
+        <p class="text-sm font-medium text-gray-700 mb-3">Timestamp → Date</p>
+        <NumberInput id="ts-input" label="Unix Timestamp (seconds)" placeholder="e.g. 1700000000" decimalPlaces={0} allowNegative={false} helperText="Enter a Unix timestamp in seconds or milliseconds" />
+        <button type="button" id="btn-convert-ts" class="tool-btn-primary w-full mt-3">
+          Convert to Date
+        </button>
+      </div>
 
-        <div>
-          <label class="block text-sm font-medium mb-1">Date & Time (UTC)</label>
-          <div class="flex gap-2">
-            <input type="datetime-local" id="datetime" class="flex-1 px-4 py-2 rounded-full border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950">
-            <button id="local-btn" class="bg-gray-200 dark:bg-slate-800 px-4 py-2 rounded-full text-sm">Use Local</button>
-          </div>
-          <button id="date-to-ts" class="mt-2 bg-indigo-600 dark:bg-indigo-500 text-white px-4 py-2 rounded-full text-sm">Convert to Timestamp →</button>
-        </div>
-
-        <div id="result" class="mt-4 p-4 bg-gray-100 dark:bg-slate-900 rounded-xl text-center hidden">
-          <p id="result-text" class="text-lg font-semibold"></p>
-        </div>
+      <!-- Date → Timestamp -->
+      <div class="border-t border-gray-100 pt-4">
+        <p class="text-sm font-medium text-gray-700 mb-3">Date → Timestamp</p>
+        <DateInput id="date-input" label="Date & Time" />
+        <button type="button" id="btn-convert-date" class="tool-btn-primary w-full mt-3">
+          Convert to Timestamp
+        </button>
       </div>
     </div>
   </div>
 
-  <script>
-    const timestampInput = document.getElementById('timestamp');
-    const datetimeInput = document.getElementById('datetime');
-    const nowBtn = document.getElementById('now-btn');
-    const localBtn = document.getElementById('local-btn');
-    const tsToDateBtn = document.getElementById('ts-to-date');
-    const dateToTsBtn = document.getElementById('date-to-ts');
-    const resultDiv = document.getElementById('result');
-    const resultText = document.getElementById('result-text');
+  <div slot="result">
+    <ResultDisplay emptyMessage="Enter a timestamp or date and click a <strong>Convert</strong> button to see results." onCopy={true}>
+      <div slot="result-content" class="space-y-3">
+        <div id="result-table" class="text-sm">
+        </div>
+      </div>
+    </ResultDisplay>
+  </div>
 
-    function showResult(msg) {
-      resultText.textContent = msg;
-      resultDiv.classList.remove('hidden');
-    }
+  <div slot="description">
+    <p>
+      A Unix timestamp (also known as Epoch time or POSIX time) is the number of seconds that have elapsed since January 1, 1970 (midnight UTC/GMT), not counting leap seconds. It's the standard way computers track time across systems.
+    </p>
+    <p>
+      <strong>Live Current Timestamp:</strong> The real-time display at the top updates every second, showing the current Unix timestamp in seconds along with the UTC date. Use this for quick reference when debugging or logging.
+    </p>
+    <p>
+      <strong>Timestamp → Date:</strong> Enter a Unix timestamp in seconds (10 digits) or milliseconds (13 digits) and convert it to a human-readable UTC date, ISO 8601 format, and local time. This is useful for reading server logs, database timestamps, or API responses.
+    </p>
+    <p>
+      <strong>Date → Timestamp:</strong> Pick a date and time using the date picker and get the corresponding Unix timestamp in both seconds and milliseconds. The converter uses your local timezone and converts to UTC automatically.
+    </p>
+    <p>
+      <strong>Common Use Cases:</strong> Unix timestamps are used in databases (MySQL, PostgreSQL), programming languages (JavaScript Date, Python time, PHP time()), API design, log files, SSL certificates, JWT tokens, and file system metadata.
+    </p>
+  </div>
+</ToolLayout>
 
-    nowBtn.addEventListener('click', () => {
-      const now = Math.floor(Date.now() / 1000);
-      timestampInput.value = now;
-      showResult(`Current Unix timestamp: ${now}`);
+<script>
+  let currentTsResult = '';
+
+  function tsToDate(unixSeconds) {
+    const ms = unixSeconds > 1e12 ? unixSeconds : unixSeconds * 1000;
+    const date = new Date(ms);
+    return {
+      utc: date.toISOString().replace('T', ' ').replace('Z', ''),
+      iso: date.toISOString(),
+      local: date.toString(),
+      localeString: date.toLocaleString(),
+      dateOnly: date.toISOString().split('T')[0],
+      timeOnly: date.toISOString().split('T')[1].replace('Z', ''),
+      dayOfWeek: date.toLocaleString('en-US', { weekday: 'long' }),
+      unixSeconds: Math.floor(ms / 1000),
+      unixMilliseconds: ms,
+    };
+  }
+
+  function dateToTs(dateInput) {
+    const date = new Date(dateInput);
+    const ms = date.getTime();
+    return {
+      unixSeconds: Math.floor(ms / 1000),
+      unixMilliseconds: ms,
+      iso: date.toISOString(),
+      utc: date.toISOString().replace('T', ' ').replace('Z', ''),
+    };
+  }
+
+  function showResult(title, rows) {
+    document.getElementById('result-empty').classList.add('hidden');
+    document.getElementById('result-data').classList.remove('hidden');
+    const html = [];
+    if (title) html.push(`<div class="font-medium text-gray-700 mb-2">${title}</div>`);
+    html.push('<div class="space-y-2">');
+    rows.forEach(([label, value]) => {
+      html.push(`<div class="flex justify-between py-1.5 border-b border-gray-50">
+        <span class="text-gray-500">${label}</span>
+        <span class="font-mono text-gray-800 text-right">${value}</span>
+      </div>`);
     });
+    html.push('</div>');
+    document.getElementById('result-table').innerHTML = html.join('');
 
-    localBtn.addEventListener('click', () => {
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, '0');
-      const day = String(now.getDate()).padStart(2, '0');
-      const hours = String(now.getHours()).padStart(2, '0');
-      const minutes = String(now.getMinutes()).padStart(2, '0');
-      datetimeInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
-    });
+    // Build copyable text
+    currentTsResult = rows.map(([l, v]) => `${l}: ${v}`).join('\n');
+  }
 
-    tsToDateBtn.addEventListener('click', () => {
-      const ts = parseInt(timestampInput.value);
-      if (isNaN(ts)) {
-        showResult('Please enter a valid Unix timestamp.');
-        return;
-      }
-      const date = new Date(ts * 1000);
-      showResult(date.toUTCString());
-    });
+  function convertTs() {
+    const val = parseInt(document.getElementById('ts-input')?.value);
+    if (!val || val <= 0) { showToast('Please enter a valid Unix timestamp.', 'error'); return; }
+    const d = tsToDate(val);
+    showResult('Timestamp → Date', [
+      ['UTC', d.utc + ' UTC'],
+      ['ISO 8601', d.iso],
+      ['Local', d.localeString],
+      ['Day of Week', d.dayOfWeek],
+      ['Date Only', d.dateOnly],
+      ['Time Only', d.timeOnly],
+      ['Unix Seconds', String(d.unixSeconds)],
+      ['Unix Milliseconds', String(d.unixMilliseconds)],
+    ]);
+  }
 
-    dateToTsBtn.addEventListener('click', () => {
-      let dateStr = datetimeInput.value;
-      if (!dateStr) {
-        showResult('Please select a date and time.');
-        return;
-      }
-      // 如果用户选择了本地时间，需要加上时区偏移
-      const date = new Date(dateStr);
-      if (isNaN(date.getTime())) {
-        showResult('Invalid date.');
-        return;
-      }
-      const ts = Math.floor(date.getTime() / 1000);
-      showResult(`Unix timestamp: ${ts} (UTC)`);
-    });
-  </script>
-  <Schema
-    toolName="Unix Timestamp Converter"
-    description={description}
-    url={Astro.url.href}
-    category="Developer"
-  />
-</BaseLayout>
+  function convertDate() {
+    const val = document.getElementById('date-input')?.value;
+    if (!val) { showToast('Please select a date and time.', 'error'); return; }
+    const d = dateToTs(val);
+    showResult('Date → Timestamp', [
+      ['Unix Seconds', String(d.unixSeconds)],
+      ['Unix Milliseconds', String(d.unixMilliseconds)],
+      ['ISO 8601', d.iso],
+      ['UTC', d.utc + ' UTC'],
+    ]);
+  }
+
+  function updateCurrent() {
+    const now = Math.floor(Date.now() / 1000);
+    const utc = new Date().toISOString().replace('T', ' ').replace('Z', '');
+    document.getElementById('current-timestamp').textContent = String(now);
+    document.getElementById('current-utc').textContent = utc + ' UTC';
+  }
+
+  updateCurrent();
+  setInterval(updateCurrent, 1000);
+
+  document.getElementById('btn-convert-ts')?.addEventListener('click', convertTs);
+  document.getElementById('btn-convert-date')?.addEventListener('click', convertDate);
+
+  document.getElementById('btn-copy-result')?.addEventListener('click', () => {
+    if (!currentTsResult) return;
+    navigator.clipboard.writeText(currentTsResult).then(() => {
+      showToast('Results copied!', 'success');
+    }).catch(() => showToast('Failed to copy.', 'error'));
+  });
+
+  // 回车键触发表单提交
+  document.getElementById('ts-input')?.addEventListener('keydown', (e) => { if (e.key === 'Enter') convertTs(); });
+</script>

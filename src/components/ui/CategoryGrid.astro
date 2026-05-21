@@ -1,0 +1,36 @@
+---
+// 分类页面工具网格 —— 展示某分类下所有工具的卡片列表
+import ToolIcon from './ToolIcon.astro';
+import { getToolsByCategory } from '../../data/tools';
+import { navigationConfig } from '../../data/navigation';
+
+export interface Props {
+  category: string;
+}
+
+const { category } = Astro.props;
+const tools = getToolsByCategory(category);
+const catInfo = navigationConfig.categoryMap[category];
+---
+
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+  {tools.map(tool => (
+    <a href={tool.href} class="tool-card group flex items-start gap-4">
+      <span class="shrink-0 flex items-center justify-center w-10 h-10 rounded-lg bg-primary-50 text-primary-600 group-hover:bg-primary-100 transition-colors">
+        <ToolIcon name={tool.icon} class="h-5 w-5" />
+      </span>
+      <div class="min-w-0">
+        <h3 class="font-semibold text-gray-900 group-hover:text-primary-700 transition-colors">
+          {tool.title}
+        </h3>
+        <p class="mt-1 text-xs text-gray-500 line-clamp-2 leading-relaxed">
+          {tool.description}
+        </p>
+      </div>
+    </a>
+  ))}
+</div>
+
+{tools.length === 0 && (
+  <p class="text-center text-gray-400 py-12">No tools found in this category.</p>
+)}

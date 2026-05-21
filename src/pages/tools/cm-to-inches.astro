@@ -1,49 +1,134 @@
 ---
-import Schema from '../../components/Schema.astro';
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getPageSeo } from '../../utils/seo.js';
+// 厘米 ↔ 英寸转换器 —— 双向转换，英尺英寸格式，常用长度参考表
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import NumberInput from '../../components/ui/NumberInput.astro';
+import ResultDisplay from '../../components/tool/ResultDisplay.astro';
 
-const { title, description } = getPageSeo('tools/cm-to-inches'); // 根据页面修改键名
+const pageTitle = 'CM to Inches Converter — Convert Centimeters to Inches';
+const pageDescription = 'Convert centimeters to inches and feet+inches format instantly. Bidirectional conversion with a handy length reference table for common measurements.';
+
+const references = [
+  { item: 'Paperclip', cm: 3, inch: 1.2 },
+  { item: 'Smartphone', cm: 15, inch: 5.9 },
+  { item: 'A4 Paper (width)', cm: 21, inch: 8.3 },
+  { item: 'Standard door', cm: 203, inch: 80 },
+  { item: 'Basketball hoop', cm: 305, inch: 120 },
+];
 ---
 
-<BaseLayout title={title} description={description} currentPath="/tools/cm-to-inches">
-  <div class="max-w-2xl mx-auto py-8">
-    <div class="bg-white dark:bg-slate-950 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-slate-800">
-      <h1 class="text-3xl font-bold mb-2">📏 CM to Inches Converter</h1>
-      <p class="text-gray-600 dark:text-gray-300 mb-6">Enter centimeters value to convert to inches.</p>
-      <div class="space-y-4">
-        <div>
-          <label class="block text-sm font-medium mb-1">Centimeters</label>
-          <input type="number" id="cm" class="w-full px-4 py-2 rounded-full border border-gray-300 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950" placeholder="e.g., 10" step="any">
-        </div>
-        <button id="convertBtn" class="w-full bg-indigo-600 dark:bg-indigo-500 hover:bg-indigo-700 dark:hover:bg-indigo-600 text-white font-medium py-2 rounded-full transition-transform transform hover:scale-98">Convert → Inches</button>
-        <div id="result" class="mt-4 p-4 bg-gray-100 dark:bg-slate-900 rounded-xl text-center text-gray-800 dark:text-gray-100 hidden">
-          <span id="inches">--</span> inches
+<ToolLayout title={pageTitle} description={pageDescription} toolHref="/tools/cm-to-inches">
+  <div slot="input">
+    <div class="space-y-4">
+      <div>
+        <label class="tool-label">Convert</label>
+        <div class="flex rounded-lg border border-gray-300 bg-gray-50 p-1 gap-1" id="convert-direction">
+          <button type="button" class="direction-btn active flex-1 py-2 text-sm font-medium rounded-md transition-all" data-dir="cm-to-inch">cm → inch</button>
+          <button type="button" class="direction-btn flex-1 py-2 text-sm font-medium rounded-md transition-all" data-dir="inch-to-cm">inch → cm</button>
         </div>
       </div>
+      <NumberInput id="input-value" label="Value" placeholder="e.g. 170" decimalPlaces={2} required={true} />
+      <button type="button" id="convert-btn" class="tool-btn-primary w-full">Convert</button>
     </div>
   </div>
-  <script>
-    const cmInput = document.getElementById('cm');
-    const convertBtn = document.getElementById('convertBtn');
-    const resultDiv = document.getElementById('result');
-    const inchesSpan = document.getElementById('inches');
 
-    convertBtn.addEventListener('click', () => {
-      const cm = parseFloat(cmInput.value);
-      if (isNaN(cm)) {
-        showMessage('Please enter a valid number.', 'error');
-        return;
-      }
-      const inches = cm / 2.54;
-      inchesSpan.textContent = inches.toFixed(4);
-      resultDiv.classList.remove('hidden');
+  <div slot="result">
+    <ResultDisplay emptyMessage="Enter a value and click <strong>Convert</strong> to see the result.">
+      <div slot="result-content">
+        <div class="text-center mb-5">
+          <div class="text-4xl font-bold text-primary-600" id="result-main">--</div>
+          <div class="text-sm text-gray-400 mt-1" id="result-unit">--</div>
+        </div>
+
+        <div id="feet-inches-row" class="hidden bg-primary-50 rounded-lg p-3 mb-3 border border-primary-100">
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-gray-600">Feet & Inches</span>
+            <span class="font-semibold text-primary-700" id="feet-inches-display">--</span>
+          </div>
+        </div>
+
+        <div class="bg-gray-50 rounded-lg p-3 mb-3">
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-gray-600">Precise value</span>
+            <span class="font-semibold text-gray-800" id="exact-result">--</span>
+          </div>
+        </div>
+
+        <div class="bg-gray-50 rounded-lg p-3">
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-gray-600">Formula</span>
+            <span class="text-xs text-gray-400" id="formula-text">--</span>
+          </div>
+        </div>
+
+        <div class="mt-auto pt-4">
+          <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Common Lengths</h4>
+          <div class="text-[11px] text-gray-500 space-y-1">
+            {references.map(ref => (
+              <div class="flex justify-between"><span>{ref.item}</span><span>{ref.cm} cm ≈ {ref.inch} in</span></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </ResultDisplay>
+  </div>
+
+  <div slot="description">
+    <p>Convert between centimeters and inches with precision. 1 inch equals exactly 2.54 centimeters. This converter handles both directions and shows the equivalent in feet and inches format.</p>
+    <p>All conversions are computed instantly in your browser.</p>
+  </div>
+</ToolLayout>
+
+<style>
+  .direction-btn { background: transparent; color: #6b7280; border: none; cursor: pointer; }
+  .direction-btn.active { background: #fff; color: #4f46e5; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+</style>
+
+<script>
+  function initDirectionToggle() {
+    const toggle = document.getElementById('convert-direction');
+    if (!toggle || toggle.dataset._init) return;
+    toggle.dataset._init = '1';
+    toggle.querySelectorAll('.direction-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        toggle.querySelectorAll('.direction-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('result-data')?.classList.add('hidden');
+        document.getElementById('result-empty')?.classList.remove('hidden');
+      });
     });
-  </script>
-    <Schema
-    category="UnitConversion"
-    toolName="CM to Inches Converter"
-    description={description}
-    url={Astro.url.href}
-  />
-</BaseLayout>
+  }
+
+  function convert() {
+    const inputVal = parseFloat(document.getElementById('input-value')?.value);
+    if (!inputVal || inputVal <= 0) { showToast('Please enter a valid positive number.', 'error'); return; }
+    const isCmToInch = document.querySelector('.direction-btn.active')?.dataset?.dir === 'cm-to-inch';
+
+    let result, unit, exact, formula;
+    if (isCmToInch) {
+      result = (inputVal / 2.54).toFixed(2);
+      unit = 'inches';
+      exact = (inputVal / 2.54).toFixed(6) + ' in';
+      formula = inputVal + ' cm ÷ 2.54 = ' + result + ' in';
+      const totalInches = inputVal / 2.54;
+      document.getElementById('feet-inches-row').classList.remove('hidden');
+      document.getElementById('feet-inches-display').textContent = Math.floor(totalInches / 12) + ' ft ' + Math.round(totalInches % 12) + ' in';
+    } else {
+      result = (inputVal * 2.54).toFixed(2);
+      unit = 'centimeters';
+      exact = (inputVal * 2.54).toFixed(6) + ' cm';
+      formula = inputVal + ' in × 2.54 = ' + result + ' cm';
+      document.getElementById('feet-inches-row').classList.add('hidden');
+    }
+
+    document.getElementById('result-empty').classList.add('hidden');
+    document.getElementById('result-data').classList.remove('hidden');
+    document.getElementById('result-main').textContent = result;
+    document.getElementById('result-unit').textContent = unit;
+    document.getElementById('exact-result').textContent = exact;
+    document.getElementById('formula-text').textContent = formula;
+  }
+
+  initDirectionToggle();
+  document.addEventListener('astro:page-load', initDirectionToggle);
+  document.getElementById('convert-btn')?.addEventListener('click', convert);
+</script>

@@ -1,81 +1,219 @@
 ---
-import Schema from '../../components/Schema.astro';
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getPageSeo } from '../../utils/seo';
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import TextareaInput from '../../components/ui/TextareaInput.astro';
+import SelectInput from '../../components/ui/SelectInput.astro';
+import ResultDisplay from '../../components/tool/ResultDisplay.astro';
 
-const { title, description } = getPageSeo('tools/encode-decode'); // 根据页面修改键名
+const pageTitle = 'Encode / Decode – Base64, URL, HTML, Hex, Base32, ROT13 | MetisTools';
+const pageDescription = 'Encode and decode Base64, URL, HTML entities, Hex, Base32, and ROT13. Auto-detect input type for decoding. Free online encoding tool.';
+
+const actionOptions = [
+  { value: 'encode', label: 'Encode' },
+  { value: 'decode', label: 'Decode' },
+];
+
+const formatOptions = [
+  { value: 'base64', label: 'Base64' },
+  { value: 'url', label: 'URL Encoding' },
+  { value: 'html', label: 'HTML Entities' },
+  { value: 'hex', label: 'Hex' },
+  { value: 'base32', label: 'Base32' },
+  { value: 'rot13', label: 'ROT13' },
+];
 ---
 
-<BaseLayout title={title} description={description} currentPath="/tools/encode-decode">
-  <div class="max-w-4xl mx-auto py-8">
-    <div class="bg-white dark:bg-slate-950 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-slate-800">
-      <h1 class="text-3xl font-bold mb-2">🔐 Encode / Decode</h1>
-      <p class="text-gray-600 dark:text-gray-300 mb-6">Select a method, enter text, and click the corresponding button.</p>
+<ToolLayout title={pageTitle} description={pageDescription} toolHref="/tools/encode-decode">
+  <div slot="input">
+    <div class="space-y-4">
+      <TextareaInput id="ed-input" label="Input Text" placeholder="Enter text to encode or decode..." rows={6} monospace={true} required={true} />
 
-      <div class="flex flex-wrap gap-2 mb-4">
-        <button data-method="base64Encode" class="bg-gray-200 dark:bg-slate-800 hover:bg-gray-300 dark:hover:bg-slate-700 px-4 py-2 rounded-full text-sm font-medium">Base64 Encode</button>
-        <button data-method="base64Decode" class="bg-gray-200 dark:bg-slate-800 hover:bg-gray-300 dark:hover:bg-slate-700 px-4 py-2 rounded-full text-sm font-medium">Base64 Decode</button>
-        <button data-method="urlEncode" class="bg-gray-200 dark:bg-slate-800 hover:bg-gray-300 dark:hover:bg-slate-700 px-4 py-2 rounded-full text-sm font-medium">URL Encode</button>
-        <button data-method="urlDecode" class="bg-gray-200 dark:bg-slate-800 hover:bg-gray-300 dark:hover:bg-slate-700 px-4 py-2 rounded-full text-sm font-medium">URL Decode</button>
-        <button data-method="htmlEncode" class="bg-gray-200 dark:bg-slate-800 hover:bg-gray-300 dark:hover:bg-slate-700 px-4 py-2 rounded-full text-sm font-medium">HTML Encode</button>
-        <button data-method="htmlDecode" class="bg-gray-200 dark:bg-slate-800 hover:bg-gray-300 dark:hover:bg-slate-700 px-4 py-2 rounded-full text-sm font-medium">HTML Decode</button>
+      <div class="grid grid-cols-2 gap-3">
+        <SelectInput id="ed-action" label="Action" options={actionOptions} selected="encode" />
+        <SelectInput id="ed-format" label="Format" options={formatOptions} selected="base64" />
       </div>
 
-      <textarea id="input-text" rows="6" class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950" placeholder="Enter text to encode/decode..."></textarea>
-
-      <div class="mt-4">
-        <label class="block text-sm font-medium mb-1">Result</label>
-        <textarea id="output-text" rows="6" class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-slate-700 bg-gray-50 dark:bg-slate-950 font-mono text-gray-900 dark:text-gray-100" readonly placeholder="Result will appear here..."></textarea>
-        <button id="copy-btn" class="mt-2 bg-indigo-600 dark:bg-indigo-500 text-white px-4 py-2 rounded-full text-sm">Copy Result</button>
+      <div class="flex gap-2">
+        <button type="button" id="btn-process" class="tool-btn-primary flex-1">
+          Encode
+        </button>
+        <button type="button" id="btn-auto" class="tool-btn-secondary text-xs px-3" title="Auto-detect and decode">
+          Auto Detect
+        </button>
       </div>
     </div>
   </div>
 
-  <script>
-    import { encoders } from '../../lib/text-tools';
+  <div slot="result">
+    <ResultDisplay emptyMessage="Enter text, choose format and action, then click <strong>Encode</strong> or <strong>Decode</strong>." onCopy={true} onDownload={true}>
+      <div slot="result-content" class="space-y-4">
+        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+          <div id="ed-output" class="text-sm font-mono text-gray-800 whitespace-pre-wrap break-all leading-relaxed max-h-[400px] overflow-y-auto"></div>
+        </div>
 
-    const inputEl = document.getElementById('input-text');
-    const outputEl = document.getElementById('output-text');
-    const copyBtn = document.getElementById('copy-btn');
+        <div class="flex gap-4 text-xs text-gray-400 pt-3 border-t border-gray-100">
+          <span>Input: <strong id="ed-in-len">0</strong> chars</span>
+          <span>Output: <strong id="ed-out-len">0</strong> chars</span>
+          <span id="ed-detected" class="text-indigo-500 font-medium hidden"></span>
+        </div>
+      </div>
+    </ResultDisplay>
+  </div>
 
-    function process(method) {
-      const text = inputEl.value;
-      if (!text.trim()) {
-        outputEl.value = '';
-        return;
-      }
-      try {
-        const result = encoders[method](text);
-        outputEl.value = result;
-      } catch (err) {
-        outputEl.value = `Error: ${err.message}`;
+  <div slot="description">
+    <p>
+      This free online encode/decode tool supports six common encoding formats. All processing happens locally in your browser — your data is never sent to any server, making it safe for sensitive information like tokens or credentials.
+    </p>
+    <p>
+      <strong>Base64:</strong> The most common binary-to-text encoding, used in data URIs, email attachments (MIME), and API authentication. Handles UTF-8 text correctly.
+    </p>
+    <p>
+      <strong>URL Encoding:</strong> Encodes special characters for safe inclusion in URLs using percent-encoding (e.g., space becomes %20). Also known as percent-encoding or URI encoding.
+    </p>
+    <p>
+      <strong>HTML Entities:</strong> Escapes characters like &lt;, &gt;, and &amp; for safe embedding in HTML documents. Essential for web developers to prevent XSS vulnerabilities.
+    </p>
+    <p>
+      <strong>Hex (Hexadecimal):</strong> Converts text to its hexadecimal byte representation. Common in cryptography, binary inspection, and low-level debugging.
+    </p>
+    <p>
+      <strong>Base32:</strong> Uses 32 characters (A-Z, 2-7) for encoding. More human-readable than Base64 and often used in TOTP secrets, product keys, and file systems.
+    </p>
+    <p>
+      <strong>ROT13:</strong> A simple Caesar cipher that rotates each letter by 13 positions. Encoding and decoding use the same operation (applying ROT13 twice returns the original text). Fun for obfuscation but not for security.
+    </p>
+    <p>
+      <strong>Auto Detect:</strong> The tool can attempt to identify the encoding type of your input (Base64, Base32, Hex, URL, or HTML) and automatically decode it — saving you from guessing the format.
+    </p>
+  </div>
+</ToolLayout>
+
+<script>
+  import { encoders, detectEncoding } from '../../lib/text-tools.js';
+
+  let currentResult = '';
+
+  function doProcess() {
+    const input = document.getElementById('ed-input')?.value || '';
+    if (!input.trim()) {
+      showToast('Please enter text to process.', 'error');
+      return;
+    }
+
+    const action = document.getElementById('ed-action')?.value || 'encode';
+    const format = document.getElementById('ed-format')?.value || 'base64';
+    const fnName = format + (action === 'encode' ? 'Encode' : 'Decode');
+    const fn = encoders[fnName];
+
+    if (!fn) {
+      showToast(`Function not found: ${fnName}`, 'error');
+      return;
+    }
+
+    try {
+      currentResult = fn(input);
+    } catch (e) {
+      showToast(`Error: ${e.message || 'Processing failed.'}`, 'error');
+      return;
+    }
+
+    showResult(input);
+  }
+
+  function doAutoDetect() {
+    const input = document.getElementById('ed-input')?.value || '';
+    if (!input.trim()) {
+      showToast('Please enter text to detect.', 'error');
+      return;
+    }
+
+    const detected = detectEncoding(input);
+    document.getElementById('ed-detected').textContent = `Detected: ${detected}`;
+    document.getElementById('ed-detected').classList.remove('hidden');
+
+    if (detected === 'unknown') {
+      showToast('Could not determine encoding type.', 'error');
+      return;
+    }
+
+    // Set format and switch to decode
+    const formatMap = { base64: 'base64', base32: 'base32', hex: 'hex', url: 'url', html: 'html' };
+    const format = formatMap[detected];
+    if (!format) return;
+
+    const selectEl = document.querySelector(`#ed-format`);
+    if (selectEl) selectEl.value = format;
+    const wrapper = document.querySelector(`.custom-select-wrapper[data-select-id="ed-format"]`);
+    if (wrapper) {
+      const textSpan = wrapper.querySelector('.custom-select-text');
+      if (textSpan) textSpan.textContent = formatOptions.find(o => o.value === format)?.label || format;
+      const nativeSelect = wrapper.querySelector('[data-native-select]');
+      if (nativeSelect) {
+        nativeSelect.value = format;
+        nativeSelect.dispatchEvent(new Event('change', { bubbles: true }));
       }
     }
 
-    const buttons = document.querySelectorAll('[data-method]');
-    buttons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const method = btn.getAttribute('data-method');
-        process(method);
-      });
-    });
-
-    copyBtn.addEventListener('click', () => {
-      if (outputEl.value && !outputEl.value.startsWith('Error')) {
-        navigator.clipboard.writeText(outputEl.value).then(() => {
-          showMessage('Copied to clipboard!', 'success');
-        }).catch(() => {
-          showMessage('Failed to copy.', 'error');
-        });
-      } else {
-        showMessage('Nothing to copy or invalid result.', 'error');
+    // Switch to decode
+    const actionSelect = document.querySelector(`#ed-action`);
+    if (actionSelect) actionSelect.value = 'decode';
+    const actionWrapper = document.querySelector(`.custom-select-wrapper[data-select-id="ed-action"]`);
+    if (actionWrapper) {
+      const textSpan = actionWrapper.querySelector('.custom-select-text');
+      if (textSpan) textSpan.textContent = 'Decode';
+      const actionNative = actionWrapper.querySelector('[data-native-select]');
+      if (actionNative) {
+        actionNative.value = 'decode';
+        actionNative.dispatchEvent(new Event('change', { bubbles: true }));
       }
-    });
-  </script>
-  <Schema
-    toolName="Encode/Decode"
-    description={description}
-    url={Astro.url.href}
-    category="Developer"
-  />
-</BaseLayout>
+    }
+
+    doProcess();
+  }
+
+  function showResult(input) {
+    document.getElementById('result-empty').classList.add('hidden');
+    document.getElementById('result-data').classList.remove('hidden');
+    document.getElementById('ed-output').textContent = currentResult;
+    document.getElementById('ed-in-len').textContent = input.length;
+    document.getElementById('ed-out-len').textContent = currentResult.length;
+  }
+
+  function updateButtonLabel() {
+    const action = document.getElementById('ed-action')?.value || 'encode';
+    const formatEl = document.getElementById('ed-format');
+    const format = formatEl && formatEl.value ? formatEl.value : 'base64';
+    const btn = document.getElementById('btn-process');
+    const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+    if (btn) btn.textContent = action === 'encode' ? `Encode ${capitalize(format)}` : `Decode ${capitalize(format)}`;
+  }
+
+  document.getElementById('ed-action')?.addEventListener('change', updateButtonLabel);
+  document.addEventListener('select-change', (e) => {
+    if (e.target?.closest('.custom-select-wrapper')?.dataset?.selectId === 'ed-action') updateButtonLabel();
+  });
+  document.getElementById('ed-format')?.addEventListener('change', updateButtonLabel);
+  document.addEventListener('select-change', (e) => {
+    if (e.target?.closest('.custom-select-wrapper')?.dataset?.selectId === 'ed-format') updateButtonLabel();
+  });
+
+  document.getElementById('btn-process')?.addEventListener('click', doProcess);
+  document.getElementById('btn-auto')?.addEventListener('click', doAutoDetect);
+
+  document.getElementById('btn-copy-result')?.addEventListener('click', () => {
+    if (!currentResult) return;
+    navigator.clipboard.writeText(currentResult).then(() => {
+      showToast('Copied to clipboard!', 'success');
+    }).catch(() => showToast('Failed to copy.', 'error'));
+  });
+
+  document.getElementById('btn-download-result')?.addEventListener('click', () => {
+    if (!currentResult) return;
+    const blob = new Blob([currentResult], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'encoded-text.txt';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+</script>

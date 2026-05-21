@@ -1,98 +1,160 @@
 ---
-import Schema from '../../components/Schema.astro';
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getPageSeo } from '../../utils/seo.js';
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import TextareaInput from '../../components/ui/TextareaInput.astro';
+import SelectInput from '../../components/ui/SelectInput.astro';
+import CheckboxInput from '../../components/ui/CheckboxInput.astro';
+import ResultDisplay from '../../components/tool/ResultDisplay.astro';
 
-const { title, description } = getPageSeo('tools/sort-shuffle');
+const pageTitle = 'Sort & Shuffle Lines – Alphabetical, Random Order | MetisTools';
+const pageDescription = 'Sort lines alphabetically (A-Z or Z-A), numerically, or randomly shuffle. Remove empty lines before sorting. Free online text sorter.';
+
+const sortOptions = [
+  { value: 'asc', label: 'A → Z (Alphabetical Ascending)' },
+  { value: 'desc', label: 'Z → A (Alphabetical Descending)' },
+  { value: 'numeric-asc', label: '1 → 9 (Numerical Ascending)' },
+  { value: 'numeric-desc', label: '9 → 1 (Numerical Descending)' },
+  { value: 'shuffle', label: 'Random Shuffle' },
+];
 ---
 
-<BaseLayout title={title} description={description} currentPath="/tools/sort-shuffle">
-  <div class="max-w-4xl mx-auto py-8">
-    <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
-      <h1 class="text-3xl font-bold mb-2">🔀 Sort & Shuffle Lines</h1>
-      <p class="text-gray-600 mb-6">Sort lines alphabetically (A–Z or Z–A) or randomize the order. Each line must be separated by a newline (Enter key).</p>
+<ToolLayout title={pageTitle} description={pageDescription} toolHref="/tools/sort-shuffle">
+  <div slot="input">
+    <div class="space-y-4">
+      <TextareaInput id="ss-input" label="Input Text" placeholder="Paste your lines here...&#10;Banana&#10;Apple&#10;Cherry&#10;Date&#10;Elderberry" rows={8} monospace={true} required={true} />
 
-      <textarea id="input-text" rows="10" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono" placeholder="Enter each item on a new line..."></textarea>
+      <SelectInput id="ss-order" label="Sort Order" options={sortOptions} selected="asc" />
 
-      <div class="mt-4 flex flex-wrap gap-2">
-        <button id="sort-asc" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-full text-sm font-medium transition">Sort A → Z</button>
-        <button id="sort-desc" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-full text-sm font-medium transition">Sort Z → A</button>
-        <button id="shuffle" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-full text-sm font-medium transition">Shuffle (Random)</button>
-      </div>
+      <CheckboxInput id="ss-remove-empty" label="Remove Empty Lines Before Sorting" checked={true} class="block" />
 
-      <div class="mt-4">
-        <label class="block text-sm font-medium mb-1">Result</label>
-        <textarea id="output-text" rows="10" class="w-full px-4 py-3 rounded-xl border border-gray-300 bg-gray-50 font-mono" readonly placeholder="Result will appear here..."></textarea>
-        <button id="copy-btn" class="mt-2 bg-indigo-600 text-white px-4 py-2 rounded-full text-sm transition hover:bg-indigo-700">Copy Result</button>
-      </div>
+      <button type="button" id="btn-sort" class="tool-btn-primary w-full">
+        Sort Lines
+      </button>
     </div>
   </div>
 
-  <script>
-    (function() {
-      const inputEl = document.getElementById('input-text');
-      const outputEl = document.getElementById('output-text');
-      const sortAscBtn = document.getElementById('sort-asc');
-      const sortDescBtn = document.getElementById('sort-desc');
-      const shuffleBtn = document.getElementById('shuffle');
-      const copyBtn = document.getElementById('copy-btn');
+  <div slot="result">
+    <ResultDisplay emptyMessage="Paste text and click <strong>Sort Lines</strong> to reorder." onCopy={true} onDownload={true}>
+      <div slot="result-content" class="space-y-4">
+        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+          <div id="ss-output" class="text-sm font-mono whitespace-pre-wrap break-all text-gray-800 leading-relaxed max-h-[400px] overflow-y-auto"></div>
+        </div>
 
-      function sortLines(text, ascending) {
-        if (!text.trim()) return '';
-        const lines = text.split(/\r?\n/);
-        // 去除最后空行（如果用户以换行结尾）
-        if (lines.length > 0 && lines[lines.length-1] === '') lines.pop();
-        if (lines.length <= 1) return text;
-        lines.sort((a, b) => {
-          // 使用 localeCompare 保证正确处理大小写和特殊字符，并保持稳定性
-          if (ascending) return a.localeCompare(b);
-          else return b.localeCompare(a);
-        });
-        return lines.join('\n');
-      }
+        <div class="flex gap-4 text-xs text-gray-400 pt-3 border-t border-gray-100">
+          <span>Total lines: <strong id="ss-count">0</strong></span>
+          <span>Empty removed: <strong id="ss-empty-removed">0</strong></span>
+        </div>
+      </div>
+    </ResultDisplay>
+  </div>
 
-      function shuffleLines(text) {
-        if (!text.trim()) return '';
-        let lines = text.split(/\r?\n/);
-        if (lines.length > 0 && lines[lines.length-1] === '') lines.pop();
-        if (lines.length <= 1) return text;
-        for (let i = lines.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [lines[i], lines[j]] = [lines[j], lines[i]];
-        }
-        return lines.join('\n');
-      }
+  <div slot="description">
+    <p>
+      This free online line sorter organizes your text lines in various orderings or randomly shuffles them. All processing happens locally in your browser — your data is never uploaded anywhere. Perfect for organizing lists, preparing data, or adding randomness.
+    </p>
+    <p>
+      <strong>Alphabetical Sort (A-Z / Z-A):</strong> Sorts lines by their text content using locale-aware comparison. Useful for alphabetizing names, keywords, to-do items, and reference lists.
+    </p>
+    <p>
+      <strong>Numerical Sort (1-9 / 9-1):</strong> Extracts the first number from each line and sorts by numeric value rather than text. Ideal for sorting version numbers, measurements, or any data with numeric prefixes.
+    </p>
+    <p>
+      <strong>Random Shuffle:</strong> Uses the Fisher-Yates algorithm to randomly reorder lines. Great for randomizing quiz questions, assigning tasks, creating random draws, or shuffling playlists.
+    </p>
+    <p>
+      <strong>Remove Empty Lines:</strong> When enabled, blank lines and whitespace-only lines are removed before sorting, resulting in a cleaner output. Toggle this off if you need to preserve blank lines.
+    </p>
+  </div>
+</ToolLayout>
 
-      function copyResult() {
-        if (!outputEl.value) {
-          if (typeof showMessage === 'function') showMessage('Nothing to copy', 'error');
-          else alert('Nothing to copy');
-          return;
-        }
-        navigator.clipboard.writeText(outputEl.value).then(() => {
-          if (typeof showMessage === 'function') showMessage('Copied to clipboard!', 'success');
-          else alert('Copied!');
-        }).catch(() => {
-          if (typeof showMessage === 'function') showMessage('Failed to copy', 'error');
-          else alert('Failed to copy');
-        });
-      }
+<script>
+  import { sortLinesAlphabetically, shuffleLines } from '../../lib/text-tools.js';
 
-      sortAscBtn.addEventListener('click', () => {
-        outputEl.value = sortLines(inputEl.value, true);
+  let currentResult = '';
+
+  function doSort() {
+    let input = document.getElementById('ss-input')?.value || '';
+    if (!input.trim()) {
+      showToast('Please enter some text.', 'error');
+      return;
+    }
+
+    const order = document.getElementById('ss-order')?.value || 'asc';
+    const removeEmpty = document.getElementById('ss-remove-empty')?.checked ?? true;
+
+    let text = input;
+    let emptyRemoved = 0;
+
+    // Remove empty lines if requested
+    if (removeEmpty) {
+      const lines = text.split(/\r?\n/);
+      const origCount = lines.length;
+      text = lines.filter(l => l.trim() !== '').join('\n');
+      emptyRemoved = origCount - text.split(/\r?\n/).length;
+    }
+
+    if (order === 'shuffle') {
+      currentResult = shuffleLines(text);
+    } else if (order.startsWith('numeric')) {
+      const lines = text.split(/\r?\n/);
+      lines.sort((a, b) => {
+        const na = parseFloat(a.trim());
+        const nb = parseFloat(b.trim());
+        if (isNaN(na) && isNaN(nb)) return 0;
+        if (isNaN(na)) return 1;
+        if (isNaN(nb)) return -1;
+        return order === 'numeric-asc' ? na - nb : nb - na;
       });
-      sortDescBtn.addEventListener('click', () => {
-        outputEl.value = sortLines(inputEl.value, false);
-      });
-      shuffleBtn.addEventListener('click', () => {
-        outputEl.value = shuffleLines(inputEl.value);
-      });
-      copyBtn.addEventListener('click', copyResult);
-    })();
-  </script>
-  <Schema
-    toolName="Sort & Shuffle"
-    description={description}
-    url={Astro.url.href}
-  />
-</BaseLayout>
+      currentResult = lines.join('\n');
+    } else {
+      currentResult = sortLinesAlphabetically(text, order);
+    }
+
+    const finalLines = (currentResult || '').split(/\r?\n/).length;
+
+    document.getElementById('result-empty').classList.add('hidden');
+    document.getElementById('result-data').classList.remove('hidden');
+    document.getElementById('ss-output').textContent = currentResult || '(no lines)';
+    document.getElementById('ss-count').textContent = finalLines;
+    document.getElementById('ss-empty-removed').textContent = emptyRemoved;
+  }
+
+  function updateButtonLabel() {
+    const order = document.getElementById('ss-order')?.value || 'asc';
+    const labelMap = {
+      asc: 'Sort A → Z',
+      desc: 'Sort Z → A',
+      'numeric-asc': 'Sort Numerically ↑',
+      'numeric-desc': 'Sort Numerically ↓',
+      shuffle: 'Shuffle Lines',
+    };
+    const btn = document.getElementById('btn-sort');
+    if (btn) btn.textContent = labelMap[order] || 'Sort Lines';
+  }
+
+  document.getElementById('ss-order')?.addEventListener('change', updateButtonLabel);
+  document.addEventListener('select-change', (e) => {
+    if (e.target?.closest('.custom-select-wrapper')?.dataset?.selectId === 'ss-order') {
+      updateButtonLabel();
+    }
+  });
+
+  document.getElementById('btn-sort')?.addEventListener('click', doSort);
+
+  document.getElementById('btn-copy-result')?.addEventListener('click', () => {
+    if (!currentResult) return;
+    navigator.clipboard.writeText(currentResult).then(() => {
+      showToast('Copied to clipboard!', 'success');
+    }).catch(() => showToast('Failed to copy.', 'error'));
+  });
+
+  document.getElementById('btn-download-result')?.addEventListener('click', () => {
+    if (!currentResult) return;
+    const blob = new Blob([currentResult], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'sorted-lines.txt';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+</script>

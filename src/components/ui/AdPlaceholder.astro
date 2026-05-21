@@ -1,0 +1,27 @@
+---
+// 广告位占位组件 —— Ads 审批通过后替换为真实广告代码
+// 使用注释标注广告位置，方便后续查找和替换
+export interface Props {
+  position: 'hero-banner' | 'tool-top' | 'tool-result' | 'sidebar' | 'content-middle' | 'footer-banner';
+  class?: string;
+}
+
+const { position, class: extraClass = '' } = Astro.props;
+
+// 各位置尺寸配置
+const positionConfig = {
+  'hero-banner': { w: 728, h: 90, label: 'Leaderboard (728×90)' },
+  'tool-top': { w: 728, h: 90, label: 'Tool Top Banner (728×90)' },
+  'tool-result': { w: 728, h: 90, label: 'Result Bottom Banner (728×90)' },
+  'sidebar': { w: 300, h: 250, label: 'Sidebar Rectangle (300×250)' },
+  'content-middle': { w: 728, h: 90, label: 'Content Middle (728×90)' },
+  'footer-banner': { w: 728, h: 90, label: 'Footer Banner (728×90)' },
+};
+
+const config = positionConfig[position];
+---
+
+<!-- [AdSense 广告位]: position -->
+<div class={`ad-placeholder ${extraClass}`} style={position === 'sidebar' ? 'min-height: 250px;' : ''}>
+  <span>{config.label}</span>
+</div>

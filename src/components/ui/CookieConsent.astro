@@ -1,0 +1,124 @@
+---
+// Cookie 同意弹窗 —— 页面底部横幅
+// GDPR / CCPA 合规，Google AdSense 审批必要
+import { siteConfig } from '../../data/site';
+---
+
+<div id="cookie-consent" class="hidden fixed bottom-0 inset-x-0 z-50">
+  <div class="bg-white border-t border-gray-200 shadow-2xl">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 py-4">
+        <!-- 文案 -->
+        <div class="flex-1">
+          <p class="text-sm text-gray-700 leading-relaxed">
+            We use cookies to improve your experience. By using {siteConfig.name}, you agree to our
+            <a href="/support/privacy-policy" class="text-primary-600 hover:text-primary-700 underline font-medium">Privacy Policy</a>.
+            You can customize your cookie preferences below.
+          </p>
+        </div>
+
+        <!-- 按钮组 -->
+        <div class="flex items-center gap-3 shrink-0">
+          <button id="cookie-reject" class="px-4 py-2 text-sm text-gray-500 hover:text-gray-700 transition-colors font-medium">
+            Reject All
+          </button>
+          <button id="cookie-customize" class="px-4 py-2 text-sm text-primary-600 hover:text-primary-700 transition-colors font-medium">
+            Customize
+          </button>
+          <button id="cookie-accept" class="px-5 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors">
+            Accept All
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 自定义选项 Modal -->
+<div id="cookie-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center bg-black/50" role="dialog" aria-modal="true">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 p-6">
+    <h3 class="text-lg font-semibold text-gray-900 mb-2">Cookie Preferences</h3>
+    <p class="text-sm text-gray-500 mb-5">Choose which cookies you allow. Necessary cookies are always enabled.</p>
+
+    <div class="space-y-4">
+      <label class="flex items-center justify-between opacity-50 cursor-not-allowed">
+        <div>
+          <span class="text-sm font-medium text-gray-700">Necessary</span>
+          <p class="text-xs text-gray-400">Required for the site to function.</p>
+        </div>
+        <input type="checkbox" checked disabled class="rounded border-gray-300 text-primary-600 focus:ring-primary-500" />
+      </label>
+
+      <label class="flex items-center justify-between cursor-pointer">
+        <div>
+          <span class="text-sm font-medium text-gray-700">Analytics</span>
+          <p class="text-xs text-gray-400">Help us improve by understanding usage.</p>
+        </div>
+        <input id="cookie-analytics" type="checkbox" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500" />
+      </label>
+
+      <label class="flex items-center justify-between cursor-pointer">
+        <div>
+          <span class="text-sm font-medium text-gray-700">Advertising</span>
+          <p class="text-xs text-gray-400">Show relevant ads to support our free tools.</p>
+        </div>
+        <input id="cookie-advertising" type="checkbox" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500" />
+      </label>
+    </div>
+
+    <div class="flex justify-end gap-3 mt-6">
+      <button id="cookie-save" class="px-5 py-2.5 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors">
+        Save Preferences
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const STORAGE_KEY = 'cookie-preferences';
+  const consentBanner = document.getElementById('cookie-consent');
+  const consentModal = document.getElementById('cookie-modal');
+
+  // 已选择过则隐藏
+  if (!localStorage.getItem(STORAGE_KEY)) {
+    consentBanner?.classList.remove('hidden');
+  }
+
+  // Accept All
+  document.getElementById('cookie-accept')?.addEventListener('click', () => {
+    const prefs = { necessary: true, analytics: true, advertising: true };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
+    consentBanner?.classList.add('hidden');
+    location.reload(); // 重新加载以激活 GA / AdSense
+  });
+
+  // Reject All
+  document.getElementById('cookie-reject')?.addEventListener('click', () => {
+    const prefs = { necessary: true, analytics: false, advertising: false };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
+    consentBanner?.classList.add('hidden');
+  });
+
+  // Customize → 打开 Modal
+  document.getElementById('cookie-customize')?.addEventListener('click', () => {
+    consentModal?.classList.remove('hidden');
+  });
+
+  // 关闭 Modal（点击遮罩）
+  consentModal?.addEventListener('click', (e) => {
+    if (e.target === consentModal) {
+      consentModal.classList.add('hidden');
+    }
+  });
+
+  // Save Preferences
+  document.getElementById('cookie-save')?.addEventListener('click', () => {
+    const analytics = document.getElementById('cookie-analytics')?.checked || false;
+    const advertising = document.getElementById('cookie-advertising')?.checked || false;
+    const prefs = { necessary: true, analytics, advertising };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
+    consentModal?.classList.add('hidden');
+    consentBanner?.classList.add('hidden');
+    if (analytics || advertising) location.reload();
+  });
+</script>

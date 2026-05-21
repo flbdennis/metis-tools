@@ -1,160 +1,220 @@
 ---
-import Schema from '../../components/Schema.astro';
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getPageSeo } from '../../utils/seo.js';
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import FileUpload from '../../components/ui/FileUpload.astro';
+import NumberInput from '../../components/ui/NumberInput.astro';
+import SelectInput from '../../components/ui/SelectInput.astro';
+import ProgressBar from '../../components/ui/ProgressBar.astro';
+import ResultDisplay from '../../components/tool/ResultDisplay.astro';
 
-const { title, description } = getPageSeo('tools/image-format-converter'); // 根据页面修改键名
+const pageTitle = 'Image Format Converter – Convert PNG, JPEG, WebP | MetisTools';
+const pageDescription = 'Convert images between PNG, JPEG, and WebP formats. Adjustable quality. Free online image format converter.';
+
+const formatOptions = [
+  { value: 'image/jpeg', label: 'JPEG (.jpg)' },
+  { value: 'image/png', label: 'PNG (.png)' },
+  { value: 'image/webp', label: 'WebP (.webp)' },
+];
 ---
 
-<BaseLayout title={title} description={description} currentPath="/tools/image-format-converter">
-  <div class="max-w-2xl mx-auto py-8">
-    <div class="bg-white dark:bg-slate-950 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-slate-800">
-      <h1 class="text-3xl font-bold mb-2">🔄 Image Format Converter</h1>
-      <p class="text-gray-600 dark:text-gray-300 mb-6">Convert between PNG, JPEG, and WebP formats. All processing is local.</p>
+<ToolLayout title={pageTitle} description={pageDescription} toolHref="/tools/image-format-converter">
+  <div slot="input">
+    <div class="space-y-4">
+      <FileUpload id="fc-file" label="Upload Image" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" maxSize={100 * 1024 * 1024} required={true} helperText="JPEG, PNG, or WebP — up to 100MB" />
 
-      <div id="upload-zone" class="border-2 border-dashed border-gray-300 dark:border-slate-700 rounded-xl p-6 text-center cursor-pointer hover:border-indigo-500 transition">
-        <svg class="mx-auto h-10 w-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-        </svg>
-        <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">Drag & drop an image here, or <span class="text-indigo-600 dark:text-indigo-400 font-medium">browse</span></p>
-        <p class="text-xs text-gray-400 mt-1">Supports PNG, JPEG, WebP</p>
-        <input type="file" id="file-input" accept="image/png,image/jpeg,image/webp" class="hidden text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950">
+      <SelectInput id="fc-format" label="Convert To" options={formatOptions} selected="image/png" />
+
+      <div id="fc-quality-group">
+        <NumberInput id="fc-quality" label="Quality" value="92" min={1} max={100} decimalPlaces={0} allowNegative={false} required={false} helperText="1 – 100 (ignored for PNG — PNG is always lossless)" />
       </div>
 
-      <div class="mt-4 grid grid-cols-2 gap-4">
-        <div>
-          <label class="block text-sm font-medium mb-1">Convert to</label>
-          <select id="target-format" class="w-full px-4 py-2 rounded-full border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950">
-            <option value="image/png">PNG</option>
-            <option value="image/jpeg">JPEG</option>
-            <option value="image/webp">WebP</option>
-          </select>
+      <details class="group">
+        <summary class="text-xs text-gray-400 cursor-pointer hover:text-gray-500">Advanced: Resize Output</summary>
+        <div class="mt-2">
+          <NumberInput id="fc-resize-width" label="Max Width (px)" value="" min={16} max={10000} decimalPlaces={0} allowNegative={false} required={false} helperText="Leave empty for original size" />
         </div>
-        <div id="quality-container" class="hidden">
-          <label class="block text-sm font-medium mb-1">Quality: <span id="quality-value">90</span>%</label>
-          <input type="range" id="quality" min="1" max="100" value="90" class="w-full text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950">
-        </div>
-      </div>
+      </details>
 
-      <button id="convert-btn" class="w-full bg-indigo-600 dark:bg-indigo-500 text-white py-2 rounded-full mt-4 disabled:opacity-50" disabled>Convert</button>
-
-      <div id="result-area" class="mt-6 hidden">
-        <p class="font-semibold text-green-600">✓ Conversion completed</p>
-        <div class="flex gap-4 mt-2">
-          <img id="preview" class="max-h-48 rounded border" />
-          <button id="download-btn" class="bg-indigo-600 dark:bg-indigo-500 text-white px-4 py-2 rounded-full text-sm self-end">Download</button>
-        </div>
-      </div>
+      <button type="button" id="btn-convert" class="tool-btn-primary w-full" disabled>
+        Convert Format
+      </button>
     </div>
   </div>
 
-  <script>
-    const uploadZone = document.getElementById('upload-zone');
-    const fileInput = document.getElementById('file-input');
-    const targetFormat = document.getElementById('target-format');
-    const qualityContainer = document.getElementById('quality-container');
-    const qualitySlider = document.getElementById('quality');
-    const qualityValue = document.getElementById('quality-value');
-    const convertBtn = document.getElementById('convert-btn');
-    const resultArea = document.getElementById('result-area');
-    const previewImg = document.getElementById('preview');
-    const downloadBtn = document.getElementById('download-btn');
-    let currentFile = null;
-    let currentResultBlob = null;
-    let currentResultType = null;
+  <div slot="result">
+    <ResultDisplay emptyMessage="Upload an image and click <strong>Convert Format</strong> to see results." onDownload={true}>
+      <div slot="result-content" class="space-y-4">
+        <ProgressBar visible={false} />
 
-    function showMsg(msg, type) {
-      if (typeof showMessage === 'function') showMessage(msg, type);
-      else alert(msg);
+        <div class="bg-gray-100 rounded-lg border border-gray-200 aspect-video flex items-center justify-center overflow-hidden">
+          <img id="fc-output-img" src="" alt="Converted" class="max-w-full max-h-full object-contain hidden" />
+          <span id="fc-output-placeholder" class="text-sm text-gray-400">Converted image will appear here</span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 text-center">
+          <div class="bg-gray-50 rounded-lg p-3 border border-gray-100">
+            <div id="fc-orig-format" class="text-sm font-medium text-gray-700">--</div>
+            <div class="text-xs text-gray-500">Original Format</div>
+          </div>
+          <div class="bg-gray-50 rounded-lg p-3 border border-gray-100">
+            <div id="fc-new-format" class="text-sm font-medium text-gray-700">--</div>
+            <div class="text-xs text-gray-500">Output Format</div>
+          </div>
+        </div>
+
+        <div class="flex gap-4 text-xs text-gray-400 pt-3 border-t border-gray-100">
+          <span>Size: <strong id="fc-size">--</strong></span>
+          <span>Dimensions: <strong id="fc-dims">--</strong></span>
+        </div>
+      </div>
+    </ResultDisplay>
+  </div>
+
+  <div slot="description">
+    <p>
+      This free online image format converter transforms images between PNG, JPEG, and WebP formats directly in your browser. Your images are never uploaded to any server — all conversion happens locally using the Canvas API, ensuring complete privacy.
+    </p>
+    <p>
+      <strong>JPEG (.jpg):</strong> Best for photographs and complex images. Uses lossy compression — adjust quality to balance file size and visual quality. Does not support transparency (background becomes white).
+    </p>
+    <p>
+      <strong>PNG (.png):</strong> Lossless format that preserves exact pixel data and supports transparency. Best for logos, icons, screenshots, and images with text or sharp edges. Larger file sizes than JPEG for photos.
+    </p>
+    <p>
+      <strong>WebP (.webp):</strong> Modern format offering both lossy and lossless compression. Typically 25-35% smaller than JPEG/PNG at equivalent quality. Widely supported by modern browsers and ideal for web performance.
+    </p>
+    <p>
+      <strong>Quality Control:</strong> Adjust the quality slider for JPEG and WebP output. PNG output is always lossless, so the quality setting is ignored for PNG conversions.
+    </p>
+    <p>
+      <strong>Optional Resize:</strong> Set a maximum width to resize the output image during conversion, useful for creating thumbnails or ensuring consistent dimensions across your assets.
+    </p>
+  </div>
+</ToolLayout>
+
+<script>
+  import { convertImageFormat, formatFileSize } from '../../lib/image-tools.js';
+
+  const showToast = window.showToast || (() => {});
+
+  let currentFile = null;
+  let currentResult = null;
+  let progressBarElement = null;
+
+  function createProgressBar() {
+    if (progressBarElement) return;
+    const container = document.querySelector('#fc-output-img')?.closest('.space-y-4');
+    if (!container) return;
+    const wrapper = document.createElement('div');
+    wrapper.className = 'mb-4';
+    wrapper.innerHTML = `
+      <div class="w-full bg-gray-200 rounded-full h-2 mb-2 overflow-hidden">
+        <div id="progress-fill" class="bg-primary-600 h-2 rounded-full" style="width: 0%"></div>
+      </div>
+      <div id="progress-status" class="text-xs text-gray-500 mb-2"></div>
+    `;
+    container.prepend(wrapper);
+    progressBarElement = wrapper;
+  }
+
+  function updateProgress(percent, status) {
+    createProgressBar();
+    const fill = document.getElementById('progress-fill');
+    const statusDiv = document.getElementById('progress-status');
+    if (fill) fill.style.width = Math.min(100, Math.max(0, percent)) + '%';
+    if (statusDiv) statusDiv.textContent = status;
+    if (progressBarElement) progressBarElement.style.display = 'block';
+  }
+
+  function hideProgress() {
+    if (progressBarElement) progressBarElement.style.display = 'none';
+  }
+
+  function clearResults() {
+    currentResult = null;
+    const resultData = document.getElementById('result-data');
+    const resultEmpty = document.getElementById('result-empty');
+    if (resultData) resultData.classList.add('hidden');
+    if (resultEmpty) resultEmpty.classList.remove('hidden');
+    const img = document.getElementById('fc-output-img');
+    const placeholder = document.getElementById('fc-output-placeholder');
+    if (img) img.classList.add('hidden');
+    if (placeholder) placeholder.classList.remove('hidden');
+    document.getElementById('fc-orig-format').textContent = '--';
+    document.getElementById('fc-new-format').textContent = '--';
+    document.getElementById('fc-size').textContent = '--';
+    document.getElementById('fc-dims').textContent = '--';
+    hideProgress();
+  }
+
+    const fileUpload = document.getElementById('fc-file');
+
+  if (fileUpload) {
+    fileUpload.addEventListener('file-selected', (e) => {
+      console.log('file-selected event received', e.detail.file);
+      currentFile = e.detail.file;
+      clearResults();
+      document.getElementById('btn-convert').disabled = false;
+    });
+    fileUpload.addEventListener('file-cleared', () => {
+      currentFile = null;
+      document.getElementById('btn-convert').disabled = true;
+      clearResults();
+    });
+  } else {
+    console.error('FileUpload element not found');
+  }
+
+  async function doConvert() {
+    if (!currentFile) { showToast('Please select an image.', 'error'); return; }
+
+    const btn = document.getElementById('btn-convert');
+    btn.disabled = true;
+    btn.textContent = 'Converting...';
+
+    clearResults();
+    document.getElementById('result-empty').classList.add('hidden');
+    document.getElementById('result-data').classList.remove('hidden');
+    updateProgress(50, 'Converting format...');
+
+    try {
+      const targetFormat = document.getElementById('fc-format')?.value || 'image/png';
+      const qualityVal = parseInt(document.getElementById('fc-quality')?.value) || 92;
+      const quality = qualityVal / 100;
+      const resizeW = parseInt(document.getElementById('fc-resize-width')?.value) || null;
+
+      currentResult = await convertImageFormat(currentFile, targetFormat, quality, resizeW);
+
+      updateProgress(100, 'Done!');
+
+      document.getElementById('fc-output-img').src = currentResult.url;
+      document.getElementById('fc-output-img').classList.remove('hidden');
+      document.getElementById('fc-output-placeholder').classList.add('hidden');
+
+      const formatLabels = { 'image/jpeg': 'JPEG', 'image/png': 'PNG', 'image/webp': 'WebP' };
+      document.getElementById('fc-orig-format').textContent = formatLabels[currentResult.originalFormat] || currentResult.originalFormat;
+      document.getElementById('fc-new-format').textContent = formatLabels[currentResult.targetFormat] || currentResult.targetFormat;
+      document.getElementById('fc-size').textContent = formatFileSize(currentResult.size);
+      document.getElementById('fc-dims').textContent = `${currentResult.width} x ${currentResult.height}`;
+
+      setTimeout(() => hideProgress(), 1500);
+    } catch (e) {
+      hideProgress();
+      showToast('Conversion failed: ' + (e.message || 'Unknown error'), 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Convert Format';
     }
+  }
 
-    function updateQualityVisibility() {
-      const format = targetFormat.value;
-      if (format === 'image/jpeg' || format === 'image/webp') {
-        qualityContainer.classList.remove('hidden');
-      } else {
-        qualityContainer.classList.add('hidden');
-      }
-    }
+  document.getElementById('btn-convert')?.addEventListener('click', doConvert);
 
-    targetFormat.addEventListener('change', updateQualityVisibility);
-    qualitySlider.addEventListener('input', () => {
-      qualityValue.textContent = qualitySlider.value;
-    });
-
-    async function handleFile(file) {
-      if (!file || !file.type.startsWith('image/')) {
-        showMsg('Please upload an image file.', 'error');
-        return;
-      }
-      currentFile = file;
-      convertBtn.disabled = false;
-      // 可选：显示原始图片预览
-    }
-
-    async function convert() {
-      if (!currentFile) return;
-      const format = targetFormat.value;
-      const quality = qualitySlider.value / 100;
-      convertBtn.disabled = true;
-      try {
-        const img = await createImageBitmap(currentFile);
-        const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0);
-        const blob = await new Promise(resolve => canvas.toBlob(resolve, format, quality));
-        currentResultBlob = blob;
-        currentResultType = format;
-        const url = URL.createObjectURL(blob);
-        previewImg.src = url;
-        resultArea.classList.remove('hidden');
-        showMsg('Conversion successful', 'success');
-      } catch (err) {
-        showMsg('Conversion failed: ' + err.message, 'error');
-      } finally {
-        convertBtn.disabled = false;
-      }
-    }
-
-    uploadZone.addEventListener('click', () => fileInput.click());
-    fileInput.addEventListener('change', (e) => {
-      if (e.target.files.length) handleFile(e.target.files[0]);
-    });
-    uploadZone.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      uploadZone.classList.add('border-indigo-500', 'bg-indigo-50');
-    });
-    uploadZone.addEventListener('dragleave', () => {
-      uploadZone.classList.remove('border-indigo-500', 'bg-indigo-50');
-    });
-    uploadZone.addEventListener('drop', (e) => {
-      e.preventDefault();
-      uploadZone.classList.remove('border-indigo-500', 'bg-indigo-50');
-      const file = e.dataTransfer.files[0];
-      if (file && file.type.startsWith('image/')) handleFile(file);
-      else showMsg('Please drop an image file.', 'error');
-    });
-    convertBtn.addEventListener('click', convert);
-    downloadBtn.addEventListener('click', () => {
-      if (currentResultBlob) {
-        const url = URL.createObjectURL(currentResultBlob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `converted.${currentResultType.split('/')[1]}`;
-        a.click();
-        URL.revokeObjectURL(url);
-      } else {
-        showMsg('No conversion result', 'error');
-      }
-    });
-    updateQualityVisibility();
-  </script>
-  <Schema
-    toolName="Image Format Converter"
-    description={description}
-    url={Astro.url.href}
-    category="ImageEditing"
-  />
-</BaseLayout>
+  document.getElementById('btn-download-result')?.addEventListener('click', () => {
+    if (!currentResult) return;
+    const ext = currentResult.targetFormat.split('/')[1];
+    const origName = (currentFile?.name || 'image').replace(/\.[^.]+$/, '');
+    const a = document.createElement('a');
+    a.href = currentResult.url;
+    a.download = `${origName}.${ext}`;
+    a.click();
+  });
+</script>

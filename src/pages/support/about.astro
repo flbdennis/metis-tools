@@ -1,70 +1,78 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import Schema from '../../components/Schema.astro';
-const siteUrl = Astro.site.href;
+import Schema from '../../components/seo/Schema.astro';
+import { seoData } from '../../data/seo';
+import { siteConfig } from '../../data/site';
 
-const title = "About MetisTools – Free Online Toolbox";
-const description = "MetisTools provides free, private, all-in-one online converters, calculators, and developer tools. No signup required.";
+const { title, description } = seoData.support.about;
 ---
 
 <BaseLayout title={title} description={description} currentPath="/support/about">
   <div class="max-w-3xl mx-auto px-4 py-12 sm:py-16">
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+    <div class="rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
       <div class="px-6 py-10 sm:p-12">
         <div class="text-center">
-          <div class="text-5xl mb-4">🛠️</div>
-          <h1 class="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-indigo-600 to-indigo-500 bg-clip-text text-transparent">About MetisTools</h1>
-          <p class="mt-3 text-lg text-gray-500 dark:text-gray-400">Your trusted source for free online tools</p>
+          <h1 class="text-3xl sm:text-4xl font-bold text-gray-900">About MetisTools</h1>
+          <p class="mt-3 text-lg text-gray-500">Your trusted source for free online tools</p>
         </div>
 
         <div class="mt-10 space-y-8">
-          <!-- 创始人信息（增强可信度） -->
           <div class="flex gap-4">
-            <div class="flex-shrink-0 text-2xl">👤</div>
+            <div class="flex-shrink-0 w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center">
+              <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+            </div>
             <div>
-              <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200">Behind the Tools</h2>
-              <p class="mt-1 text-gray-600 dark:text-gray-300 leading-relaxed">
-                MetisTools is proudly developed by <strong>Dennis Fan</strong>, a full-stack developer with over 5 years of experience in web performance and security. Frustrated by slow, ad‑ridden tool sites, Dennis built this platform from the ground up to be fast, private, and completely free.
+              <h2 class="text-xl font-semibold text-gray-800">Behind the Tools</h2>
+              <p class="mt-1 text-gray-600 leading-relaxed">
+                MetisTools is proudly developed by <strong>{siteConfig.developer}</strong>, a full-stack developer with over 5 years of experience in web performance and security. Frustrated by slow, ad-ridden tool sites, this platform was built from the ground up to be fast, private, and completely free.
               </p>
-              <p class="mt-2 text-gray-600 dark:text-gray-300 leading-relaxed">
-                Every tool runs locally in your browser – no data is ever uploaded to our servers. Your privacy is our priority.
+              <p class="mt-2 text-gray-600 leading-relaxed">
+                Every tool runs locally in your browser — no data is ever uploaded to our servers. Your privacy is our priority.
               </p>
             </div>
           </div>
 
           <div class="flex gap-4">
-            <div class="flex-shrink-0 text-2xl">🎯</div>
+            <div class="flex-shrink-0 w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center">
+              <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+            </div>
             <div>
-              <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200">Our Mission</h2>
-              <p class="mt-1 text-gray-600 dark:text-gray-300 leading-relaxed">We believe essential tools should be accessible to everyone, everywhere. No paywalls, no data collection, no distractions – just pure functionality that works.</p>
+              <h2 class="text-xl font-semibold text-gray-800">Our Mission</h2>
+              <p class="mt-1 text-gray-600 leading-relaxed">We believe essential tools should be accessible to everyone, everywhere. No paywalls, no data collection, no distractions — just pure functionality that works.</p>
             </div>
           </div>
 
           <div class="flex gap-4">
-            <div class="flex-shrink-0 text-2xl">🛠️</div>
+            <div class="flex-shrink-0 w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center">
+              <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            </div>
             <div>
-              <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200">What We Offer</h2>
-              <p class="mt-1 text-gray-600 dark:text-gray-300 leading-relaxed">From unit converters and calculators to PDF tools, image editors, and developer utilities – all running locally in your browser. Your files never leave your device.</p>
+              <h2 class="text-xl font-semibold text-gray-800">What We Offer</h2>
+              <p class="mt-1 text-gray-600 leading-relaxed">From unit converters and calculators to PDF tools, image editors, and developer utilities — all running locally in your browser. Your files never leave your device.</p>
             </div>
           </div>
 
           <div class="flex gap-4">
-            <div class="flex-shrink-0 text-2xl">🚀</div>
+            <div class="flex-shrink-0 w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center">
+              <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            </div>
             <div>
-              <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200">Our Vision</h2>
-              <p class="mt-1 text-gray-600 dark:text-gray-300 leading-relaxed">To build the most comprehensive, fast, and private toolkit on the web. Every tool is designed with simplicity and performance in mind.</p>
+              <h2 class="text-xl font-semibold text-gray-800">Our Vision</h2>
+              <p class="mt-1 text-gray-600 leading-relaxed">To build the most comprehensive, fast, and private toolkit on the web. Every tool is designed with simplicity and performance in mind.</p>
             </div>
           </div>
 
-          <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-6 flex gap-4">
-            <div class="flex-shrink-0 text-2xl">💬</div>
+          <div class="bg-gray-50 rounded-xl p-6 flex gap-4">
+            <div class="flex-shrink-0 w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center">
+              <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+            </div>
             <div>
-              <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200">Get in Touch</h2>
-              <p class="mt-1 text-gray-600 dark:text-gray-300">Have feedback or suggestions? We'd love to hear from you.</p>
+              <h2 class="text-xl font-semibold text-gray-800">Get in Touch</h2>
+              <p class="mt-1 text-gray-600">Have feedback or suggestions? We'd love to hear from you.</p>
               <p class="mt-3">
-                <a href="/support/contact" class="inline-flex items-center text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-medium">
+                <a href="/support/contact" class="inline-flex items-center text-indigo-600 hover:text-indigo-700 font-medium">
                   Contact us
-                  <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                  <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                 </a>
               </p>
             </div>
@@ -73,9 +81,5 @@ const description = "MetisTools provides free, private, all-in-one online conver
       </div>
     </div>
   </div>
-  <Schema
-    toolName="About MetisTools"
-    description={description}
-    url={siteUrl + "/support/about"}
-  />
+  <Schema type="WebSite" />
 </BaseLayout>

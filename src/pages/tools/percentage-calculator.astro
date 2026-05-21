@@ -1,140 +1,169 @@
 ---
-import Schema from '../../components/Schema.astro';
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getPageSeo } from '../../utils/seo.js';
-const { title, description } = getPageSeo('tools/percentage-calculator'); // 根据页面修改键名
+// 百分比计算器页面 —— 多种模式：X% of Y、占比、变化率、增减
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import NumberInput from '../../components/ui/NumberInput.astro';
+import ResultDisplay from '../../components/tool/ResultDisplay.astro';
+
+const pageTitle = 'Percentage Calculator — Calculate Percentages Instantly';
+const pageDescription = 'Calculate percentages in multiple modes: percentage of a number, percentage change, increase/decrease, and what percent one number is of another.';
+
+const modes = [
+  { id: 'percent-of', label: 'What is X% of Y?' },
+  { id: 'what-percent', label: 'X is what % of Y?' },
+  { id: 'change', label: 'Percentage Change' },
+  { id: 'increase', label: 'Increase by %' },
+  { id: 'decrease', label: 'Decrease by %' },
+];
 ---
 
-<BaseLayout title={title} description={description} currentPath="/tools/percentage-calculator">
-  <div class="max-w-2xl mx-auto py-8">
-    <div class="bg-white dark:bg-slate-950 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-slate-800">
-      <h1 class="text-3xl font-bold mb-2">📊 Percentage Calculator</h1>
-      <p class="text-gray-600 dark:text-gray-300 mb-6">Three common percentage calculations.</p>
-      
-      <!-- 模式选择 -->
-      <div class="mb-4">
-        <label class="block text-sm font-medium mb-1">Calculation Type</label>
-        <select id="mode" class="w-full px-4 py-2 rounded-full border border-gray-300 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950">
-          <option value="what-percent">What percent of number A is number B?</option>
-          <option value="percent-of">What is X% of number Y?</option>
-          <option value="percent-change">Percentage increase/decrease from A to B</option>
-        </select>
+<ToolLayout title={pageTitle} description={pageDescription} toolHref="/tools/percentage-calculator">
+  <div slot="input">
+    <div class="space-y-4">
+      <div>
+        <label class="tool-label">Calculation Mode</label>
+        <div class="space-y-1.5" id="mode-selector">
+          {modes.map((mode, i) => (
+            <button type="button" class={`mode-btn w-full text-left px-3 py-2.5 text-sm rounded-lg border transition-all ${i === 0 ? 'border-primary-400 bg-primary-50 text-primary-700 font-medium' : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'}`} data-mode={mode.id}>
+              {mode.label}
+            </button>
+          ))}
+        </div>
       </div>
-      
-      <!-- 动态输入区域 -->
-      <div id="inputs-area"></div>
-      
-      <button id="calcBtn" class="w-full bg-indigo-600 dark:bg-indigo-500 hover:bg-indigo-700 dark:hover:bg-indigo-600 text-white font-medium py-2 rounded-full transition-transform transform hover:scale-98">Calculate</button>
-      
-      <div id="result" class="mt-4 p-4 bg-gray-100 dark:bg-slate-900 rounded-xl text-center text-gray-800 dark:text-gray-100 hidden">
-        <span id="resultText">--</span>
+
+      <div id="inputs-percent-of">
+        <NumberInput id="pct-x" label="Percentage" placeholder="e.g. 15" decimalPlaces={2} required={true} helperText="%" />
+        <div class="mt-3"><NumberInput id="pct-y" label="of What Number?" placeholder="e.g. 200" decimalPlaces={2} required={true} /></div>
       </div>
+      <div id="inputs-what-percent" class="hidden">
+        <NumberInput id="wp-x" label="Part" placeholder="e.g. 50" decimalPlaces={2} required={true} />
+        <div class="mt-3"><NumberInput id="wp-y" label="Whole" placeholder="e.g. 200" decimalPlaces={2} required={true} /></div>
+      </div>
+      <div id="inputs-change" class="hidden">
+        <NumberInput id="ch-from" label="Original Value" placeholder="e.g. 100" decimalPlaces={2} required={true} />
+        <div class="mt-3"><NumberInput id="ch-to" label="New Value" placeholder="e.g. 125" decimalPlaces={2} required={true} /></div>
+      </div>
+      <div id="inputs-inc-dec" class="hidden">
+        <NumberInput id="id-value" label="Value" placeholder="e.g. 200" decimalPlaces={2} required={true} />
+        <div class="mt-3"><NumberInput id="id-pct" label="Percentage" placeholder="e.g. 20" decimalPlaces={2} required={true} helperText="%" /></div>
+      </div>
+
+      <button type="button" id="calc-pct" class="tool-btn-primary w-full">Calculate</button>
     </div>
   </div>
-  
-  <script>
-    const modeSelect = document.getElementById('mode');
-    const inputsArea = document.getElementById('inputs-area');
-    const calcBtn = document.getElementById('calcBtn');
-    const resultDiv = document.getElementById('result');
-    const resultSpan = document.getElementById('resultText');
-    
-    // 渲染动态输入框
-    function renderInputs() {
-      const mode = modeSelect.value;
-      let html = '';
-      if (mode === 'what-percent') {
-        html = `
-          <div class="mb-4">
-            <label class="block text-sm font-medium mb-1">Number A (part)</label>
-            <input type="number" id="a" class="w-full px-4 py-2 rounded-full border border-gray-300 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950" placeholder="e.g., 30" step="any">
+
+  <div slot="result">
+    <ResultDisplay emptyMessage="Select a mode, enter values, then click <strong>Calculate</strong> to see the result.">
+      <div slot="result-content">
+        <div class="text-center mb-5">
+          <div class="text-4xl font-bold text-primary-600" id="pct-result">--</div>
+          <div class="text-sm text-gray-400 mt-1" id="pct-result-label"></div>
+        </div>
+
+        <div class="mt-auto bg-gray-50 rounded-lg p-3">
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-gray-600">Formula</span>
+            <span class="text-xs text-gray-400" id="pct-formula">--</span>
           </div>
-          <div class="mb-4">
-            <label class="block text-sm font-medium mb-1">Number B (whole)</label>
-            <input type="number" id="b" class="w-full px-4 py-2 rounded-full border border-gray-300 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950" placeholder="e.g., 200" step="any">
-          </div>
-        `;
-      } else if (mode === 'percent-of') {
-        html = `
-          <div class="mb-4">
-            <label class="block text-sm font-medium mb-1">Percentage (%)</label>
-            <input type="number" id="percent" class="w-full px-4 py-2 rounded-full border border-gray-300 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950" placeholder="e.g., 15" step="any">
-          </div>
-          <div class="mb-4">
-            <label class="block text-sm font-medium mb-1">Number</label>
-            <input type="number" id="number" class="w-full px-4 py-2 rounded-full border border-gray-300 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950" placeholder="e.g., 200" step="any">
-          </div>
-        `;
-      } else if (mode === 'percent-change') {
-        html = `
-          <div class="mb-4">
-            <label class="block text-sm font-medium mb-1">Initial value</label>
-            <input type="number" id="initial" class="w-full px-4 py-2 rounded-full border border-gray-300 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950" placeholder="e.g., 100" step="any">
-          </div>
-          <div class="mb-4">
-            <label class="block text-sm font-medium mb-1">Final value</label>
-            <input type="number" id="final" class="w-full px-4 py-2 rounded-full border border-gray-300 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950" placeholder="e.g., 120" step="any">
-          </div>
-        `;
+        </div>
+      </div>
+    </ResultDisplay>
+  </div>
+
+  <div slot="description">
+    <p>This percentage calculator handles five common operations: find a percent of a number, determine what percent one is of another, calculate percentage change, and increase or decrease a value by a percentage. All calculations are local.</p>
+  </div>
+</ToolLayout>
+
+<style>
+  .mode-btn { cursor: pointer; }
+</style>
+
+<script>
+  let currentMode = 'percent-of';
+
+  function initModeSelector() {
+    const selector = document.getElementById('mode-selector');
+    if (!selector || selector.dataset._init) return;
+    selector.dataset._init = '1';
+    const inputGroups = { 'percent-of': 'inputs-percent-of', 'what-percent': 'inputs-what-percent', 'change': 'inputs-change', 'increase': 'inputs-inc-dec', 'decrease': 'inputs-inc-dec' };
+
+    selector.querySelectorAll('.mode-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        selector.querySelectorAll('.mode-btn').forEach(b => { b.className = 'mode-btn w-full text-left px-3 py-2.5 text-sm rounded-lg border transition-all border-gray-200 bg-white text-gray-600 hover:border-gray-300'; });
+        btn.className = 'mode-btn w-full text-left px-3 py-2.5 text-sm rounded-lg border transition-all border-primary-400 bg-primary-50 text-primary-700 font-medium';
+        currentMode = btn.dataset.mode;
+        Object.values(inputGroups).forEach(id => { const el = document.getElementById(id); if (el) el.classList.add('hidden'); });
+        const target = document.getElementById(inputGroups[currentMode]);
+        if (target) target.classList.remove('hidden');
+        document.getElementById('result-data')?.classList.add('hidden');
+        document.getElementById('result-empty')?.classList.remove('hidden');
+      });
+    });
+  }
+
+  function calculate() {
+    let result, label, formula;
+
+    switch (currentMode) {
+      case 'percent-of': {
+        const pct = parseFloat(document.getElementById('pct-x')?.value);
+        const num = parseFloat(document.getElementById('pct-y')?.value);
+        if (isNaN(pct) || isNaN(num)) { showToast('Please enter valid numbers.', 'error'); return; }
+        result = (pct / 100) * num;
+        label = pct + '% of ' + num + ' = ' + result;
+        formula = '(' + pct + ' ÷ 100) × ' + num + ' = ' + result;
+        break;
       }
-      inputsArea.innerHTML = html;
-      resultDiv.classList.add('hidden');
-    }
-    
-    function calculate() {
-      const mode = modeSelect.value;
-      let result = '';
-      let isValid = true;
-      
-      if (mode === 'what-percent') {
-        const a = parseFloat(document.getElementById('a')?.value);
-        const b = parseFloat(document.getElementById('b')?.value);
-        if (isNaN(a) || isNaN(b) || b === 0) {
-          showMessage('Please enter valid numbers (B cannot be zero).', 'error');
-          return;
-        }
-        const percent = (a / b) * 100;
-        result = `${a} is ${percent.toFixed(2)}% of ${b}`;
-      } 
-      else if (mode === 'percent-of') {
-        const percent = parseFloat(document.getElementById('percent')?.value);
-        const number = parseFloat(document.getElementById('number')?.value);
-        if (isNaN(percent) || isNaN(number)) {
-          showMessage('Please enter valid numbers.', 'error');
-          return;
-        }
-        const value = (percent / 100) * number;
-        result = `${percent}% of ${number} is ${value.toFixed(4)}`;
-      } 
-      else if (mode === 'percent-change') {
-        const initial = parseFloat(document.getElementById('initial')?.value);
-        const final = parseFloat(document.getElementById('final')?.value);
-        if (isNaN(initial) || isNaN(final)) {
-          showMessage('Please enter valid numbers.', 'error');
-          return;
-        }
-        if (initial === 0) {
-          showMessage('Initial value cannot be zero for percentage change.', 'error');
-          return;
-        }
-        const change = ((final - initial) / initial) * 100;
-        const type = change >= 0 ? 'increase' : 'decrease';
-        result = `${type.charAt(0).toUpperCase() + type.slice(1)} of ${Math.abs(change).toFixed(2)}% from ${initial} to ${final}`;
+      case 'what-percent': {
+        const part = parseFloat(document.getElementById('wp-x')?.value);
+        const whole = parseFloat(document.getElementById('wp-y')?.value);
+        if (isNaN(part) || isNaN(whole)) { showToast('Please enter valid numbers.', 'error'); return; }
+        if (whole === 0) { showToast('The whole value cannot be zero.', 'error'); return; }
+        const pctVal = ((part / whole) * 100).toFixed(2);
+        result = pctVal + '%';
+        label = part + ' is ' + pctVal + '% of ' + whole;
+        formula = '(' + part + ' ÷ ' + whole + ') × 100 = ' + pctVal + '%';
+        break;
       }
-      
-      resultSpan.textContent = result;
-      resultDiv.classList.remove('hidden');
+      case 'change': {
+        const from = parseFloat(document.getElementById('ch-from')?.value);
+        const to = parseFloat(document.getElementById('ch-to')?.value);
+        if (isNaN(from) || isNaN(to)) { showToast('Please enter valid numbers.', 'error'); return; }
+        if (from === 0) { showToast('Original value cannot be zero.', 'error'); return; }
+        const change = ((to - from) / Math.abs(from)) * 100;
+        result = change.toFixed(2) + '%';
+        label = Math.abs(change).toFixed(2) + '% ' + (change >= 0 ? 'increase' : 'decrease');
+        formula = '((' + to + ' - ' + from + ') ÷ |' + from + '|) × 100 = ' + change.toFixed(2) + '%';
+        break;
+      }
+      case 'increase': {
+        const val = parseFloat(document.getElementById('id-value')?.value);
+        const pct = parseFloat(document.getElementById('id-pct')?.value);
+        if (isNaN(val) || isNaN(pct)) { showToast('Please enter valid numbers.', 'error'); return; }
+        result = val * (1 + pct / 100);
+        label = val + ' + ' + pct + '% = ' + result;
+        formula = val + ' × (1 + ' + pct + ' ÷ 100) = ' + result;
+        break;
+      }
+      case 'decrease': {
+        const val = parseFloat(document.getElementById('id-value')?.value);
+        const pct = parseFloat(document.getElementById('id-pct')?.value);
+        if (isNaN(val) || isNaN(pct)) { showToast('Please enter valid numbers.', 'error'); return; }
+        result = val * (1 - pct / 100);
+        label = val + ' - ' + pct + '% = ' + result;
+        formula = val + ' × (1 - ' + pct + ' ÷ 100) = ' + result;
+        break;
+      }
     }
-    
-    modeSelect.addEventListener('change', renderInputs);
-    calcBtn.addEventListener('click', calculate);
-    
-    renderInputs();
-  </script>
-  <Schema
-    toolName="Percentage Calculator"
-    description={description}
-    url={Astro.url.href}
-    category="Math"
-  />
-</BaseLayout>
+
+    document.getElementById('result-empty').classList.add('hidden');
+    document.getElementById('result-data').classList.remove('hidden');
+    document.getElementById('pct-result').textContent = typeof result === 'number' ? parseFloat(result.toFixed(6)).toString() : result;
+    document.getElementById('pct-result-label').textContent = label;
+    document.getElementById('pct-formula').textContent = formula;
+  }
+
+  initModeSelector();
+  document.addEventListener('astro:page-load', initModeSelector);
+  document.getElementById('calc-pct')?.addEventListener('click', calculate);
+</script>

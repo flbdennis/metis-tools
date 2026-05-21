@@ -1,0 +1,47 @@
+---
+// 文本输入框组件 —— 统一样式的 text input
+export interface Props {
+  id: string;
+  label?: string;
+  type?: 'text' | 'email' | 'url' | 'tel';
+  placeholder?: string;
+  value?: string;
+  required?: boolean;
+  disabled?: boolean;
+  class?: string;
+  helperText?: string;
+}
+
+const {
+  id,
+  label = '',
+  type = 'text',
+  placeholder = '',
+  value = '',
+  required = false,
+  disabled = false,
+  class: extraClass = '',
+  helperText = '',
+} = Astro.props;
+---
+
+<div class={`${extraClass}`}>
+  {label && (
+    <label for={id} class="tool-label">
+      {label}
+      {required && <span class="text-red-500 ml-0.5">*</span>}
+    </label>
+  )}
+  <input
+    type={type}
+    id={id}
+    name={id}
+    value={value}
+    placeholder={placeholder}
+    required={required}
+    disabled={disabled}
+    class="tool-input"
+  />
+  <p class="field-error hidden text-xs text-red-500 mt-1"></p>
+  {helperText && <p class="text-xs text-gray-400 mt-1">{helperText}</p>}
+</div>

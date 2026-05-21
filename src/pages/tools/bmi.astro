@@ -1,92 +1,196 @@
 ---
-import Schema from "../../components/Schema.astro";
-import BaseLayout from "../../layouts/BaseLayout.astro";
-import { getPageSeo } from '../../utils/seo.js';
+// BMI 计算器页面 —— 支持公制/英制单位，BMI 评分、体重分类、健康体重范围
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import NumberInput from '../../components/ui/NumberInput.astro';
+import SelectInput from '../../components/ui/SelectInput.astro';
+import ResultDisplay from '../../components/tool/ResultDisplay.astro';
 
-const { title, description } = getPageSeo('tools/bmi'); // 根据页面修改键名
+const pageTitle = 'BMI Calculator — Free Body Mass Index Calculator';
+const pageDescription = 'Calculate your Body Mass Index (BMI) instantly with metric or imperial units. Get your BMI score, weight category, healthy weight range, and personalized health insights.';
+
+const unitOptions = [
+  { value: 'metric', label: 'Metric (cm / kg)' },
+  { value: 'imperial', label: 'Imperial (ft / lbs)' },
+];
+
+const heightUnitOptions = [
+  { value: 'ft', label: 'Feet (ft)' },
+  { value: 'in', label: 'Inches (in)' },
+];
 ---
 
-<BaseLayout title={title} description={description} currentPath="/tools/bmi">
-  <div class="max-w-2xl mx-auto py-8">
-    <div class="bg-white dark:bg-slate-950 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-slate-800">
-      <h1 class="text-3xl font-bold mb-2">⚖️ BMI Calculator</h1>
-      <p class="text-gray-600 dark:text-gray-300 mb-6">
-        Enter your height and weight to calculate your Body Mass Index.
-      </p>
-      <div class="space-y-4">
-        <div>
-          <label class="block text-sm font-medium mb-1">Height (cm)</label>
-          <input
-            type="number"
-            id="height"
-            class="w-full px-4 py-2 rounded-full border border-gray-300 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950"
-            placeholder="e.g., 175"
-            step="any"
-          />
-        </div>
-        <div>
-          <label class="block text-sm font-medium mb-1">Weight (kg)</label>
-          <input
-            type="number"
-            id="weight"
-            class="w-full px-4 py-2 rounded-full border border-gray-300 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950"
-            placeholder="e.g., 70"
-            step="any"
-          />
-        </div>
-        <button
-          id="calcBtn"
-          class="w-full bg-indigo-600 dark:bg-indigo-500 hover:bg-indigo-700 dark:hover:bg-indigo-600 text-white font-medium py-2 rounded-full transition-transform transform hover:scale-98"
-          >Calculate BMI</button
-        >
-        <div
-          id="result"
-          class="mt-4 p-4 bg-gray-100 dark:bg-slate-900 rounded-xl text-center text-gray-800 dark:text-gray-100 hidden"
-        >
-          <p class="text-lg font-semibold">
-            Your BMI: <span id="bmiValue">--</span>
-          </p>
-          <p>Category: <span id="category">--</span></p>
-        </div>
+<ToolLayout title={pageTitle} description={pageDescription} toolHref="/tools/bmi">
+  <div slot="input">
+    <div class="space-y-4">
+      <SelectInput id="bmi-unit" label="Unit" options={unitOptions} selected="metric" />
+
+      <!-- 公制输入 -->
+      <div id="metric-inputs" class="space-y-4">
+        <NumberInput id="height-cm" label="Height" placeholder="e.g. 170" decimalPlaces={0} required={true} helperText="centimeters" />
+        <NumberInput id="weight-kg" label="Weight" placeholder="e.g. 65" decimalPlaces={1} required={true} helperText="kilograms" />
       </div>
+
+      <!-- 英制输入（默认隐藏） -->
+      <div id="imperial-inputs" class="hidden space-y-4">
+        <div class="grid grid-cols-[1fr_auto] gap-3 items-end">
+          <div class="flex-1">
+            <NumberInput id="height-imp" label="Height" placeholder="e.g. 5.75" decimalPlaces={2} required={true} />
+          </div>
+          <div style="min-width: 140px;">
+            <SelectInput id="height-unit" label="Unit" options={heightUnitOptions} selected="ft" />
+          </div>
+        </div>
+        <NumberInput id="weight-lbs" label="Weight" placeholder="e.g. 150" decimalPlaces={1} required={true} helperText="pounds" />
+      </div>
+
+      <button type="button" id="calc-bmi" class="tool-btn-primary w-full">
+        Calculate BMI
+      </button>
     </div>
   </div>
-  <script>
-    const heightInput = document.getElementById("height");
-    const weightInput = document.getElementById("weight");
-    const calcBtn = document.getElementById("calcBtn");
-    const resultDiv = document.getElementById("result");
-    const bmiSpan = document.getElementById("bmiValue");
-    const categorySpan = document.getElementById("category");
 
-    calcBtn.addEventListener("click", () => {
-      const heightCm = parseFloat(heightInput.value);
-      const weightKg = parseFloat(weightInput.value);
-      if (
-        isNaN(heightCm) ||
-        isNaN(weightKg) ||
-        heightCm <= 0 ||
-        weightKg <= 0
-      ) {
-        showMessage("Please enter valid height and weight.", "error");
-        return;
+  <div slot="result">
+    <ResultDisplay emptyMessage="Enter your height and weight, then click <strong>Calculate BMI</strong> to see your results.">
+      <div slot="result-content">
+        <div class="text-center mb-5">
+          <div id="bmi-value" class="text-5xl font-bold text-primary-600">--</div>
+          <div id="bmi-category" class="inline-block mt-2 px-3 py-1 rounded-full text-sm font-semibold">--</div>
+        </div>
+
+        <div class="mb-5">
+          <div class="flex h-3 rounded-full overflow-hidden bg-gray-200">
+            <div class="bg-blue-400" style="width:18.5%"></div>
+            <div class="bg-green-500" style="width:6.5%"></div>
+            <div class="bg-yellow-400" style="width:5%"></div>
+            <div class="bg-orange-500" style="width:5%"></div>
+            <div class="bg-red-500" style="width:65%"></div>
+          </div>
+          <div class="flex justify-between text-[10px] text-gray-400 mt-1">
+            <span>15</span><span>18.5</span><span>25</span><span>30</span><span>35</span><span>40+</span>
+          </div>
+          <div id="bmi-marker" class="relative h-0">
+            <div class="absolute w-0.5 h-5 bg-gray-900 -top-5 rounded transition-all duration-300" style="left:0%"></div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 text-sm">
+          <div class="bg-primary-50 rounded-lg p-3 text-center border border-primary-100">
+            <div id="healthy-min" class="font-semibold text-primary-700">--</div>
+            <div class="text-xs text-primary-500">Healthy min weight</div>
+          </div>
+          <div class="bg-primary-50 rounded-lg p-3 text-center border border-primary-100">
+            <div id="healthy-max" class="font-semibold text-primary-700">--</div>
+            <div class="text-xs text-primary-500">Healthy max weight</div>
+          </div>
+        </div>
+
+        <div class="mt-auto pt-4 text-xs text-gray-400 text-center border-t border-gray-100">
+          <p>BMI = weight (kg) / height² (m²)</p>
+          <p id="prime-text" class="mt-0.5"></p>
+        </div>
+      </div>
+    </ResultDisplay>
+  </div>
+
+  <div slot="description">
+    <p>
+      Body Mass Index (BMI) is a simple, widely used screening tool that estimates your body fat based on your height and weight.
+      While it doesn't measure body fat directly, it provides a reasonable snapshot for most adults of whether you're at a healthy weight.
+    </p>
+    <ul>
+      <li><strong>Underweight:</strong> Below 18.5 — may indicate malnutrition or underlying health conditions.</li>
+      <li><strong>Normal weight:</strong> 18.5 – 24.9 — associated with the lowest health risks.</li>
+      <li><strong>Overweight:</strong> 25.0 – 29.9 — increased risk of cardiovascular disease and diabetes.</li>
+      <li><strong>Obese:</strong> 30.0 and above — significantly elevated health risks.</li>
+    </ul>
+  </div>
+</ToolLayout>
+
+<script>
+  function getBMICategory(bmi) {
+    if (bmi < 16) return { cat: 'Severely Underweight', color: 'bg-blue-500 text-white' };
+    if (bmi < 18.5) return { cat: 'Underweight', color: 'bg-blue-400 text-white' };
+    if (bmi < 25) return { cat: 'Normal Weight', color: 'bg-green-500 text-white' };
+    if (bmi < 30) return { cat: 'Overweight', color: 'bg-yellow-500 text-white' };
+    if (bmi < 35) return { cat: 'Obese Class I', color: 'bg-orange-500 text-white' };
+    if (bmi < 40) return { cat: 'Obese Class II', color: 'bg-red-500 text-white' };
+    return { cat: 'Obese Class III', color: 'bg-red-700 text-white' };
+  }
+
+  function initUnitSelect() {
+    const unitSelect = document.getElementById('bmi-unit');
+    if (!unitSelect || unitSelect.dataset._bmiInit) return;
+    unitSelect.dataset._bmiInit = '1';
+
+    const metricInputs = document.getElementById('metric-inputs');
+    const imperialInputs = document.getElementById('imperial-inputs');
+
+    function toggleInputs() {
+      const isMetric = unitSelect.value === 'metric';
+      metricInputs.classList.toggle('hidden', !isMetric);
+      imperialInputs.classList.toggle('hidden', isMetric);
+      document.getElementById('result-data').classList.add('hidden');
+      document.getElementById('result-empty').classList.remove('hidden');
+    }
+
+    unitSelect.addEventListener('change', toggleInputs);
+    document.addEventListener('select-change', (e) => {
+      if (e.target?.closest('.custom-select-wrapper')?.dataset?.selectId === 'bmi-unit') {
+        toggleInputs();
       }
-      const heightM = heightCm / 100;
-      const bmi = weightKg / (heightM * heightM);
-      let category = "";
-      if (bmi < 18.5) category = "Underweight";
-      else if (bmi < 25) category = "Normal weight";
-      else if (bmi < 30) category = "Overweight";
-      else category = "Obese";
-      bmiSpan.textContent = bmi.toFixed(1);
-      categorySpan.textContent = category;
-      resultDiv.classList.remove("hidden");
     });
-  </script>
-  <Schema
-    category="Health"
-    toolName="BMI Calculator"
-    description={description}
-    url={Astro.url.href}
-  />
-</BaseLayout>
+  }
+
+  function calculateBMI() {
+    const unitSelect = document.getElementById('bmi-unit');
+    const isMetric = unitSelect?.value === 'metric';
+    let heightM, weightKg, heightDisplay;
+
+    if (isMetric) {
+      const cm = parseFloat(document.getElementById('height-cm')?.value);
+      const kg = parseFloat(document.getElementById('weight-kg')?.value);
+      if (!cm || cm <= 0 || !kg || kg <= 0) { showToast('Please enter valid height and weight values.', 'error'); return; }
+      heightM = cm / 100;
+      weightKg = kg;
+      heightDisplay = cm + ' cm';
+    } else {
+      const heightVal = parseFloat(document.getElementById('height-imp')?.value);
+      const heightUnit = document.getElementById('height-unit')?.value;
+      const lbs = parseFloat(document.getElementById('weight-lbs')?.value);
+      if (!heightVal || heightVal <= 0 || !lbs || lbs <= 0) { showToast('Please enter valid height and weight values.', 'error'); return; }
+
+      if (heightUnit === 'ft') heightM = heightVal * 0.3048;
+      else if (heightUnit === 'in') heightM = heightVal * 0.0254;
+      else heightM = heightVal / 100;
+
+      weightKg = lbs * 0.453592;
+      heightDisplay = heightVal + ' ' + heightUnit;
+    }
+
+    const bmi = weightKg / (heightM * heightM);
+    const bmiRounded = bmi.toFixed(1);
+    const { cat, color } = getBMICategory(bmi);
+    const minHealthyKg = (18.5 * heightM * heightM).toFixed(1);
+    const maxHealthyKg = (24.9 * heightM * heightM).toFixed(1);
+
+    document.getElementById('result-empty').classList.add('hidden');
+    document.getElementById('result-data').classList.remove('hidden');
+    document.getElementById('bmi-value').textContent = bmiRounded;
+    const catEl = document.getElementById('bmi-category');
+    catEl.textContent = cat;
+    catEl.className = 'inline-block mt-2 px-3 py-1 rounded-full text-sm font-semibold ' + color;
+    document.getElementById('healthy-min').textContent = minHealthyKg + ' kg';
+    document.getElementById('healthy-max').textContent = maxHealthyKg + ' kg';
+
+    const markerPos = Math.max(0, Math.min(100, ((bmi - 15) / 25) * 100));
+    const marker = document.getElementById('bmi-marker').querySelector('div');
+    if (marker) marker.style.left = markerPos + '%';
+
+    const prime = (bmi / 25).toFixed(2);
+    document.getElementById('prime-text').textContent = 'BMI Prime: ' + prime;
+  }
+
+  initUnitSelect();
+  document.addEventListener('astro:page-load', initUnitSelect);
+  document.getElementById('calc-bmi')?.addEventListener('click', calculateBMI);
+</script>

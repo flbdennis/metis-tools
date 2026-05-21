@@ -1,258 +1,265 @@
 ---
-import Schema from '../../components/Schema.astro';
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getPageSeo } from '../../utils/seo.js';
-const { title, description } = getPageSeo('tools/pdf-converter'); // 根据页面修改键名
+// PDF Converter —— PDF → Image / Text / HTML
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import FileUpload from '../../components/ui/FileUpload.astro';
+import SelectInput from '../../components/ui/SelectInput.astro';
+import ProgressBar from '../../components/ui/ProgressBar.astro';
+import ResultDisplay from '../../components/tool/ResultDisplay.astro';
+
+const pageTitle = 'PDF Converter – Convert PDF to Image, Text, HTML | MetisTools';
+const pageDescription = 'Convert PDF files to images (PNG/JPEG), extract text, or convert to HTML. Free online PDF converter with no file size limits. No signup required.';
+
+const formatOptions = [
+  { value: 'png', label: 'Image – PNG' },
+  { value: 'jpeg', label: 'Image – JPEG' },
+  { value: 'text', label: 'Text' },
+  { value: 'html', label: 'HTML' },
+];
 ---
 
-<BaseLayout title={title} description={description} currentPath="/tools/pdf-converter">
-  <div class="max-w-2xl mx-auto py-8">
-    <div class="bg-white dark:bg-slate-950 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-slate-800">
-      <h1 class="text-3xl font-bold mb-2">🔄 PDF Converter</h1>
-      <p class="text-gray-600 dark:text-gray-300 mb-6">Upload a PDF and choose a target format. Conversion happens entirely in your browser.</p>
+<ToolLayout title={pageTitle} description={pageDescription} toolHref="/tools/pdf-converter">
+  <div slot="input">
+    <div class="space-y-4">
+      <FileUpload id="pdf-file" label="PDF File" accept=".pdf,application/pdf" helperText="PDF files up to 50MB" required={true} />
 
-      <!-- 内嵌上传区域（带拖拽） -->
-      <div id="upload-zone" class="border-2 border-dashed border-gray-300 dark:border-slate-700 rounded-xl p-6 text-center cursor-pointer hover:border-indigo-500 transition">
-        <svg class="mx-auto h-10 w-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-        </svg>
-        <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">Drag & drop your PDF file here, or <span class="text-indigo-600 dark:text-indigo-400 font-medium">browse</span></p>
-        <p class="text-xs text-gray-400 mt-1">PDF files only, up to 50MB</p>
-        <input type="file" id="file-input" accept="application/pdf" class="hidden text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950">
-      </div>
+      <SelectInput id="pdf-format" label="Output Format" options={formatOptions} selected="png" />
 
-      <!-- 格式选择 -->
-      <div class="mt-4">
-        <label class="block text-sm font-medium mb-2">Convert to</label>
-        <select id="target-format" class="w-full px-4 py-2 rounded-full border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-950">
-          <optgroup label="📄 Text & HTML">
-            <option value="txt">Plain Text (.txt)</option>
-            <option value="html">HTML (.html)</option>
-          </optgroup>
-          <optgroup label="🖼️ Image formats">
-            <option value="png">PNG (images per page)</option>
-            <option value="jpg">JPEG (images per page)</option>
-          </optgroup>
-          <optgroup label="📁 Microsoft Office">
-            <option value="docx" disabled>Word (.docx) - Coming soon</option>
-            <option value="pptx" disabled>PowerPoint (.pptx) - Coming soon</option>
-            <option value="xlsx" disabled>Excel (.xlsx) - Coming soon</option>
-          </optgroup>
-        </select>
-        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">* Office formats coming soon (in development).</p>
-      </div>
-
-      <!-- 结果区域 -->
-      <div id="result-area" class="mt-6 hidden">
-        <div class="p-4 bg-gray-100 dark:bg-slate-900 rounded-xl">
-          <p class="font-semibold text-green-600">✓ Conversion completed</p>
-          <div id="result-content" class="mt-2"></div>
-          <button id="download-btn" class="mt-4 bg-indigo-600 dark:bg-indigo-500 text-white px-4 py-2 rounded-full text-sm">Download</button>
-        </div>
-      </div>
+      <button type="button" id="convert-pdf" class="tool-btn-primary w-full" disabled>
+        Convert PDF
+      </button>
     </div>
   </div>
 
-  <!-- 引入必需的库 -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <div slot="result">
+    <ResultDisplay emptyMessage="Select a PDF file and output format, then click <strong>Convert PDF</strong> to start." onDownload={true}>
+      <div slot="result-content" class="space-y-4">
+        <ProgressBar visible={false} />
 
-  <script>
-    let pdfjsReady = false;
+        <!-- 图片输出 -->
+        <div id="pdf-result-images" class="hidden space-y-3 max-h-96 overflow-y-auto"></div>
 
-    // 等待 PDF.js 库加载完成
-    function initPdfWorker() {
-      if (typeof pdfjsLib !== 'undefined') {
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-        pdfjsReady = true;
-      } else {
-        setTimeout(initPdfWorker, 100);
-      }
-    }
-    initPdfWorker();
+        <!-- 文本输出 -->
+        <div id="pdf-result-text" class="hidden">
+          <textarea id="pdf-text-output" class="w-full h-64 rounded-lg border border-gray-300 bg-white p-3 text-sm text-gray-800 resize-y focus:border-primary-500 focus:ring-2 focus:ring-primary-200" readonly></textarea>
+        </div>
 
-    // 定义 PDF 处理函数
-    async function pdfToImages(pdfFile, imageType = 'image/png', scale = 1.5) {
-      while (!pdfjsReady) await new Promise(r => setTimeout(r, 50));
-      const arrayBuffer = await pdfFile.arrayBuffer();
-      const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
-      const pdf = await loadingTask.promise;
-      const numPages = pdf.numPages;
-      const blobs = [];
+        <!-- HTML 输出 -->
+        <div id="pdf-result-html" class="hidden">
+          <iframe id="pdf-html-preview" class="w-full h-80 rounded-lg border border-gray-300 bg-white" srcdoc="" sandbox="allow-same-origin allow-scripts"></iframe>
+          <div class="flex items-center justify-between mt-3">
+            <span class="text-xs text-gray-400">Preview</span>
+          </div>
+        </div>
+      </div>
+    </ResultDisplay>
+  </div>
 
-      for (let i = 1; i <= numPages; i++) {
-        const page = await pdf.getPage(i);
-        const viewport = page.getViewport({ scale });
-        const canvas = document.createElement('canvas');
-        const context = canvas.getContext('2d');
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
-        await page.render({ canvasContext: context, viewport }).promise;
-        const blob = await new Promise(resolve => canvas.toBlob(resolve, imageType));
-        blobs.push(blob);
-      }
-      return blobs;
-    }
+  <div slot="description">
+    <p>
+      Convert your PDF documents to images, text, or HTML with this free online PDF converter.
+      All processing happens locally in your browser — your files are never uploaded to any server,
+      ensuring complete privacy and security.
+    </p>
+    <ul>
+      <li><strong>PDF to Image:</strong> Convert each page to high-quality PNG or JPEG images. Download individually or as a ZIP archive.</li>
+      <li><strong>PDF to Text:</strong> Extract all readable text from your PDF. Great for editing, copying, or repurposing content.</li>
+      <li><strong>PDF to HTML:</strong> Convert your PDF content into an HTML file you can view in any browser. The generated HTML is pure image-based, works everywhere.</li>
+    </ul>
+    <p>
+      Supports PDF files up to 50MB. No signup, no watermarks, and no file limits. Your documents stay private
+      because all conversion is done directly in your browser using client-side processing.
+    </p>
+  </div>
+</ToolLayout>
 
-    async function pdfToText(pdfFile) {
-      while (!pdfjsReady) await new Promise(r => setTimeout(r, 50));
-      const arrayBuffer = await pdfFile.arrayBuffer();
-      const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
-      const pdf = await loadingTask.promise;
-      let fullText = '';
-      for (let i = 1; i <= pdf.numPages; i++) {
-        const page = await pdf.getPage(i);
-        const textContent = await page.getTextContent();
-        const pageText = textContent.items.map(item => item.str).join(' ');
-        fullText += pageText + '\n';
-      }
-      return fullText;
-    }
+<script>
+  import { pdfToImages, pdfToText, pdfToHtml } from '../../lib/pdf-tools.js';
 
-    async function pdfToHtml(pdfFile) {
-      const text = await pdfToText(pdfFile);
-      const escapedText = text.replace(/[&<>]/g, function(m) {
-        if (m === '&') return '&amp;';
-        if (m === '<') return '&lt;';
-        if (m === '>') return '&gt;';
-        return m;
+let currentFile = null;
+let currentHtmlBlob = null;
+let currentImageBlobs = null;
+
+function clearResults() {
+  currentImageBlobs = null;
+  currentHtmlBlob = null;
+  document.getElementById('result-data').classList.add('hidden');
+  document.getElementById('result-empty').classList.remove('hidden');
+  ['pdf-result-images', 'pdf-result-text', 'pdf-result-html'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.add('hidden');
+  });
+  const imgContainer = document.getElementById('pdf-result-images');
+  if (imgContainer) imgContainer.innerHTML = '';
+  const textarea = document.getElementById('pdf-text-output');
+  if (textarea) textarea.value = '';
+  const iframe = document.getElementById('pdf-html-preview');
+  if (iframe) iframe.srcdoc = '';
+  hideProgress();
+}
+
+document.getElementById('pdf-file')?.addEventListener('file-selected', (e) => {
+  currentFile = e.detail.file;
+  clearResults();
+  document.getElementById('convert-pdf').disabled = false;
+});
+
+document.getElementById('pdf-file')?.addEventListener('file-cleared', () => {
+  currentFile = null;
+  currentImageBlobs = null;
+  currentHtmlBlob = null;
+  clearResults();
+  document.getElementById('convert-pdf').disabled = true;
+});
+
+function showResult(sectionId) {
+  ['pdf-result-images', 'pdf-result-text', 'pdf-result-html'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.add('hidden');
+  });
+  const target = document.getElementById(sectionId);
+  if (target) target.classList.remove('hidden');
+}
+
+// 动态加载 JSZip 并打包下载
+async function downloadImagesAsZip(blobs, fileName) {
+  if (typeof JSZip === 'undefined') {
+    await new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+      script.onload = resolve;
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+  }
+  const zip = new JSZip();
+  blobs.forEach((blob, idx) => {
+    zip.file(`page-${idx + 1}.png`, blob);
+  });
+  const content = await zip.generateAsync({ type: 'blob' });
+  const url = URL.createObjectURL(content);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName.replace(/\.pdf$/i, '') + '.zip';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+async function convertPdf() {
+  const format = document.getElementById('pdf-format')?.value;
+
+  if (!currentFile) { showToast('Please select a PDF file.', 'error'); return; }
+  if (!format) { showToast('Please select an output format.', 'error'); return; }
+
+  const btn = document.getElementById('convert-pdf');
+  btn.disabled = true;
+  btn.textContent = 'Converting...';
+
+  // 清理旧内容并显示进度
+  clearResults();
+  document.getElementById('result-empty').classList.add('hidden');
+  document.getElementById('result-data').classList.remove('hidden');
+  updateProgress(20, 'Loading PDF...');
+
+  const downloadBtn = document.getElementById('btn-download-result');
+  if (downloadBtn) downloadBtn.classList.add('hidden');
+
+  try {
+    if (format === 'png' || format === 'jpeg') {
+      updateProgress(40, 'Converting pages to images...');
+      const mimeType = format === 'png' ? 'image/png' : 'image/jpeg';
+      const blobs = await pdfToImages(currentFile, mimeType, 1.5);
+      currentImageBlobs = blobs;
+
+      updateProgress(90, 'Rendering preview...');
+
+      const container = document.getElementById('pdf-result-images');
+      if (!container) return;
+      container.innerHTML = '';
+
+      blobs.forEach((blob, i) => {
+        const url = URL.createObjectURL(blob);
+        const div = document.createElement('div');
+        div.className = 'flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200';
+        div.innerHTML = `
+          <div class="w-16 h-16 flex-shrink-0 rounded bg-gray-100 overflow-hidden flex items-center justify-center">
+            <img src="${url}" alt="Page ${i + 1}" class="w-full h-full object-contain" />
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium text-gray-800">Page ${i + 1}</p>
+            <p class="text-xs text-gray-500">${format.toUpperCase()} — ${(blob.size / 1024).toFixed(1)} KB</p>
+          </div>
+          <a href="${url}" download="page-${i + 1}.${format}" class="inline-flex items-center gap-1 rounded-lg border border-primary-200 bg-primary-50 px-3 py-1.5 text-xs font-medium text-primary-700 hover:bg-primary-100 transition-colors">
+            <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+            Download
+          </a>
+        `;
+        container.appendChild(div);
       });
-      return `<!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"><title>Converted PDF</title></head>
-<body><pre>${escapedText}</pre></body>
-</html>`;
+
+      if (downloadBtn) {
+        downloadBtn.classList.remove('hidden');
+        downloadBtn.onclick = () => {
+          downloadImagesAsZip(blobs, currentFile.name);
+        };
+      }
+      showResult('pdf-result-images');
+    } else if (format === 'text') {
+      updateProgress(40, 'Extracting text...');
+      const text = await pdfToText(currentFile);
+      updateProgress(90, 'Rendering...');
+      const textarea = document.getElementById('pdf-text-output');
+      if (textarea) {
+        textarea.value = text;
+        textarea.style.height = Math.min(400, text.split('\n').length * 20 + 40) + 'px';
+      }
+      if (downloadBtn) {
+        downloadBtn.classList.remove('hidden');
+        downloadBtn.onclick = () => {
+          const blob = new Blob([text], { type: 'text/plain' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = currentFile.name.replace(/\.pdf$/i, '') + '.txt';
+          a.click();
+          URL.revokeObjectURL(url);
+        };
+      }
+      showResult('pdf-result-text');
+    } else if (format === 'html') {
+      updateProgress(40, 'Converting to HTML...');
+      const html = await pdfToHtml(currentFile);
+      updateProgress(90, 'Rendering preview...');
+      const htmlBlob = new Blob([html], { type: 'text/html' });
+      currentHtmlBlob = htmlBlob;
+
+      const iframe = document.getElementById('pdf-html-preview');
+      if (iframe) iframe.srcdoc = html;
+
+      if (downloadBtn) {
+        downloadBtn.classList.remove('hidden');
+        downloadBtn.onclick = () => {
+          const url = URL.createObjectURL(htmlBlob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = currentFile.name.replace(/\.pdf$/i, '') + '.html';
+          a.click();
+          URL.revokeObjectURL(url);
+        };
+      }
+      showResult('pdf-result-html');
     }
 
-    function escapeHtml(str) {
-      return str.replace(/[&<>]/g, (m) => {
-        if (m === '&') return '&amp;';
-        if (m === '<') return '&lt;';
-        if (m === '>') return '&gt;';
-        return m;
-      });
-    }
+    updateProgress(100, 'Done!');
+    setTimeout(() => hideProgress(), 1500);
+  } catch (err) {
+    hideProgress();
+    console.error(err);
+    showToast(err.message || 'PDF conversion failed. Please try a different file.', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Convert PDF';
+  }
+}
 
-    // DOM 元素
-    const uploadZone = document.getElementById('upload-zone');
-    const fileInput = document.getElementById('file-input');
-    const targetFormat = document.getElementById('target-format');
-    const resultDiv = document.getElementById('result-area');
-    const resultContent = document.getElementById('result-content');
-    const downloadBtn = document.getElementById('download-btn');
-
-    let currentBlob = null;
-    let currentFilename = null;
-
-    function showMsg(msg, type = 'info') {
-      if (typeof showMessage === 'function') {
-        showMessage(msg, type);
-      } else {
-        alert(msg);
-      }
-    }
-
-    async function processFile(file) {
-      if (!file || file.type !== 'application/pdf') {
-        showMsg('Please upload a valid PDF file.', 'error');
-        return;
-      }
-
-      const format = targetFormat.value;
-
-      if (['docx', 'pptx', 'xlsx'].includes(format)) {
-        showMsg(`${format.toUpperCase()} format is not yet supported. Coming soon.`, 'error');
-        return;
-      }
-
-      resultDiv.classList.add('hidden');
-      resultContent.innerHTML = '';
-      showMsg(`Converting PDF to ${format}...`, 'info');
-
-      try {
-        if (format === 'png' || format === 'jpg') {
-          const imageType = format === 'png' ? 'image/png' : 'image/jpeg';
-          const blobs = await pdfToImages(file, imageType);
-          if (!blobs.length) throw new Error('No pages extracted');
-          // 使用全局 JSZip
-          const zip = new JSZip();
-          blobs.forEach((blob, idx) => {
-            zip.file(`page-${idx+1}.${format}`, blob);
-          });
-          const zipBlob = await zip.generateAsync({ type: 'blob' });
-          currentBlob = zipBlob;
-          currentFilename = `pdf-images.zip`;
-          resultContent.innerHTML = `<p>${blobs.length} pages converted. Download the ZIP archive.</p>`;
-        } 
-        else if (format === 'txt') {
-          const text = await pdfToText(file);
-          if (!text.trim()) throw new Error('No text content');
-          currentBlob = new Blob([text], { type: 'text/plain' });
-          currentFilename = `converted.txt`;
-          const preview = text.slice(0, 500) + (text.length > 500 ? '…' : '');
-          resultContent.innerHTML = `<pre class="text-xs max-h-60 overflow-auto bg-gray-50 dark:bg-slate-950 p-2 rounded">${escapeHtml(preview)}</pre>`;
-        } 
-        else if (format === 'html') {
-          const html = await pdfToHtml(file);
-          currentBlob = new Blob([html], { type: 'text/html' });
-          currentFilename = `converted.html`;
-          resultContent.innerHTML = `<p>HTML file generated.</p>`;
-        } 
-        else {
-          showMsg(`Unsupported format: ${format}`, 'error');
-          return;
-        }
-
-        resultDiv.classList.remove('hidden');
-        showMsg('Conversion successful!', 'success');
-      } catch (err) {
-        console.error(err);
-        showMsg(`Conversion failed: ${err.message}`, 'error');
-      }
-    }
-
-    uploadZone.addEventListener('click', () => fileInput.click());
-    fileInput.addEventListener('change', (e) => {
-      if (e.target.files.length) processFile(e.target.files[0]);
-    });
-
-    uploadZone.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      uploadZone.classList.add('border-indigo-500', 'bg-indigo-50');
-    });
-    uploadZone.addEventListener('dragleave', () => {
-      uploadZone.classList.remove('border-indigo-500', 'bg-indigo-50');
-    });
-    uploadZone.addEventListener('drop', (e) => {
-      e.preventDefault();
-      uploadZone.classList.remove('border-indigo-500', 'bg-indigo-50');
-      const file = e.dataTransfer.files[0];
-      if (file && file.type === 'application/pdf') {
-        processFile(file);
-      } else {
-        showMsg('Please drop a PDF file.', 'error');
-      }
-    });
-
-    downloadBtn.addEventListener('click', () => {
-      if (currentBlob && currentFilename) {
-        const url = URL.createObjectURL(currentBlob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = currentFilename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      } else {
-        showMsg('No conversion result yet.', 'error');
-      }
-    });
-  </script>
-  <Schema
-    toolName="PDF Converter"
-    description={description}
-    url={Astro.url.href}
-    category="Utility"
-  />
-</BaseLayout>
+document.getElementById('convert-pdf')?.addEventListener('click', convertPdf);
+</script>
