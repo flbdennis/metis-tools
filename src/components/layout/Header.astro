@@ -11,7 +11,7 @@ const { currentPath = '/' } = Astro.props;
     <div class="flex h-16 items-center justify-between">
       <!-- Logo -->
       <a href="/" class="flex items-center gap-2.5 shrink-0" aria-label={siteConfig.name}>
-        <img src="/logo.webp" alt={siteConfig.name} class="h-8 w-8" width="32" height="32" />
+        <img src="/logo.webp" alt={siteConfig.name} class="h-8 w-8" width="32" height="32" fetchpriority="high" />
         <span class="text-lg font-bold text-gray-900">{siteConfig.name}</span>
       </a>
 

@@ -1,13 +1,35 @@
-// src/lib/pdf-tools.js
-import * as pdfjsLib from 'pdfjs-dist';
-import { PDFDocument } from 'pdf-lib';
-import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
+// src/lib/pdf-tools.js —— 动态导入，按需加载 pdfjs-dist / pdf-lib
+let _pdfjsLib;
+let _PDFDocument;
+let _initPromise;
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl;
+async function initPdfjs() {
+  if (_pdfjsLib) return _pdfjsLib;
+  if (!_initPromise) {
+    _initPromise = (async () => {
+      const [pdfjsMod, workerUrlMod] = await Promise.all([
+        import('pdfjs-dist'),
+        import('pdfjs-dist/build/pdf.worker.min.mjs?url'),
+      ]);
+      pdfjsMod.GlobalWorkerOptions.workerSrc = workerUrlMod.default;
+      _pdfjsLib = pdfjsMod;
+      return _pdfjsLib;
+    })();
+  }
+  return _initPromise;
+}
+
+async function initPdfLib() {
+  if (_PDFDocument) return _PDFDocument;
+  const mod = await import('pdf-lib');
+  _PDFDocument = mod.PDFDocument;
+  return _PDFDocument;
+}
 
 const CMAP_URL = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@5.7.284/cmaps/';
 
 export async function pdfToImages(pdfFile, imageType = 'image/png', scale = 1.5) {
+  const pdfjsLib = await initPdfjs();
   const arrayBuffer = await pdfFile.arrayBuffer();
   const loadingTask = pdfjsLib.getDocument({
     data: arrayBuffer,
@@ -53,6 +75,7 @@ function groupTextItemsByLine(items) {
 }
 
 export async function pdfToText(pdfFile) {
+  const pdfjsLib = await initPdfjs();
   const arrayBuffer = await pdfFile.arrayBuffer();
   const loadingTask = pdfjsLib.getDocument({
     data: arrayBuffer,
@@ -70,12 +93,6 @@ export async function pdfToText(pdfFile) {
   return pageTexts.join('\n\n');
 }
 
-/**
- * 纯图片版 PDF 转 HTML（每页转为图片嵌入）
- * @param {File} pdfFile - PDF 文件
- * @param {number} scale - 图片缩放比例，默认 2
- * @returns {Promise<string>}
- */
 export async function pdfToHtml(pdfFile, scale = 2) {
   const imageBlobs = await pdfToImages(pdfFile, 'image/png', scale);
   const imagesBase64 = await Promise.all(imageBlobs.map(blobToBase64));
@@ -108,7 +125,7 @@ export async function pdfToHtml(pdfFile, scale = 2) {
 <body><div class="container">
   ${pagesHtml}
   <div class="info-note">
-    ⚡ This HTML file contains embedded images of your PDF pages.  
+    ⚡ This HTML file contains embedded images of your PDF pages.
     It works in any browser, even when opened locally (file://).
   </div>
 </div></body>

@@ -17,7 +17,7 @@ const { title, description, toolHref, ogImage } = Astro.props;
 const tool = allTools.find(t => t.href === toolHref);
 const blogSlug = tool?.blogSlug || null;
 const toolSlug = toolHref.replace('/tools/', '');
-const pageOgImage = ogImage || `/og/${toolSlug}.jpg`;
+const pageOgImage = ogImage || `/og/${toolSlug}.webp`;
 ---
 
 <BaseLayout

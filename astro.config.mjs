@@ -23,6 +23,8 @@ export default defineConfig({
       minify: 'esbuild',
       // 代码分割
       rollupOptions: {
+        // gifenc 仅用于 mp4-to-gif（未启用），外置避免构建错误
+        external: ['gifenc'],
         output: {
           manualChunks: {
             'flowbite': ['flowbite'],

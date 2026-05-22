@@ -15,7 +15,7 @@ const {
   title,
   description,
   canonical,
-  ogImage = `${siteConfig.url}/og/home.jpg`,
+  ogImage = `${siteConfig.url}/og/home.webp`,
   ogType = 'website',
   noIndex = false,
 } = Astro.props;
@@ -49,6 +49,8 @@ const canonicalUrl = canonical ? new URL(canonical, siteConfig.url).href : Astro
 <meta name="twitter:image" content={ogImage} />
 
 <!-- 预连接第三方域名（性能优化） -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="preconnect" href="https://www.googletagmanager.com" />
 <link rel="preconnect" href="https://www.google-analytics.com" />
 <link rel="preconnect" href="https://pagead2.googlesyndication.com" />
@@ -56,6 +58,7 @@ const canonicalUrl = canonical ? new URL(canonical, siteConfig.url).href : Astro
 <!-- Google AdSense（异步加载，受 Cookie 同意控制） -->
 <script async src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${siteConfig.googleAdsenseId}`} crossorigin="anonymous"></script>
 
-<!-- Inter 字体预加载 -->
+<!-- Inter 字体：preload + 异步加载避免渲染阻塞 -->
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" as="style" />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" media="print" onload="this.onload=null;this.media='all'" />
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" /></noscript>

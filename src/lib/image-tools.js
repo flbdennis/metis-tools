@@ -1,8 +1,6 @@
 // src/lib/image-tools.js
 // 图像工具纯函数 —— 所有函数不操作 DOM，接收数据返回结果
 
-import GIFEncoder, { quantize } from 'gifenc';
-
 // ===== 通用辅助 =====
 
 export function formatFileSize(bytes) {
@@ -304,7 +302,15 @@ export async function createGifFromVideo(videoFile, startTime, endTime, fps, max
   console.log('[gif] Frames extracted', frames.length);
   if (frames.length === 0) throw new Error('No frames extracted.');
 
-  // 使用 gifenc 的正确 API
+  // 动态导入 gifenc（仅此函数按需加载）
+  let GIFEncoder, quantize;
+  try {
+    const gifenc = await import(/* @vite-ignore */ 'gifenc');
+    GIFEncoder = gifenc.default;
+    quantize = gifenc.quantize;
+  } catch {
+    throw new Error('GIF encoding library not available. Please ensure gifenc is installed.');
+  }
   const palette = quantize(frames[0].data, 256);
   const gif = GIFEncoder();
   const delay = Math.round(1000 / fps);
