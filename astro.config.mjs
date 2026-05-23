@@ -1,6 +1,7 @@
 // Astro 配置文件
 import { defineConfig } from 'astro/config';
 import tailwind from '@astrojs/tailwind';
+import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
   // 网站 URL
@@ -10,7 +11,15 @@ export default defineConfig({
   // URL 末尾不加斜杠
   trailingSlash: 'never',
   // 集成
-  integrations: [tailwind()],
+  integrations: [
+    tailwind(),
+    sitemap({
+      // 默认包含所有静态页面，这里过滤掉禁用页面
+      filter: (page) => !page.includes('/tools/mp4-to-gif'),
+      // 最后修改日期
+      lastmod: new Date(),
+    }),
+  ],
   // 构建优化
   build: {
     // CSS 内联
