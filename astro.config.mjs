@@ -14,9 +14,7 @@ export default defineConfig({
   integrations: [
     tailwind(),
     sitemap({
-      // 默认包含所有静态页面，这里过滤掉禁用页面
       filter: (page) => !page.includes('/tools/mp4-to-gif'),
-      // 最后修改日期
       lastmod: new Date(),
     }),
   ],
